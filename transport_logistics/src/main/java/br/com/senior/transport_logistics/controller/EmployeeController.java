@@ -35,7 +35,6 @@ public class EmployeeController {
     }
 
     @PostMapping
-    @Transactional
     public ResponseEntity<EmployeeResponseDTO> create(@RequestBody @Valid EmployeeRequestDTO employeeCreateDTO) {
 
         EmployeeResponseDTO createdEmployee = service.create(employeeCreateDTO);
