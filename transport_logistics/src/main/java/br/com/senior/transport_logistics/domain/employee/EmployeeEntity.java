@@ -65,5 +65,6 @@ public class EmployeeEntity {
         this.email = request.email();
         this.active = true;
         this.role = request.role();
+        this.hub = hub;
     }
 }
