@@ -12,16 +12,16 @@ public record EmployeeRequestDTO(
 
         @Size(max = 11, message = "{employee.cnh.size}")
         @NotBlank(message = "{employee.cnh.notBlank}")
-        @Pattern(regexp = "^\\d{11}$", message = "CNH deve conter 11 dígitos numéricos")
+        @Pattern(regexp = "^\\d{11}$", message = "{employee.cnh.format}")
         String cnh,
 
         @Size(max = 11, message = "{employee.cpf.size}")
-        @CPF
+        @CPF(message = "{employee.cpf.format}")
         String cpf,
 
         @Size(max = 100, message = "{employee.email.size}")
         @NotBlank(message = "{employee.email.notBlank}")
-        @Email
+        @Email(message = "{employee.email.format}")
         String email,
 
         HubEntity hub,
