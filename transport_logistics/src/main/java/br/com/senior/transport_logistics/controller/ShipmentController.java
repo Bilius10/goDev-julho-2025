@@ -39,7 +39,6 @@ public class ShipmentController {
     }
 
     @PostMapping
-    @Transactional
     public ResponseEntity<ShipmentResponseDTO> create(@RequestBody @Valid ShipmentCreateDTO shipmentRequestDTO) {
         ShipmentResponseDTO createdShipment = service.create(shipmentRequestDTO);
 
