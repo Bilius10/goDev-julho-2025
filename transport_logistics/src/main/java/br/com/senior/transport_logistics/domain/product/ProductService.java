@@ -17,7 +17,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class ProductService {
 
-    private ProductRepository repository;
+    private final ProductRepository repository;
 
     public PageDTO<ProductResponseDTO> findAllWithFilters(ProductCategory category, Float limitWeight, Pageable pageable) {
 
@@ -71,10 +71,9 @@ public class ProductService {
         repository.save(productFound);
     }
 
-    private ProductEntity findById(Long id){
+    public ProductEntity findById(Long id){
         return repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Nenhum produto encontrado"));
-
     }
 
 }
