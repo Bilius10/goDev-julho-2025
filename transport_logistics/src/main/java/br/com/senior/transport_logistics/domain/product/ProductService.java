@@ -14,9 +14,9 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class ProductService {
 
-    @Autowired
     private ProductRepository repository;
 
     public PageDTO<ProductResponseDTO> findAllWithFilters(ProductCategory category, Float limitWeight, Pageable pageable) {
