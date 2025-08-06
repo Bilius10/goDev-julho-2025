@@ -1,9 +1,7 @@
 package br.com.senior.transport_logistics.domain.hub;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.*;
 import lombok.*;
 
 @Data
@@ -20,10 +18,12 @@ public class HubEntity {
     private Long id;
 
     @NotBlank(message = "{hub.name.notBlank}")
+    @Size(max = 100, message = "{hub.name.size}")
     @Column(nullable = false, unique = true)
     private String name;
 
-    @NotBlank(message = "{hub.cpnj.notBlank}")
+    @NotBlank(message = "{hub.cnpj.notBlank}")
+    @Pattern(message = "{hub.cnpj.pattern}", regexp = "^\\d{2}\\.?\\d{3}\\.?\\d{3}/?\\d{4}-?\\d{2}$\n")
     @Column(nullable = false, unique = true)
     private String cnpj;
 
@@ -32,6 +32,7 @@ public class HubEntity {
     private String street;
 
     @NotBlank(message = "{hub.number.notBlank}")
+    @Size(max = 6, message = "{hub.number.size}")
     @Column(nullable = false)
     private String number;
 
