@@ -4,7 +4,7 @@ import br.com.senior.transport_logistics.domain.employee.enums.Role;
 import jakarta.validation.constraints.*;
 import org.hibernate.validator.constraints.br.CPF;
 
-public record EmployeeRequestDTO(
+public record EmployeeCreateRequestDTO(
         @Size(max = 100, message = "{employee.name.size}")
         @NotBlank(message = "{employee.name.notBlank}")
         String name,
@@ -24,6 +24,7 @@ public record EmployeeRequestDTO(
         String email,
 
         @NotNull(message = "{employee.idHub.notNull}")
+        @Positive(message = "{employee.idHub.Positive}")
         Long idHub,
 
         @NotNull(message = "{employee.role.notNull}")

@@ -1,7 +1,8 @@
 package br.com.senior.transport_logistics.controller;
 
 import br.com.senior.transport_logistics.domain.employee.EmployeeService;
-import br.com.senior.transport_logistics.domain.employee.dto.request.EmployeeRequestDTO;
+import br.com.senior.transport_logistics.domain.employee.dto.request.EmployeeCreateRequestDTO;
+import br.com.senior.transport_logistics.domain.employee.dto.request.EmployeeUpdateRequestDTO;
 import br.com.senior.transport_logistics.domain.employee.dto.response.EmployeeResponseDTO;
 import br.com.senior.transport_logistics.dto.PageDTO;
 import jakarta.validation.Valid;
@@ -35,7 +36,7 @@ public class EmployeeController {
     }
 
     @PostMapping
-    public ResponseEntity<EmployeeResponseDTO> create(@RequestBody @Valid EmployeeRequestDTO employeeCreateDTO) {
+    public ResponseEntity<EmployeeResponseDTO> create(@RequestBody @Valid EmployeeCreateRequestDTO employeeCreateDTO) {
 
         EmployeeResponseDTO createdEmployee = service.create(employeeCreateDTO);
 
@@ -51,7 +52,7 @@ public class EmployeeController {
     @PutMapping("/{id}")
     public ResponseEntity<EmployeeResponseDTO> update(
             @PathVariable Long id,
-            @RequestBody @Valid EmployeeRequestDTO employeeUpdateDTO){
+            @RequestBody @Valid EmployeeUpdateRequestDTO employeeUpdateDTO){
 
         return ResponseEntity.status(HttpStatus.OK).body(service.update(id, employeeUpdateDTO));
     }

@@ -1,8 +1,8 @@
 package br.com.senior.transport_logistics.domain.employee.enums;
 
 public enum Role {
-    BOSS("Chefe"),
-    DRIVER("Motorista");
+    BOSS("boos"),
+    DRIVER("driver");
 
     private String role;
 

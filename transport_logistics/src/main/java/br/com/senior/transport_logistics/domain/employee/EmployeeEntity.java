@@ -1,6 +1,7 @@
 package br.com.senior.transport_logistics.domain.employee;
 
-import br.com.senior.transport_logistics.domain.employee.dto.request.EmployeeRequestDTO;
+import br.com.senior.transport_logistics.domain.employee.dto.request.EmployeeCreateRequestDTO;
+import br.com.senior.transport_logistics.domain.employee.dto.request.EmployeeUpdateRequestDTO;
 import br.com.senior.transport_logistics.domain.employee.enums.Role;
 import br.com.senior.transport_logistics.domain.hub.HubEntity;
 import jakarta.persistence.*;
@@ -58,7 +59,7 @@ public class EmployeeEntity {
     @Size(max = 50, message = "{employee.role.size}")
     private Role role;
 
-    public EmployeeEntity(EmployeeRequestDTO request, HubEntity hub) {
+    public EmployeeEntity(EmployeeCreateRequestDTO request, HubEntity hub) {
         this.name = request.name();
         this.cnh = request.cnh();
         this.cpf = request.cpf();
@@ -66,5 +67,10 @@ public class EmployeeEntity {
         this.active = true;
         this.role = request.role();
         this.hub = hub;
+    }
+
+    public void updateEmployee(EmployeeUpdateRequestDTO request) {
+        this.name = request.name();
+        this.email = request.email();
     }
 }

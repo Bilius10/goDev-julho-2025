@@ -1,6 +1,7 @@
 package br.com.senior.transport_logistics.domain.employee;
 
-import br.com.senior.transport_logistics.domain.employee.dto.request.EmployeeRequestDTO;
+import br.com.senior.transport_logistics.domain.employee.dto.request.EmployeeCreateRequestDTO;
+import br.com.senior.transport_logistics.domain.employee.dto.request.EmployeeUpdateRequestDTO;
 import br.com.senior.transport_logistics.domain.employee.dto.response.EmployeeResponseDTO;
 import br.com.senior.transport_logistics.domain.hub.HubEntity;
 import br.com.senior.transport_logistics.domain.hub.HubService;
@@ -34,11 +35,9 @@ public class EmployeeService {
 
 
     @Transactional
-    public EmployeeResponseDTO create(EmployeeRequestDTO request) {
+    public EmployeeResponseDTO create(EmployeeCreateRequestDTO request) {
 
-        if(repository.existsByNameIgnoreCase(request.name())){
-            throw new RuntimeException("Já existe um funcionário com esse nome");
-        }
+        createValidation(request);
 
         HubEntity hub = hubService.findById(request.idHub());
         EmployeeEntity employeeEntity = new EmployeeEntity(request, hub);
@@ -50,14 +49,13 @@ public class EmployeeService {
         );
     }
 
-    public EmployeeResponseDTO update(Long id, EmployeeRequestDTO request) {
-        this.findById(id);
+    public EmployeeResponseDTO update(Long id, EmployeeUpdateRequestDTO request) {
+        verifyIfEmailIsUsed(request.email());
 
-        HubEntity hub = hubService.findById(request.idHub());
-        EmployeeEntity employeeEntity = new EmployeeEntity(request, hub);
-        employeeEntity.setId(id);
+        EmployeeEntity employeeFound = this.findById(id);
+        employeeFound.updateEmployee(request);
 
-        EmployeeEntity saveEmployee = repository.save(employeeEntity);
+        EmployeeEntity saveEmployee = repository.save(employeeFound);
 
         return new EmployeeResponseDTO(
                 saveEmployee.getId(), saveEmployee.getName(), saveEmployee.getCnh(), saveEmployee.getCpf(), saveEmployee.getEmail(), saveEmployee.isActive(), saveEmployee.getRole(), HubResponseDTO.basic(saveEmployee.getHub())
@@ -75,5 +73,29 @@ public class EmployeeService {
     public EmployeeEntity findById(Long id) {
         return repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Nenhum funcionário encontrado"));
+    }
+
+    private void createValidation(EmployeeCreateRequestDTO request) {
+        verifyIfCnhIsUsed(request.cnh());
+        verifyIfCpfIsUsed(request.cpf());
+        verifyIfEmailIsUsed(request.email());
+    }
+
+    private void verifyIfCpfIsUsed(String cpf){
+        if(repository.existsByCpf(cpf)){
+            throw new RuntimeException("Cpf ja esta em uso");
+        }
+    }
+
+    private void verifyIfEmailIsUsed(String email){
+        if(repository.existsByEmail(email)){
+            throw new RuntimeException("Email ja esta em uso");
+        }
+    }
+
+    private void verifyIfCnhIsUsed(String cnh){
+        if(repository.existsByCnh(cnh)){
+            throw  new RuntimeException("Cnh ja esta em uso");
+        }
     }
 }
