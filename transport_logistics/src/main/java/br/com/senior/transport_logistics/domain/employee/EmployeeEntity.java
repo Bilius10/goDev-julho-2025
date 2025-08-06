@@ -58,12 +58,13 @@ public class EmployeeEntity {
     @Size(max = 50, message = "{employee.role.size}")
     private Role role;
 
-    public EmployeeEntity(EmployeeRequestDTO request) {
+    public EmployeeEntity(EmployeeRequestDTO request, HubEntity hub) {
         this.name = request.name();
         this.cnh = request.cnh();
         this.cpf = request.cpf();
         this.email = request.email();
         this.active = true;
         this.role = request.role();
+        this.hub = hub;
     }
 }

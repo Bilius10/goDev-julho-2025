@@ -1,6 +1,5 @@
 package br.com.senior.transport_logistics.domain.employee.dto.request;
 
-import br.com.senior.transport_logistics.domain.hub.HubEntity;
 import br.com.senior.transport_logistics.domain.employee.enums.Role;
 import jakarta.validation.constraints.*;
 import org.hibernate.validator.constraints.br.CPF;
@@ -24,7 +23,8 @@ public record EmployeeRequestDTO(
         @Email(message = "{employee.email.format}")
         String email,
 
-        HubEntity hub,
+        @NotNull(message = "{employee.idHub.notNull}")
+        Long idHub,
 
         @NotNull(message = "{employee.role.notNull}")
         @Size(max = 50, message = "{employee.role.size}")
