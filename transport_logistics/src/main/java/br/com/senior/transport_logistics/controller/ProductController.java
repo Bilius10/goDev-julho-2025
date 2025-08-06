@@ -23,7 +23,7 @@ import java.net.URI;
 @RequestMapping("/api/v1/products")
 public class ProductController {
 
-    private ProductService service;
+    private final ProductService service;
 
     @GetMapping
     public ResponseEntity<PageDTO<ProductResponseDTO>> findAllWithFilters(
@@ -65,7 +65,7 @@ public class ProductController {
 
     @DeleteMapping("/{id}")
     @Transactional
-    public ResponseEntity<ProductResponseDTO> delete(@PathVariable Long id){
+    public ResponseEntity<Void> delete(@PathVariable Long id){
 
         service.delete(id);
 
