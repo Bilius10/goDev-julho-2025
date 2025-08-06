@@ -1,5 +1,6 @@
 package br.com.senior.transport_logistics.domain.truck;
 
+import br.com.senior.transport_logistics.domain.hub.HubEntity;
 import br.com.senior.transport_logistics.domain.truck.enums.AxleSetup;
 import br.com.senior.transport_logistics.domain.truck.enums.TruckBody;
 import br.com.senior.transport_logistics.domain.truck.enums.TruckStatus;
@@ -36,6 +37,11 @@ public class TruckEntity {
     @Size(max = 100, message = "{truck.model.size}")
     @Column(name = "model", nullable = false)
     private String model;
+
+    @NotNull(message = "{truck.hub.notNull}")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "hub_id")
+    private HubEntity hub;
 
     @NotNull(message = "{truck.type.notNull}")
     @Enumerated(EnumType.STRING)
