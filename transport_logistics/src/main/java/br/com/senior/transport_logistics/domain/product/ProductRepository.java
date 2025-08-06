@@ -21,4 +21,6 @@ public interface ProductRepository extends JpaRepository<ProductEntity,Long> {
             @Param(value = "weight") Float limitWeight,
             Pageable pageable
     );
+
+    boolean existsByNameIgnoreCase(String name);
 }

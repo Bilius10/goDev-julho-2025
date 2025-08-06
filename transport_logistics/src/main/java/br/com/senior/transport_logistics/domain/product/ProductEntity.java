@@ -1,5 +1,6 @@
 package br.com.senior.transport_logistics.domain.product;
 
+import br.com.senior.transport_logistics.domain.product.dto.request.ProductRequestDTO;
 import br.com.senior.transport_logistics.domain.product.enums.ProductCategory;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
@@ -30,11 +31,20 @@ public class ProductEntity {
     @Column(name = "category")
     @Enumerated(EnumType.STRING)
     @NotNull(message = "{product.category.notNull}")
-    @Size(max = 100, message = "{product.category.size}")
     private ProductCategory category;
 
     @Column(name = "weight")
-    @NotNull(message = "")
-    private float weight;
+    @NotNull(message = "{product.weight.notNull}")
+    private double weight;
+
+    @Column(name = "active")
+    private boolean active;
+
+    public ProductEntity(ProductRequestDTO productCreateDTO) {
+        this.name = productCreateDTO.name();
+        this.category = productCreateDTO.productCategory();
+        this.weight = productCreateDTO.weight();
+        this.active = true;
+    }
 
 }

@@ -8,10 +8,10 @@ public record ProductResponseDTO(
         long id,
         String name,
         ProductCategory category,
-        float weight
+        double weight
 ) {
 
-    public ProductResponseDTO(long id, String name, ProductCategory category, float weight) {
+    public ProductResponseDTO(long id, String name, ProductCategory category, double weight) {
         this.id = id;
         this.name = name;
         this.category = category;
