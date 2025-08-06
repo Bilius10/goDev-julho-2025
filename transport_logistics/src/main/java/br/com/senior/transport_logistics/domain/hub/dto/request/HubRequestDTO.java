@@ -15,7 +15,7 @@ public record HubRequestDTO(
         String cnpj,
 
         @NotBlank(message = "{hub.cep.notBlank}")
-        @Pattern(message = "{hub.cep.pattern}", regexp = "^(0[1-9]\\d{3}|1\\d{4})-?\\d{3}$")
+        @Pattern(message = "{hub.cep.pattern}", regexp = "^(0[1-9]\\d{3}|1\\d{4})?\\d{3}$")
         String cep,
 
         @NotBlank(message = "{hub.number.notBlank}")

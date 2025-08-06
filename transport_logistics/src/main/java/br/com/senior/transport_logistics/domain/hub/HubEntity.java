@@ -64,4 +64,9 @@ public class HubEntity {
     @Pattern(regexp = "^(0[1-9]\\d{3}|1\\d{4})-?\\d{3}$")
     @Column(nullable = false)
     private String cep;
+
+    public String formatAddress() {
+        return this.street + ", " + this.number + ", " + this.district + ", "
+                + this.city + ", " + this.state + ", " + this.country + ", " + this.cep;
+    }
 }
