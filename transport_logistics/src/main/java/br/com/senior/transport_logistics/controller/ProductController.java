@@ -5,6 +5,7 @@ import br.com.senior.transport_logistics.domain.product.dto.request.ProductReque
 import br.com.senior.transport_logistics.domain.product.dto.response.ProductResponseDTO;
 import br.com.senior.transport_logistics.domain.product.enums.ProductCategory;
 import br.com.senior.transport_logistics.dto.PageDTO;
+import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,11 +39,13 @@ public class ProductController {
     }
 
     @PostMapping
+    @Transactional
     public ResponseEntity<ProductResponseDTO> create(@RequestBody @Valid ProductRequestDTO productCreateDTO){
         return ResponseEntity.status(HttpStatus.CREATED).body(service.create(productCreateDTO));
     }
 
     @PutMapping("/{id}")
+    @Transactional
     public ResponseEntity<ProductResponseDTO> update(
             @PathVariable Long id,
             @RequestBody @Valid ProductRequestDTO productUpdateDTO){
@@ -51,6 +54,7 @@ public class ProductController {
     }
 
     @DeleteMapping("/{id}")
+    @Transactional
     public ResponseEntity<ProductResponseDTO> delete(@PathVariable Long id){
 
         service.delete(id);

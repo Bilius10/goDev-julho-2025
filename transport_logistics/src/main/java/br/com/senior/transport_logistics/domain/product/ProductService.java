@@ -4,6 +4,7 @@ import br.com.senior.transport_logistics.domain.product.dto.request.ProductReque
 import br.com.senior.transport_logistics.domain.product.dto.response.ProductResponseDTO;
 import br.com.senior.transport_logistics.domain.product.enums.ProductCategory;
 import br.com.senior.transport_logistics.dto.PageDTO;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -33,6 +34,7 @@ public class ProductService {
         );
     }
 
+    @Transactional
     public ProductResponseDTO create(ProductRequestDTO request){
 
         if(repository.existsByNameIgnoreCase(request.name())){
@@ -47,7 +49,8 @@ public class ProductService {
                 saveProduct.getId(), saveProduct.getName(), saveProduct.getCategory(), saveProduct.getWeight()
         );
     }
-    
+
+    @Transactional
     public ProductResponseDTO update(Long id, ProductRequestDTO request){
         this.findById(id);
 
@@ -61,6 +64,7 @@ public class ProductService {
         );
     }
 
+    @Transactional
     public void delete(Long id) {
         ProductEntity productFound = this.findById(id);
         productFound.setActive(false);
