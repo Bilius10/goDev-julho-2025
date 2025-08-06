@@ -23,18 +23,18 @@ public class ProductEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @Column(name = "name")
     @Size(max = 100, message = "{product.name.size}")
     @NotBlank(message = "{product.name.notBlank}")
+    @Column(name = "name", nullable = false, unique = true)
     private String name;
 
-    @Column(name = "category")
     @Enumerated(EnumType.STRING)
     @NotNull(message = "{product.category.notNull}")
+    @Column(name = "category", nullable = false)
     private ProductCategory category;
 
-    @Column(name = "weight")
     @NotNull(message = "{product.weight.notNull}")
+    @Column(name = "weight", nullable = false)
     private double weight;
 
     @Column(name = "active")

@@ -50,7 +50,6 @@ public class ProductService {
         );
     }
 
-    @Transactional
     public ProductResponseDTO update(Long id, ProductRequestDTO request){
         this.findById(id);
 
