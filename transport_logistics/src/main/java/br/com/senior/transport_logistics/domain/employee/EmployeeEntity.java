@@ -4,13 +4,12 @@ import br.com.senior.transport_logistics.domain.employee.dto.request.EmployeeReq
 import br.com.senior.transport_logistics.domain.employee.enums.Role;
 import br.com.senior.transport_logistics.domain.hub.HubEntity;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.validator.constraints.br.CPF;
 
 @Getter
 @Setter
@@ -32,15 +31,18 @@ public class EmployeeEntity {
     @Column(name = "cnh")
     @Size(max = 11, message = "{employee.cnh.size}")
     @NotBlank(message = "{employee.cnh.notBlank}")
+    @Pattern(regexp = "^\\d{11}$", message = "{employee.cnh.format}")
     private String cnh;
 
     @Column(name = "cpf")
     @Size(max = 11, message = "{employee.cpf.size}")
+    @CPF(message = "{employee.cpf.format}")
     private String cpf;
 
     @Column(name = "email")
     @Size(max = 100, message = "{employee.email.size}")
     @NotBlank(message = "{employee.email.notBlank}")
+    @Email(message = "{employee.email.format}")
     private String email;
 
     @Column(name = "active")
