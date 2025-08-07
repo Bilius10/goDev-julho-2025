@@ -45,7 +45,7 @@ CREATE TABLE IF NOT EXISTS trucks (
     model VARCHAR(100) NOT NULL,
     hub_id INTEGER,
     type VARCHAR(20) NOT NULL,
-    body_type VARCHAR(20) NOT NULL,
+    body VARCHAR(20) NOT NULL,
     axle_setup VARCHAR(20) NOT NULL,
     load_capacity FLOAT NOT NULL,
     weight DOUBLE PRECISION NOT NULL,

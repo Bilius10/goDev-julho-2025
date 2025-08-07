@@ -86,7 +86,7 @@ public class TruckEntity {
 
     @NotNull(message = "{truck.averageFuelConsumption.notNull}")
     @Positive(message = "{truck.averageFuelConsumption.positive}")
-    @Column(name = "average_fueld_consumption", nullable = false)
+    @Column(name = "average_fuel_consumption", nullable = false)
     private Double averageFuelConsumption;
 
     @NotNull(message = "{truck.status.notNull}")
@@ -98,9 +98,10 @@ public class TruckEntity {
     @Column(name = "features")
     private String features;
 
-    public TruckEntity(TruckRequestDTO request) {
-        this.code = request.code();
+    public TruckEntity(TruckRequestDTO request, String code, HubEntity hub) {
+        this.code = code;
         this.model = request.model();
+        this.hub = hub;
         this.type = request.type();
         this.body = request.body();
         this.axleSetup = request.axleSetup();
