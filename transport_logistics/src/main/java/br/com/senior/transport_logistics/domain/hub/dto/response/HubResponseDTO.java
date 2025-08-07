@@ -40,7 +40,7 @@ public record HubResponseDTO(
                 .cnpj(entity.getCnpj())
                 .street(entity.getStreet())
                 .number(entity.getNumber())
-                .district(entity.getDistrict())
+                .district(entity.getNeighborhood())
                 .city(entity.getCity())
                 .state(entity.getState())
                 .country(entity.getCountry())
