@@ -1,15 +1,12 @@
-package br.com.senior.transport_logistics.service;
+package br.com.senior.transport_logistics.infrastructure.external;
 
-import br.com.senior.transport_logistics.dto.NominationDTO.CoordinatesDTO;
-import br.com.senior.transport_logistics.dto.OpenRouteDTO.ResponseForGemini;
-import br.com.senior.transport_logistics.dto.OpenRouteDTO.request.OpenRouteRequestBody;
-import br.com.senior.transport_logistics.dto.OpenRouteDTO.request.OptionsRecord;
-import br.com.senior.transport_logistics.dto.OpenRouteDTO.request.ProfileParamsRecord;
-import br.com.senior.transport_logistics.dto.OpenRouteDTO.request.RestrictionsRecord;
-import br.com.senior.transport_logistics.dto.OpenRouteDTO.response.OrsResponse;
-import br.com.senior.transport_logistics.dto.OpenRouteDTO.response.RouteRecord;
-import br.com.senior.transport_logistics.dto.OpenRouteDTO.response.SegmentRecord;
-import br.com.senior.transport_logistics.dto.OpenRouteDTO.response.StepRecord;
+import br.com.senior.transport_logistics.infrastructure.dto.NominationDTO.CoordinatesDTO;
+import br.com.senior.transport_logistics.infrastructure.dto.OpenRouteDTO.ResponseForGemini;
+import br.com.senior.transport_logistics.infrastructure.dto.OpenRouteDTO.request.OpenRouteRequestBody;
+import br.com.senior.transport_logistics.infrastructure.dto.OpenRouteDTO.request.OptionsRecord;
+import br.com.senior.transport_logistics.infrastructure.dto.OpenRouteDTO.request.ProfileParamsRecord;
+import br.com.senior.transport_logistics.infrastructure.dto.OpenRouteDTO.request.RestrictionsRecord;
+import br.com.senior.transport_logistics.infrastructure.dto.OpenRouteDTO.response.OrsResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;

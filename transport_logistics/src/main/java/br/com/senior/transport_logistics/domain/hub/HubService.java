@@ -1,16 +1,14 @@
 package br.com.senior.transport_logistics.domain.hub;
 
-import br.com.senior.transport_logistics.domain.employee.EmployeeEntity;
-import br.com.senior.transport_logistics.domain.employee.dto.response.EmployeeResponseDTO;
 import br.com.senior.transport_logistics.domain.hub.dto.request.HubCreateRequestDTO;
 import br.com.senior.transport_logistics.domain.hub.dto.request.HubUpdateRequestDTO;
 import br.com.senior.transport_logistics.domain.hub.dto.response.HubResponseDTO;
 import br.com.senior.transport_logistics.domain.hub.dto.response.HubSummaryProjection;
 import br.com.senior.transport_logistics.dto.AddresDTO;
 import br.com.senior.transport_logistics.dto.CoordinatesDTO;
-import br.com.senior.transport_logistics.dto.PageDTO;
-import br.com.senior.transport_logistics.service.NominatimApiClientService;
-import br.com.senior.transport_logistics.service.ViaCepApiCilentService;
+import br.com.senior.transport_logistics.infrastructure.dto.PageDTO;
+import br.com.senior.transport_logistics.infrastructure.external.NominatimApiClientService;
+import br.com.senior.transport_logistics.infrastructure.external.ViaCepApiCilentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

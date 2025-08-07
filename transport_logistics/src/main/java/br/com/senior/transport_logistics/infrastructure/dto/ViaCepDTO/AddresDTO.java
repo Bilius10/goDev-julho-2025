@@ -1,4 +1,4 @@
-package br.com.senior.transport_logistics.dto.ViaCepDTO;
+package br.com.senior.transport_logistics.infrastructure.dto.ViaCepDTO;
 
 public record AddresDTO(
         String logradouro,

@@ -1,6 +1,6 @@
-package br.com.senior.transport_logistics.service;
+package br.com.senior.transport_logistics.infrastructure.external;
 
-import br.com.senior.transport_logistics.dto.NominationDTO.CoordinatesDTO;
+import br.com.senior.transport_logistics.infrastructure.dto.NominationDTO.CoordinatesDTO;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.UriComponentsBuilder;
 

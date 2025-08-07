@@ -1,4 +1,4 @@
-package br.com.senior.transport_logistics.service;
+package br.com.senior.transport_logistics.infrastructure.external;
 
 import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.googleai.GoogleAiGeminiChatModel;

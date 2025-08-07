@@ -5,7 +5,7 @@ import br.com.senior.transport_logistics.domain.product.ProductService;
 import br.com.senior.transport_logistics.domain.shipment.dto.request.ShipmentCreateDTO;
 import br.com.senior.transport_logistics.domain.shipment.dto.request.ShipmentUpdateDTO;
 import br.com.senior.transport_logistics.domain.shipment.dto.response.ShipmentResponseDTO;
-import br.com.senior.transport_logistics.dto.PageDTO;
+import br.com.senior.transport_logistics.infrastructure.dto.PageDTO;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
