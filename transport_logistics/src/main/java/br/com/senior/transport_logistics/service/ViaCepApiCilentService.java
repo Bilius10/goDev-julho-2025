@@ -1,6 +1,6 @@
 package br.com.senior.transport_logistics.service;
 
-import br.com.senior.transport_logistics.dto.AddresDTO;
+import br.com.senior.transport_logistics.dto.ViaCepDTO.AddresDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.UriComponentsBuilder;
