@@ -21,6 +21,23 @@ CREATE TABLE IF NOT EXISTS shipments (
     CONSTRAINT fk_shipment_product FOREIGN KEY (product_id) REFERENCES products (id)
 );
 
+-- Table: hubs
+CREATE TABLE IF NOT EXISTS hubs (
+    id SERIAL,
+    name VARCHAR(100) NOT NULL UNIQUE,
+    cnpj VARCHAR(20) NOT NULL UNIQUE,
+    street VARCHAR(100) NOT NULL,
+    number VARCHAR(6) NOT NULL,
+    neighborhood VARCHAR(100) NOT NULL,
+    city VARCHAR(100) NOT NULL,
+    state VARCHAR(100) NOT NULL,
+    country VARCHAR(100),
+    latitude DOUBLE PRECISION,
+    longitude DOUBLE PRECISION,
+    cep CHAR(9) NOT NULL,
+    CONSTRAINT pk_hub PRIMARY KEY (id)
+);
+
 -- Table: trucks
 CREATE TABLE IF NOT EXISTS trucks (
     id SERIAL,
@@ -38,25 +55,8 @@ CREATE TABLE IF NOT EXISTS trucks (
     average_fuel_consumption DOUBLE PRECISION NOT NULL,
     status VARCHAR(20) NOT NULL,
     features VARCHAR(100),
-    CONSTRAINT pk_truck PRIMARY KEY (id)
-    CONSTRAINT fk_truck_hub FOREIGN KEY (hub_id) REFERENCES hub(id)
-);
-
--- Table: hubs
-CREATE TABLE IF NOT EXISTS hubs (
-    id SERIAL,
-    name VARCHAR(100) NOT NULL UNIQUE,
-    cnpj VARCHAR(20) NOT NULL UNIQUE,
-    street VARCHAR(100) NOT NULL,
-    number VARCHAR(6) NOT NULL,
-    neighborhood VARCHAR(100) NOT NULL,
-    city VARCHAR(100) NOT NULL,
-    state VARCHAR(100) NOT NULL,
-    country VARCHAR(100),
-    latitude DOUBLE PRECISION,
-    longitude DOUBLE PRECISION,
-    cep CHAR(9) NOT NULL,
-    CONSTRAINT pk_hub PRIMARY KEY (id)
+    CONSTRAINT pk_truck PRIMARY KEY (id),
+    CONSTRAINT fk_truck_hub FOREIGN KEY (hub_id) REFERENCES hubs(id)
 );
 
 -- Table: employees
