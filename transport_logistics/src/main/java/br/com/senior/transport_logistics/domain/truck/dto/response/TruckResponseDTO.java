@@ -1,6 +1,6 @@
 package br.com.senior.transport_logistics.domain.truck.dto.response;
 
-import br.com.senior.transport_logistics.domain.hub.HubEntity;
+import br.com.senior.transport_logistics.domain.hub.dto.response.HubResponseDTO;
 import br.com.senior.transport_logistics.domain.truck.TruckEntity;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
@@ -10,7 +10,7 @@ import lombok.Builder;
 public record TruckResponseDTO(
         String code,
         String model,
-        HubEntity hub,
+        HubResponseDTO hub,
         String type,
         String body,
         String axleSetup,
@@ -38,7 +38,7 @@ public record TruckResponseDTO(
         return TruckResponseDTO.builder()
                 .code(truck.getCode())
                 .model(truck.getModel())
-                .hub(truck.getHub())
+                .hub(HubResponseDTO.basic(truck.getHub()))
                 .type(truck.getType().getDescription())
                 .body(truck.getBody().getDescription())
                 .axleSetup(truck.getAxleSetup().getDescription())

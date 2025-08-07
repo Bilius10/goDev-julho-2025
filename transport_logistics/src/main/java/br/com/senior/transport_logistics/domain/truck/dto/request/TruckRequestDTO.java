@@ -13,6 +13,9 @@ public record TruckRequestDTO(
         @Size(max = 100, message = "{truck.model.size}")
         String model,
 
+        @NotNull(message = "{truck.hub.notNull}")
+        Long hubId,
+
         @NotNull(message = "{truck.type.notNull}")
         TruckType type,
 
