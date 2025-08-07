@@ -1,17 +1,24 @@
 package br.com.senior.transport_logistics.service;
 
 import br.com.senior.transport_logistics.dto.NominationDTO.CoordinatesDTO;
-import br.com.senior.transport_logistics.dto.OpenRouteDTO.OrsResponse;
+import br.com.senior.transport_logistics.dto.OpenRouteDTO.ResponseForGemini;
+import br.com.senior.transport_logistics.dto.OpenRouteDTO.request.OpenRouteRequestBody;
+import br.com.senior.transport_logistics.dto.OpenRouteDTO.request.OptionsRecord;
+import br.com.senior.transport_logistics.dto.OpenRouteDTO.request.ProfileParamsRecord;
+import br.com.senior.transport_logistics.dto.OpenRouteDTO.request.RestrictionsRecord;
+import br.com.senior.transport_logistics.dto.OpenRouteDTO.response.OrsResponse;
+import br.com.senior.transport_logistics.dto.OpenRouteDTO.response.RouteRecord;
+import br.com.senior.transport_logistics.dto.OpenRouteDTO.response.SegmentRecord;
+import br.com.senior.transport_logistics.dto.OpenRouteDTO.response.StepRecord;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.UriComponentsBuilder;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.HttpClientErrorException;
+
+import java.util.Collections;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -23,35 +30,48 @@ public class OpenRouteApiClientService {
     @Value("${openrouteservice.api.key}")
     private String chaveApi;
 
-    public double obterDistancia(CoordinatesDTO coordenadaUsuario, CoordinatesDTO coordenadaPonto) {
-        String urlPersonalizada = UriComponentsBuilder.fromHttpUrl(URL_API_ROTAS)
-                .queryParam("start", coordenadaUsuario.longitude() + "," + coordenadaUsuario.latitude())
-                .queryParam("end", coordenadaPonto.longitude() + "," + coordenadaPonto.latitude())
-                .toUriString();
+    public ResponseForGemini obterDistancia(CoordinatesDTO start, CoordinatesDTO finish, RestrictionsRecord restrictions) {
+
+        List<List<CoordinatesDTO>> coordinates = List.of(Collections.singletonList(start), Collections.singletonList(finish));
+
+        ProfileParamsRecord profileParams = new ProfileParamsRecord(restrictions);
+        OptionsRecord options = new OptionsRecord(profileParams);
+
+        OpenRouteRequestBody requestBody = new OpenRouteRequestBody(
+                coordinates,
+                "recommended",
+                options
+        );
 
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", this.chaveApi);
+        headers.setContentType(MediaType.APPLICATION_JSON);
 
-        HttpEntity<String> entity = new HttpEntity<>(headers);
+        HttpEntity<OpenRouteRequestBody> entity = new HttpEntity<>(requestBody, headers);
 
         try {
 
             ResponseEntity<OrsResponse> response = restTemplate.exchange(
-                    urlPersonalizada,
-                    HttpMethod.GET,
+                    URL_API_ROTAS,
+                    HttpMethod.POST,
                     entity,
                     OrsResponse.class
             );
 
-            OrsResponse orsResponse = response.getBody();
+            OrsResponse responseBody = response.getBody();
 
-            if (orsResponse == null || orsResponse.features() == null || orsResponse.features().length == 0) {
+            if (responseBody != null && responseBody.routes() != null && !responseBody.routes().isEmpty()) {
                 throw new RuntimeException("Nenhuma rota encontrada entre os pontos informados.");
             }
 
-            double distanciaEmMetros = orsResponse.features()[0].properties().segments();
+            return new ResponseForGemini(
+                    responseBody.routes().get(0).summary().distance(),
+                    responseBody.routes().stream()
+                            .flatMap(route -> route.segments().stream())
+                            .flatMap(segment -> segment.steps().stream())
+                            .toList()
+            );
 
-            return distanciaEmMetros / 1000.0;
         } catch (HttpClientErrorException e) {
 
             throw new RuntimeException("Problema com a requisição para a API de rotas: ");
