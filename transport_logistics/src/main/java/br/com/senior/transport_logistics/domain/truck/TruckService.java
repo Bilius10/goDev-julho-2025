@@ -2,6 +2,7 @@ package br.com.senior.transport_logistics.domain.truck;
 
 import br.com.senior.transport_logistics.domain.hub.HubService;
 import br.com.senior.transport_logistics.domain.truck.dto.request.TruckRequestDTO;
+import br.com.senior.transport_logistics.domain.truck.dto.response.AverageDimensionsTrucks;
 import br.com.senior.transport_logistics.domain.truck.dto.response.TruckResponseDTO;
 import br.com.senior.transport_logistics.domain.truck.enums.TruckStatus;
 import br.com.senior.transport_logistics.domain.truck.enums.TruckType;
@@ -13,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -67,5 +69,20 @@ public class TruckService {
         String dateTimeCode = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
 
         return String.format("TR-%s-%s-%04d", type.name(), dateTimeCode, timeMillisSuffix);
+    }
+
+    public AverageDimensionsTrucks findAverageDimensionsTrucks(){
+        return repository.findAverageDimensionsTrucks()
+                .orElseThrow(() -> new RuntimeException("Nenhum caminhão cadastrado"));
+    }
+
+    public List<TruckEntity> findByLoadCapacityGreaterThan(Double loadCapacity){
+        List<TruckEntity> trucks = repository.findByLoadCapacityGreaterThan(loadCapacity);
+
+        if (trucks.isEmpty()) {
+            throw new RuntimeException("Nenhum caminhão encontrado que suporte essa carga.");
+        }
+
+        return trucks;
     }
 }
