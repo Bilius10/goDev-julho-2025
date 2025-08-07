@@ -24,7 +24,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class OpenRouteApiClientService {
 
-    private static final String URL_API_ROTAS = "https://api.openrouteservice.org/v2/directions/foot-walking";
+    private static final String URL_API_ROTAS = "https://api.openrouteservice.org/v2/directions/driving-hvg/json";
     private final RestTemplate restTemplate;
 
     @Value("${openrouteservice.api.key}")
