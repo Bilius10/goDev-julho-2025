@@ -9,10 +9,6 @@ import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 
 public record TruckRequestDTO(
-        @NotBlank(message = "{truck.code.notBlank}")
-        @Size(max = 50, message = "{truck.code.size}")
-        String code,
-
         @NotBlank(message = "{truck.model.notBlank}")
         @Size(max = 100, message = "{truck.model.size}")
         String model,

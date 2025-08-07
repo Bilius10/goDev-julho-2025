@@ -98,8 +98,8 @@ public class TruckEntity {
     @Column(name = "features")
     private String features;
 
-    public TruckEntity(TruckRequestDTO request) {
-        this.code = request.code();
+    public TruckEntity(TruckRequestDTO request, String code) {
+        this.code = code;
         this.model = request.model();
         this.type = request.type();
         this.body = request.body();
