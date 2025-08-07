@@ -3,15 +3,12 @@ package br.com.senior.transport_logistics.domain.product;
 import br.com.senior.transport_logistics.domain.product.dto.request.ProductRequestDTO;
 import br.com.senior.transport_logistics.domain.product.dto.response.ProductResponseDTO;
 import br.com.senior.transport_logistics.domain.product.enums.ProductCategory;
-import br.com.senior.transport_logistics.dto.PageDTO;
+import br.com.senior.transport_logistics.infrastructure.dto.PageDTO;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor

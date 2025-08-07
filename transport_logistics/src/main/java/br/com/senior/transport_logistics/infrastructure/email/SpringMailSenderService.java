@@ -1,4 +1,4 @@
-package br.com.senior.transport_logistics.service;
+package br.com.senior.transport_logistics.infrastructure.email;
 
 import br.com.senior.transport_logistics.domain.employee.EmployeeEntity;
 import jakarta.mail.MessagingException;

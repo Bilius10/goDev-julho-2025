@@ -5,7 +5,7 @@ import br.com.senior.transport_logistics.domain.truck.dto.request.TruckRequestDT
 import br.com.senior.transport_logistics.domain.truck.dto.response.TruckResponseDTO;
 import br.com.senior.transport_logistics.domain.truck.enums.TruckStatus;
 import br.com.senior.transport_logistics.domain.truck.enums.TruckType;
-import br.com.senior.transport_logistics.dto.PageDTO;
+import br.com.senior.transport_logistics.infrastructure.dto.PageDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;

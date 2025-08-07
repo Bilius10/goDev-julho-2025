@@ -1,4 +1,4 @@
-package br.com.senior.transport_logistics.dto.OpenRouteDTO.response;
+package br.com.senior.transport_logistics.infrastructure.dto.OpenRouteDTO.response;
 
 public record SummaryRecord(
         double distance,

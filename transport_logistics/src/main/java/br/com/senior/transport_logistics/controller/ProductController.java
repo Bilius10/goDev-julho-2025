@@ -4,7 +4,7 @@ import br.com.senior.transport_logistics.domain.product.ProductService;
 import br.com.senior.transport_logistics.domain.product.dto.request.ProductRequestDTO;
 import br.com.senior.transport_logistics.domain.product.dto.response.ProductResponseDTO;
 import br.com.senior.transport_logistics.domain.product.enums.ProductCategory;
-import br.com.senior.transport_logistics.dto.PageDTO;
+import br.com.senior.transport_logistics.infrastructure.dto.PageDTO;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

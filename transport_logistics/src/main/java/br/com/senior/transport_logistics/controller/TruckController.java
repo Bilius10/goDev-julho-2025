@@ -4,7 +4,7 @@ import br.com.senior.transport_logistics.domain.truck.TruckService;
 import br.com.senior.transport_logistics.domain.truck.dto.request.TruckRequestDTO;
 import br.com.senior.transport_logistics.domain.truck.dto.response.TruckResponseDTO;
 import br.com.senior.transport_logistics.domain.truck.enums.TruckStatus;
-import br.com.senior.transport_logistics.dto.PageDTO;
+import br.com.senior.transport_logistics.infrastructure.dto.PageDTO;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;

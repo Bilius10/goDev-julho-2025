@@ -1,6 +1,6 @@
-package br.com.senior.transport_logistics.dto.OpenRouteDTO.request;
+package br.com.senior.transport_logistics.infrastructure.dto.OpenRouteDTO.request;
 
-import br.com.senior.transport_logistics.dto.NominationDTO.CoordinatesDTO;
+import br.com.senior.transport_logistics.infrastructure.dto.NominationDTO.CoordinatesDTO;
 
 import java.util.List;
 

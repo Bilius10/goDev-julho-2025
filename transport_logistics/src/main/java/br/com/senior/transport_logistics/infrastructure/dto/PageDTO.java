@@ -1,4 +1,4 @@
-package br.com.senior.transport_logistics.dto;
+package br.com.senior.transport_logistics.infrastructure.dto;
 
 import br.com.senior.transport_logistics.domain.hub.dto.response.HubResponseDTO;
 
