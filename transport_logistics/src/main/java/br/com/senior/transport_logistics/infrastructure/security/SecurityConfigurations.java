@@ -31,12 +31,13 @@ public class SecurityConfigurations {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(
                         auth -> {
-                            auth.requestMatchers(HttpMethod.POST, "/api/v1/hubs").hasRole("ADMIN");
-                            auth.requestMatchers(HttpMethod.PUT, "/api/v1/hubs").hasRole("ADMIN");
-                            auth.requestMatchers(HttpMethod.DELETE, "/api/v1/hubs").hasRole("ADMIN");
+                            // auth.requestMatchers(HttpMethod.POST, "/api/v1/hubs").hasRole("ADMIN");
+                            // auth.requestMatchers(HttpMethod.PUT, "/api/v1/hubs").hasRole("ADMIN");
+                            // auth.requestMatchers(HttpMethod.DELETE, "/api/v1/hubs").hasRole("ADMIN");
                             auth.requestMatchers(HttpMethod.POST, "/api/v1/auth/*").permitAll();
                             auth.requestMatchers("/v3/api-docs/**", "/swagger-ui.html", "/swagger-ui/**").permitAll();
-                            auth.anyRequest().authenticated();
+                            // auth.anyRequest().authenticated();
+                            auth.anyRequest().permitAll();
                         }
                 )
                 .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
