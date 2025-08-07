@@ -1,8 +1,12 @@
 package br.com.senior.transport_logistics.domain.hub;
 
+import br.com.senior.transport_logistics.domain.hub.dto.request.HubCreateRequestDTO;
+import br.com.senior.transport_logistics.dto.AddresDTO;
+import br.com.senior.transport_logistics.dto.CoordinatesDTO;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.*;
+import org.hibernate.validator.constraints.br.CNPJ;
 
 @Data
 @NoArgsConstructor
@@ -23,7 +27,7 @@ public class HubEntity {
     private String name;
 
     @NotBlank(message = "{hub.cnpj.notBlank}")
-    @Pattern(message = "{hub.cnpj.pattern}", regexp = "^\\d{2}\\.?\\d{3}\\.?\\d{3}/?\\d{4}-?\\d{2}$\n")
+    @CNPJ(message = "{hub.cnpj.pattern}")
     @Column(nullable = false, unique = true)
     private String cnpj;
 
@@ -38,7 +42,7 @@ public class HubEntity {
 
     @NotBlank(message = "{hub.district.notBlank}")
     @Column(nullable = false)
-    private String district;
+    private String neighborhood;
 
     @NotBlank(message = "{hub.city.notBlank}")
     @Column(nullable = false)
@@ -61,7 +65,36 @@ public class HubEntity {
     private Double longitude;
 
     @NotBlank(message = "{hub.cep.notBlank}")
-    @Pattern(regexp = "^(0[1-9]\\d{3}|1\\d{4})-?\\d{3}$")
     @Column(nullable = false)
     private String cep;
+
+    public HubEntity(HubCreateRequestDTO request, AddresDTO addresDTO){
+        this.name = request.name();
+        this.cnpj = request.cnpj();
+        this.cep = request.cep();
+        this.street = addresDTO.logradouro();
+        this.number = request.number();
+        this.neighborhood = addresDTO.bairro();
+        this.city = addresDTO.localidade();
+        this.state = addresDTO.uf();
+        this.country = "Brasil";
+    }
+
+    public void updateAddres(AddresDTO addresDTO, String number){
+        this.street = addresDTO.logradouro();
+        this.number = number;
+        this.neighborhood = addresDTO.bairro();
+        this.city = addresDTO.localidade();
+        this.state = addresDTO.uf();
+    }
+
+    public void updateCoordinates(CoordinatesDTO coordinatesDTO){
+        this.latitude = coordinatesDTO.latitude();
+        this.longitude = coordinatesDTO.longitude();
+    }
+
+    public String formatAddress() {
+        return this.street + ", " + this.number + ", " + this.neighborhood + ", "
+                + this.city + ", " + this.state + ", " + this.country + ", " + this.cep;
+    }
 }

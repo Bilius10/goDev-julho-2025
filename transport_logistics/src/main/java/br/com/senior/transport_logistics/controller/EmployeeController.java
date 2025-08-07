@@ -1,0 +1,68 @@
+package br.com.senior.transport_logistics.controller;
+
+import br.com.senior.transport_logistics.domain.employee.EmployeeService;
+import br.com.senior.transport_logistics.domain.employee.dto.request.EmployeeCreateRequestDTO;
+import br.com.senior.transport_logistics.domain.employee.dto.request.EmployeeUpdateRequestDTO;
+import br.com.senior.transport_logistics.domain.employee.dto.response.EmployeeResponseDTO;
+import br.com.senior.transport_logistics.dto.PageDTO;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+
+import java.net.URI;
+
+@RequiredArgsConstructor
+@RestController
+@RequestMapping("/api/v1/employees")
+public class EmployeeController {
+
+    private EmployeeService service;
+
+    @GetMapping
+    public ResponseEntity<PageDTO<EmployeeResponseDTO>> findAll(
+            @RequestParam(defaultValue = "0", required = false) int page,
+            @RequestParam(defaultValue = "10", required = false) int size,
+            @RequestParam(defaultValue = "name", required = false) String sortBy,
+            @RequestParam(defaultValue = "true", required = false) boolean ascending
+    ) {
+        Pageable pageable = PageRequest.of(page, size);
+        return ResponseEntity.status(HttpStatus.OK).body(service.findAll(pageable));
+    }
+
+    @PostMapping
+    public ResponseEntity<EmployeeResponseDTO> create(@RequestBody @Valid EmployeeCreateRequestDTO employeeCreateDTO) {
+
+        EmployeeResponseDTO createdEmployee = service.create(employeeCreateDTO);
+
+        URI location = ServletUriComponentsBuilder
+                .fromCurrentRequest()
+                .path("/{id}")
+                .buildAndExpand(createdEmployee.id())
+                .toUri();
+
+        return ResponseEntity.created(location).body(createdEmployee);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<EmployeeResponseDTO> update(
+            @PathVariable Long id,
+            @RequestBody @Valid EmployeeUpdateRequestDTO employeeUpdateDTO){
+
+        return ResponseEntity.status(HttpStatus.OK).body(service.update(id, employeeUpdateDTO));
+    }
+
+    @DeleteMapping("/{id}")
+    @Transactional
+    public ResponseEntity<EmployeeResponseDTO> delete(@PathVariable Long id){
+
+        service.delete(id);
+
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+}
