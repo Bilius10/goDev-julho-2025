@@ -64,6 +64,7 @@ public class HubService {
         return HubResponseDTO.basic(saveHub);
     }
 
+    @Transactional
     public HubResponseDTO update(HubUpdateRequestDTO request, Long id){
         HubEntity hubFound = this.findById(id);
 
@@ -88,6 +89,7 @@ public class HubService {
         return HubResponseDTO.basic(saveHub);
     }
 
+    @Transactional
     public void delete(Long id){
         if(repository.existsById(id)){
             throw new RuntimeException("Sede não encontrada");
