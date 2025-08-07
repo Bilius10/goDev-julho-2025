@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Bem-vindo à LogiTrack</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #f6f6f6; font-family: Arial, sans-serif;">
+
+<table align="center" border="0" cellpadding="0" cellspacing="0" width="600" style="border-collapse: collapse; background-color: #ffffff; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-top: 20px; margin-bottom: 20px;">
+
+    <!-- Cabeçalho com Ícone -->
+    <tr>
+        <td align="center" style="padding: 40px 0 30px 0;">
+            <span style="font-size: 80px;">🚚</span>
+        </td>
+    </tr>
+
+    <!-- Conteúdo Principal -->
+    <tr>
+        <td style="padding: 20px 30px;">
+            <h2 style="color: #2c3e50;">Olá, <span th:text="${nome}">Funcionário</span>!</h2>
+
+            <p style="color: #555555; line-height: 1.6;">
+                Seja muito bem-vindo(a) à equipe <strong>LogiTrack</strong>! Estamos felizes em ter você a bordo para otimizar nossas operações logísticas.
+            </p>
+
+            <p style="color: #555555; line-height: 1.6;">
+                Este sistema foi projetado para facilitar seu trabalho e centralizar as informações. Com ele, você poderá:
+            </p>
+
+            <ul style="color: #555555; line-height: 1.6; padding-left: 20px;">
+                <li>Consultar os detalhes das suas rotas de entrega.</li>
+                <li>Atualizar o status de cada carga em tempo real.</li>
+                <li>Comunicar-se de forma eficiente com a equipe de logística.</li>
+            </ul>
+
+            <p style="color: #555555; font-weight: bold; line-height: 1.6;">
+                Importante: Fique atento ao seu e-mail, pois você receberá por aqui todas as notificações e detalhes sobre as novas cargas que forem atribuídas a você.
+            </p>
+
+            <p style="color: #555555; line-height: 1.6;">
+                Nosso objetivo é garantir um fluxo de trabalho mais ágil, seguro e organizado para todos.
+            </p>
+        </td>
+    </tr>
+
+    <!-- Rodapé -->
+    <tr>
+        <td align="center" style="padding: 20px 30px; background-color: #ecf0f1; border-bottom-left-radius: 8px; border-bottom-right-radius: 8px;">
+            <p style="margin: 0; font-size: 12px; color: #888;">
+                © 2025 LogiTrack. Todos os direitos reservados.
+            </p>
+        </td>
+    </tr>
+</table>
+
+</body>
+</html>
