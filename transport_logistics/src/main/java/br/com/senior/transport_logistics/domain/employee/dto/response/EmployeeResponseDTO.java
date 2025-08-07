@@ -10,14 +10,15 @@ import lombok.Builder;
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record EmployeeResponseDTO(
-        long id,
+        Long id,
         String name,
         String cnh,
         String cpf,
         String email,
-        boolean active,
+        Boolean active,
         Role role,
-        HubResponseDTO hub
+        HubResponseDTO hub,
+        String token
 ) {
 
     public static EmployeeResponseDTO basic(EmployeeEntity entity, HubEntity hub) {
@@ -30,6 +31,12 @@ public record EmployeeResponseDTO(
                 .email(entity.getEmail())
                 .role(entity.getRole())
                 .hub(HubResponseDTO.basic(hub))
+                .build();
+    }
+
+    public static EmployeeResponseDTO token(String token) {
+        return EmployeeResponseDTO.builder()
+                .token(token)
                 .build();
     }
 }

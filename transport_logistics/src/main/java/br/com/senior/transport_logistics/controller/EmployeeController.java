@@ -35,20 +35,6 @@ public class EmployeeController {
         return ResponseEntity.status(HttpStatus.OK).body(service.findAll(pageable));
     }
 
-    @PostMapping
-    public ResponseEntity<EmployeeResponseDTO> create(@RequestBody @Valid EmployeeCreateRequestDTO employeeCreateDTO) {
-
-        EmployeeResponseDTO createdEmployee = service.create(employeeCreateDTO);
-
-        URI location = ServletUriComponentsBuilder
-                .fromCurrentRequest()
-                .path("/{id}")
-                .buildAndExpand(createdEmployee.id())
-                .toUri();
-
-        return ResponseEntity.created(location).body(createdEmployee);
-    }
-
     @PutMapping("/{id}")
     public ResponseEntity<EmployeeResponseDTO> update(
             @PathVariable Long id,
