@@ -23,12 +23,15 @@ public record EmployeeCreateRequestDTO(
         @Email(message = "{employee.email.format}")
         String email,
 
+        @Size(min = 8, max = 100, message = "{employee.password.size}")
+        @NotBlank(message = "{employee.password.notBlank}")
+        String password,
+
         @NotNull(message = "{employee.idHub.notNull}")
         @Positive(message = "{employee.idHub.Positive}")
         Long idHub,
 
         @NotNull(message = "{employee.role.notNull}")
-        @Size(max = 50, message = "{employee.role.size}")
         Role role
 ) {
 }

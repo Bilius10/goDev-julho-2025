@@ -6,19 +6,23 @@ import br.com.senior.transport_logistics.domain.employee.enums.Role;
 import br.com.senior.transport_logistics.domain.hub.HubEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.validator.constraints.br.CPF;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
+import java.util.Collection;
+import java.util.List;
 
 @Getter
 @Setter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "employees")
 @Entity(name = "Employee")
-public class EmployeeEntity {
+public class EmployeeEntity implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -46,6 +50,11 @@ public class EmployeeEntity {
     @Email(message = "{employee.email.format}")
     private String email;
 
+    @Column(name = "password")
+    @Size(min = 8, max = 100, message = "{employee.password.size}")
+    @NotBlank(message = "{employee.password.notBlank}")
+    private String password;
+
     @Column(name = "active")
     private boolean active;
 
@@ -56,7 +65,6 @@ public class EmployeeEntity {
     @Column(name = "role")
     @Enumerated(EnumType.STRING)
     @NotNull(message = "{employee.role.notNull}")
-    @Size(max = 50, message = "{employee.role.size}")
     private Role role;
 
     public EmployeeEntity(EmployeeCreateRequestDTO request, HubEntity hub) {
@@ -72,5 +80,40 @@ public class EmployeeEntity {
     public void updateEmployee(EmployeeUpdateRequestDTO request) {
         this.name = request.name();
         this.email = request.email();
+    }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return List.of(new SimpleGrantedAuthority("ROLE_" + role.name()));
+    }
+
+    @Override
+    public String getPassword() {
+        return password;
+    }
+
+    @Override
+    public String getUsername() {
+        return email;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return active;
     }
 }
