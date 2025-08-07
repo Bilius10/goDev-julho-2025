@@ -6,12 +6,11 @@ import br.com.senior.transport_logistics.domain.employee.dto.request.EmployeeUpd
 import br.com.senior.transport_logistics.domain.employee.dto.response.EmployeeResponseDTO;
 import br.com.senior.transport_logistics.domain.hub.HubEntity;
 import br.com.senior.transport_logistics.domain.hub.HubService;
-import br.com.senior.transport_logistics.domain.hub.dto.response.HubResponseDTO;
 import br.com.senior.transport_logistics.dto.PageDTO;
 import br.com.senior.transport_logistics.infrastructure.exception.common.FieldAlreadyExistsException;
 import br.com.senior.transport_logistics.infrastructure.exception.common.ResourceNotFoundException;
 import br.com.senior.transport_logistics.infrastructure.exception.common.WrongPasswordException;
-import br.com.senior.transport_logistics.security.TokenService;
+import br.com.senior.transport_logistics.infrastructure.security.TokenService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.security.crypto.password.PasswordEncoder;
