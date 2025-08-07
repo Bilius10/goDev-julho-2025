@@ -4,9 +4,9 @@ import br.com.senior.transport_logistics.domain.hub.dto.request.HubCreateRequest
 import br.com.senior.transport_logistics.domain.hub.dto.request.HubUpdateRequestDTO;
 import br.com.senior.transport_logistics.domain.hub.dto.response.HubResponseDTO;
 import br.com.senior.transport_logistics.domain.hub.dto.response.HubSummaryProjection;
-import br.com.senior.transport_logistics.dto.AddresDTO;
-import br.com.senior.transport_logistics.dto.CoordinatesDTO;
+import br.com.senior.transport_logistics.infrastructure.dto.NominationDTO.CoordinatesDTO;
 import br.com.senior.transport_logistics.infrastructure.dto.PageDTO;
+import br.com.senior.transport_logistics.infrastructure.dto.ViaCepDTO.AddresDTO;
 import br.com.senior.transport_logistics.infrastructure.external.NominatimApiClientService;
 import br.com.senior.transport_logistics.infrastructure.external.ViaCepApiCilentService;
 import lombok.RequiredArgsConstructor;

@@ -1,8 +1,8 @@
 package br.com.senior.transport_logistics.domain.hub;
 
 import br.com.senior.transport_logistics.domain.hub.dto.request.HubCreateRequestDTO;
-import br.com.senior.transport_logistics.dto.AddresDTO;
-import br.com.senior.transport_logistics.dto.CoordinatesDTO;
+import br.com.senior.transport_logistics.infrastructure.dto.NominationDTO.CoordinatesDTO;
+import br.com.senior.transport_logistics.infrastructure.dto.ViaCepDTO.AddresDTO;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.*;
