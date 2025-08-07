@@ -1,6 +1,7 @@
 package br.com.senior.transport_logistics.domain.truck;
 
 import br.com.senior.transport_logistics.domain.hub.HubEntity;
+import br.com.senior.transport_logistics.domain.truck.dto.request.TruckRequestDTO;
 import br.com.senior.transport_logistics.domain.truck.enums.AxleSetup;
 import br.com.senior.transport_logistics.domain.truck.enums.TruckBody;
 import br.com.senior.transport_logistics.domain.truck.enums.TruckStatus;
@@ -96,4 +97,20 @@ public class TruckEntity {
     @Size(max = 100, message = "{truck.features.size}")
     @Column(name = "features")
     private String features;
+
+    public TruckEntity(TruckRequestDTO request) {
+        this.code = request.code();
+        this.model = request.model();
+        this.type = request.type();
+        this.body = request.body();
+        this.axleSetup = request.axleSetup();
+        this.loadCapacity = request.loadCapacity();
+        this.weight = request.weight();
+        this.length = request.length();
+        this.width = request.width();
+        this.height = request.height();
+        this.averageFuelConsumption = request.averageFuelConsumption();
+        this.status = TruckStatus.AVAILABLE;
+        this.features = request.features();
+    }
 }
