@@ -48,7 +48,7 @@ public class TransportController {
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
                 .path("/{id}")
-                .buildAndExpand("ola")
+                .buildAndExpand(createdTransport.id())
                 .toUri();
 
         return ResponseEntity.created(location).body(createdTransport);
@@ -58,7 +58,7 @@ public class TransportController {
     public ResponseEntity<TransportResponseDTO> update(
             @PathVariable Long id,
             @RequestBody @Valid UpdateTransportRequest updateTransportRequest
-            ){
+    ){
 
         return ResponseEntity.status(HttpStatus.OK).body(service.update(updateTransportRequest, id));
     }
