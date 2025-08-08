@@ -4,11 +4,16 @@ import br.com.senior.transport_logistics.domain.product.dto.request.ProductReque
 import br.com.senior.transport_logistics.domain.product.dto.response.ProductResponseDTO;
 import br.com.senior.transport_logistics.domain.product.enums.ProductCategory;
 import br.com.senior.transport_logistics.infrastructure.dto.PageDTO;
+import br.com.senior.transport_logistics.infrastructure.exception.common.FieldAlreadyExistsException;
+import br.com.senior.transport_logistics.infrastructure.exception.common.ResourceNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+
+import static br.com.senior.transport_logistics.infrastructure.exception.ExceptionMessages.PRODUCT_NAME_IN_USE;
+import static br.com.senior.transport_logistics.infrastructure.exception.ExceptionMessages.PRODUCT_NOT_FOUND_BY_ID;
 
 @Service
 @RequiredArgsConstructor
@@ -35,7 +40,7 @@ public class ProductService {
     public ProductResponseDTO create(ProductRequestDTO request){
 
         if(repository.existsByNameIgnoreCase(request.name())){
-            throw new RuntimeException("Já existe um produto com esse nome");
+            throw new FieldAlreadyExistsException(PRODUCT_NAME_IN_USE.getMessage(request.name()));
         }
 
         ProductEntity productEntity = new ProductEntity(request);
@@ -70,7 +75,7 @@ public class ProductService {
 
     public ProductEntity findById(Long id){
         return repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Nenhum produto encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException(PRODUCT_NOT_FOUND_BY_ID.getMessage(id)));
     }
 
 }

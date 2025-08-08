@@ -12,6 +12,9 @@ public enum ExceptionMessages {
     EMPLOYEE_CPF_IN_USE("O campo CPF com valor '%s' já está em uso por outro funcionário."),
     EMPLOYEE_CNH_IN_USE("O campo CNH com valor '%s' já está em uso por outro funcionário."),
 
+    PRODUCT_NOT_FOUND_BY_ID("Produto com o campo 'id' igual a '%s' não foi encontrado"),
+    PRODUCT_NAME_IN_USE("O campo nome com valor '%s' já está em uso por outro produto."),
+
     ERROR("ERROR");
 
     private final String template;
