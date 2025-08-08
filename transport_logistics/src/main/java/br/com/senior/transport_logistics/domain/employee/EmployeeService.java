@@ -4,10 +4,10 @@ import br.com.senior.transport_logistics.domain.employee.dto.request.EmployeeCre
 import br.com.senior.transport_logistics.domain.employee.dto.request.EmployeeLoginRequestDTO;
 import br.com.senior.transport_logistics.domain.employee.dto.request.EmployeeUpdateRequestDTO;
 import br.com.senior.transport_logistics.domain.employee.dto.response.EmployeeResponseDTO;
+import br.com.senior.transport_logistics.domain.employee.enums.Role;
 import br.com.senior.transport_logistics.domain.hub.HubEntity;
 import br.com.senior.transport_logistics.domain.hub.HubService;
 import br.com.senior.transport_logistics.infrastructure.dto.PageDTO;
-import br.com.senior.transport_logistics.infrastructure.exception.ExceptionMessages;
 import br.com.senior.transport_logistics.infrastructure.email.SpringMailSenderService;
 import br.com.senior.transport_logistics.infrastructure.exception.common.FieldAlreadyExistsException;
 import br.com.senior.transport_logistics.infrastructure.exception.common.ResourceNotFoundException;
@@ -33,7 +33,7 @@ public class EmployeeService {
     private final SpringMailSenderService mailSenderService;
 
     @Transactional
-    public EmployeeResponseDTO signUp(EmployeeCreateRequestDTO dto) {
+    public EmployeeResponseDTO create(EmployeeCreateRequestDTO dto) {
         createValidation(dto);
         HubEntity hub = hubService.findById(dto.idHub());
 
@@ -42,10 +42,10 @@ public class EmployeeService {
                 .cnh(dto.cnh())
                 .cpf(dto.cpf())
                 .email(dto.email())
-                .password(passwordEncoder.encode(dto.password()))
+                .password(passwordEncoder.encode(dto.cpf()))
                 .hub(hub)
-                .role(dto.role())
                 .active(true)
+                .role(Role.DRIVER)
                 .build();
 
         repository.save(employee);
