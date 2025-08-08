@@ -6,6 +6,7 @@ import br.com.senior.transport_logistics.domain.truck.dto.response.TruckResponse
 import br.com.senior.transport_logistics.domain.truck.enums.TruckStatus;
 import br.com.senior.transport_logistics.domain.truck.enums.TruckType;
 import br.com.senior.transport_logistics.infrastructure.dto.PageDTO;
+import br.com.senior.transport_logistics.infrastructure.exception.common.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -13,6 +14,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+
+import static br.com.senior.transport_logistics.infrastructure.exception.ExceptionMessages.TRUCK_NOT_FOUND_BY_CODE;
 
 @Service
 @RequiredArgsConstructor
@@ -59,7 +62,7 @@ public class TruckService {
     @Transactional(readOnly = true)
     public TruckEntity findEntityByCode(String code) {
         return repository.findByCode(code)
-                .orElseThrow(() -> new RuntimeException("Caminhão não encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException(TRUCK_NOT_FOUND_BY_CODE.getMessage(code)));
     }
 
     private String generateTruckCode(TruckType type) {

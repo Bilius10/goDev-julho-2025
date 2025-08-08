@@ -17,7 +17,7 @@ public enum ExceptionMessages {
 
     SHIPMENT_NOT_FOUND_BY_ID("Carga com o campo 'id' igual a '%s' não foi encontrado"),
 
-    ERROR("ERROR");
+    TRUCK_NOT_FOUND_BY_CODE("Caminhão com o campo 'id' igual a '%s' não foi encontrado");
 
     private final String template;
 
