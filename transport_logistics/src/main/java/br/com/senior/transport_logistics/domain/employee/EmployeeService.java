@@ -115,6 +115,13 @@ public class EmployeeService {
         repository.save(employee);
     }
 
+    @Transactional
+    public void updateRole(Long id, Role role) {
+        EmployeeEntity employee = this.findById(id);
+        employee.setRole(role);
+        repository.save(employee);
+    }
+
     private void createValidation(EmployeeCreateRequestDTO request) {
         verifyIfCnhIsUsed(request.cnh());
         verifyIfCpfIsUsed(request.cpf());
