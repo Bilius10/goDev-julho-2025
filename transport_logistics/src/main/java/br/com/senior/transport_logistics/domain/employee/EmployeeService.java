@@ -7,6 +7,7 @@ import br.com.senior.transport_logistics.domain.employee.dto.response.EmployeeRe
 import br.com.senior.transport_logistics.domain.hub.HubEntity;
 import br.com.senior.transport_logistics.domain.hub.HubService;
 import br.com.senior.transport_logistics.infrastructure.dto.PageDTO;
+import br.com.senior.transport_logistics.infrastructure.email.SpringMailSenderService;
 import br.com.senior.transport_logistics.infrastructure.exception.common.FieldAlreadyExistsException;
 import br.com.senior.transport_logistics.infrastructure.exception.common.ResourceNotFoundException;
 import br.com.senior.transport_logistics.infrastructure.exception.common.WrongPasswordException;
@@ -26,6 +27,7 @@ public class EmployeeService {
     private final PasswordEncoder passwordEncoder;
     private final TokenService tokenService;
     private final HubService hubService;
+    private final SpringMailSenderService mailSenderService;
 
     @Transactional
     public void signUp(EmployeeCreateRequestDTO dto) {
@@ -36,7 +38,7 @@ public class EmployeeService {
         createValidation(dto);
         HubEntity hub = hubService.findById(dto.idHub());
 
-        var user = EmployeeEntity.builder()
+        var employee = EmployeeEntity.builder()
                 .name(dto.name())
                 .cnh(dto.cnh())
                 .cpf(dto.cpf())
@@ -47,7 +49,8 @@ public class EmployeeService {
                 .active(true)
                 .build();
 
-        repository.save(user);
+        repository.save(employee);
+        mailSenderService.sendWelcomeEmail(employee);
     }
 
     @Transactional(readOnly = true)
