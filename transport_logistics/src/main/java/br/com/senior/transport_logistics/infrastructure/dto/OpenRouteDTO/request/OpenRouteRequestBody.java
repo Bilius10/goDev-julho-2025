@@ -5,7 +5,7 @@ import br.com.senior.transport_logistics.infrastructure.dto.NominationDTO.Coordi
 import java.util.List;
 
 public record OpenRouteRequestBody(
-        List<List<CoordinatesDTO>> coordinates,
+        List<List<Double>> coordinates,
         String preference,
         OptionsRecord options
 ) {

@@ -1,0 +1,72 @@
+package br.com.senior.transport_logistics.controller;
+
+import br.com.senior.transport_logistics.domain.transport.TransportEntity;
+import br.com.senior.transport_logistics.domain.transport.TransportService;
+import br.com.senior.transport_logistics.domain.transport.dto.request.CreateTransportRequest;
+import br.com.senior.transport_logistics.domain.transport.dto.request.UpdateTransportRequest;
+import br.com.senior.transport_logistics.domain.transport.dto.response.TransportResponseDTO;
+import br.com.senior.transport_logistics.infrastructure.dto.GeminiDTO.GeminiResponse;
+import br.com.senior.transport_logistics.infrastructure.dto.PageDTO;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import reactor.core.publisher.Mono;
+
+import java.net.URI;
+
+@RestController
+@RequestMapping("/api/v1/transports")
+@RequiredArgsConstructor
+public class TransportController {
+
+    private final TransportService service;
+
+    @GetMapping
+    public ResponseEntity<PageDTO<TransportResponseDTO>> findAll(
+            @RequestParam(defaultValue = "0", required = false) int page,
+            @RequestParam(defaultValue = "10", required = false) int size,
+            @RequestParam(defaultValue = "id", required = false) String sortBy,
+            @RequestParam(defaultValue = "true", required = false) boolean ascending
+    ) {
+        Sort sort = ascending ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        return ResponseEntity.status(HttpStatus.OK).body(service.findAll(pageable));
+    }
+
+    @PostMapping
+    public ResponseEntity<TransportResponseDTO> create(@RequestBody @Valid CreateTransportRequest request) throws JsonProcessingException {
+        TransportResponseDTO createdTransport = service.create(request);
+
+        URI location = ServletUriComponentsBuilder
+                .fromCurrentRequest()
+                .path("/{id}")
+                .buildAndExpand(createdTransport.id())
+                .toUri();
+
+        return ResponseEntity.created(location).body(createdTransport);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<TransportResponseDTO> update(
+            @PathVariable Long id,
+            @RequestBody @Valid UpdateTransportRequest updateTransportRequest
+    ){
+
+        return ResponseEntity.status(HttpStatus.OK).body(service.update(updateTransportRequest, id));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable Long id){
+        service.delete(id);
+
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+}

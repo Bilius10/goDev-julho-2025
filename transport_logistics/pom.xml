@@ -28,12 +28,12 @@
 	</scm>
 	<properties>
 		<java.version>17</java.version>
+		<spring-ai.version>1.0.0</spring-ai.version>
 	</properties>
 	<dependencies>
 		<dependency>
-			<groupId>dev.langchain4j</groupId>
-			<artifactId>langchain4j-google-ai-gemini</artifactId>
-			<version>0.35.0</version>
+			<groupId>org.springframework.ai</groupId>
+			<artifactId>spring-ai-starter-model-openai</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.json</groupId>
@@ -105,6 +105,19 @@
 			<version>4.2.1</version>
 		</dependency>
 	</dependencies>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.springframework.ai</groupId>
+				<artifactId>spring-ai-bom</artifactId>
+				<version>${spring-ai.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
 
 	<build>
 		<plugins>

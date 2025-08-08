@@ -21,7 +21,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class OpenRouteApiClientService {
 
-    private static final String URL_API_ROTAS = "https://api.openrouteservice.org/v2/directions/driving-hvg/json";
+    private static final String URL_API_ROTAS = "https://api.openrouteservice.org/v2/directions/driving-hgv/json";
     private final RestTemplate restTemplate;
 
     @Value("${openrouteservice.api.key}")
@@ -29,7 +29,10 @@ public class OpenRouteApiClientService {
 
     public ResponseForGemini obterDistancia(CoordinatesDTO start, CoordinatesDTO finish, RestrictionsRecord restrictions) {
 
-        List<List<CoordinatesDTO>> coordinates = List.of(Collections.singletonList(start), Collections.singletonList(finish));
+        List<List<Double>> coordinates = List.of(
+                List.of(start.latitude(), start.longitude()),
+                List.of(finish.latitude(), finish.longitude())
+        );
 
         ProfileParamsRecord profileParams = new ProfileParamsRecord(restrictions);
         OptionsRecord options = new OptionsRecord(profileParams);
@@ -57,12 +60,13 @@ public class OpenRouteApiClientService {
 
             OrsResponse responseBody = response.getBody();
 
-            if (responseBody != null && responseBody.routes() != null && !responseBody.routes().isEmpty()) {
+            if (responseBody != null && responseBody.routes() != null && responseBody.routes().isEmpty()) {
                 throw new RuntimeException("Nenhuma rota encontrada entre os pontos informados.");
             }
 
             return new ResponseForGemini(
                     responseBody.routes().get(0).summary().distance(),
+                    responseBody.routes().get(0).summary().duration(),
                     responseBody.routes().stream()
                             .flatMap(route -> route.segments().stream())
                             .flatMap(segment -> segment.steps().stream())

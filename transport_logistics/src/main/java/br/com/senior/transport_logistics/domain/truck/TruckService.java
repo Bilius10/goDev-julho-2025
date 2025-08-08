@@ -2,6 +2,7 @@ package br.com.senior.transport_logistics.domain.truck;
 
 import br.com.senior.transport_logistics.domain.hub.HubService;
 import br.com.senior.transport_logistics.domain.truck.dto.request.TruckRequestDTO;
+import br.com.senior.transport_logistics.domain.truck.dto.response.AverageDimensionsTrucks;
 import br.com.senior.transport_logistics.domain.truck.dto.response.TruckResponseDTO;
 import br.com.senior.transport_logistics.domain.truck.enums.TruckStatus;
 import br.com.senior.transport_logistics.domain.truck.enums.TruckType;
@@ -14,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 import static br.com.senior.transport_logistics.infrastructure.exception.ExceptionMessages.TRUCK_NOT_FOUND_BY_CODE;
 
@@ -70,5 +72,26 @@ public class TruckService {
         String dateTimeCode = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
 
         return String.format("TR-%s-%s-%04d", type.name(), dateTimeCode, timeMillisSuffix);
+    }
+
+    public TruckEntity findById(Long id){
+        return repository.findById(id).orElseThrow(() -> new RuntimeException("Caminhão não existe"));
+    }
+
+    public AverageDimensionsTrucks findAverageDimensionsTrucks(){
+        return repository.findAverageDimensionsTrucks()
+                .orElseThrow(() -> new RuntimeException("Nenhum caminhão cadastrado"));
+    }
+
+    public List<TruckEntity> findByLoadCapacityGreaterThan(Double loadCapacity, Long idHUb, LocalDate exitDay, LocalDate expectArrivalDay){
+        System.out.println(loadCapacity);
+        List<TruckEntity> trucks
+                = repository.findAvailableTrucksByCapacityAndHubNotInRouteBetween(loadCapacity, idHUb);
+
+        if (trucks.isEmpty()) {
+            throw new RuntimeException("Nenhum caminhão encontrado que suporte essa carga.");
+        }
+
+        return trucks;
     }
 }
