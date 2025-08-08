@@ -15,6 +15,8 @@ public enum ExceptionMessages {
     PRODUCT_NOT_FOUND_BY_ID("Produto com o campo 'id' igual a '%s' não foi encontrado"),
     PRODUCT_NAME_IN_USE("O campo nome com valor '%s' já está em uso por outro produto."),
 
+    SHIPMENT_NOT_FOUND_BY_ID("Carga com o campo 'id' igual a '%s' não foi encontrado"),
+
     ERROR("ERROR");
 
     private final String template;

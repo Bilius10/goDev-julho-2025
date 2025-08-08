@@ -6,11 +6,14 @@ import br.com.senior.transport_logistics.domain.shipment.dto.request.ShipmentCre
 import br.com.senior.transport_logistics.domain.shipment.dto.request.ShipmentUpdateDTO;
 import br.com.senior.transport_logistics.domain.shipment.dto.response.ShipmentResponseDTO;
 import br.com.senior.transport_logistics.infrastructure.dto.PageDTO;
+import br.com.senior.transport_logistics.infrastructure.exception.common.ResourceNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+
+import static br.com.senior.transport_logistics.infrastructure.exception.ExceptionMessages.SHIPMENT_NOT_FOUND_BY_ID;
 
 @Service
 @RequiredArgsConstructor
@@ -62,7 +65,7 @@ public class ShipmentService {
 
     public void delete(Long id){
         if(repository.existsById(id)){
-            throw new RuntimeException("Nenhuma carga encontrada");
+            throw new ResourceNotFoundException(SHIPMENT_NOT_FOUND_BY_ID.getMessage(id));
         }
 
         repository.deleteById(id);
@@ -70,6 +73,6 @@ public class ShipmentService {
 
     public ShipmentEntity findById(Long id){
         return repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Nenhuma carga encontrada"));
+                .orElseThrow(() -> new ResourceNotFoundException(SHIPMENT_NOT_FOUND_BY_ID.getMessage(id)));
     }
 }
