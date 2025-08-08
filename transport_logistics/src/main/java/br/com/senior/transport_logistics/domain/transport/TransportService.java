@@ -142,10 +142,6 @@ public class TransportService {
                 availabilityDeadline
         );
 
-        if (candidateTrucks.isEmpty()){
-            throw new RuntimeException("No candidate trucks found for the specified criteria.");
-        }
-
         String routeStepsJson = objectMapper.writeValueAsString(route.steps());
 
         return geminiApiClientService.chooseBestTruck(
