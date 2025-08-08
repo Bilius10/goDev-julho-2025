@@ -14,6 +14,8 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
+import static br.com.senior.transport_logistics.infrastructure.exception.ExceptionMessages.EMPLOYEE_NOT_FOUND_BY_EMAIL;
+
 @Component
 @RequiredArgsConstructor
 public class SecurityFilter extends OncePerRequestFilter {
@@ -31,7 +33,7 @@ public class SecurityFilter extends OncePerRequestFilter {
         if (token != null) {
             String email = tokenService.getSubject(token);
             var user = repository.findByEmail(email)
-                    .orElseThrow(() -> new ResourceNotFoundException("Usuário", "Email", email));
+                    .orElseThrow(() -> new ResourceNotFoundException(EMPLOYEE_NOT_FOUND_BY_EMAIL.getMessage(email)));
 
             var authentication = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
 

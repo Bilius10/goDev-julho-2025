@@ -8,6 +8,7 @@ public enum ExceptionMessages {
     HUB_ALREADY_EXISTS_IN_CITY("A cidade %s já possui uma filial."),
 
     EMPLOYEE_NOT_FOUND_BY_ID("Funcionário com o campo 'id' igual a '%s' não foi encontrado"),
+    EMPLOYEE_NOT_FOUND_BY_EMAIL("Funcionário com o campo 'email' igual a '%s' não foi encontrado"),
     EMPLOYEE_EMAIL_IN_USE("O campo email com valor '%s' já está em uso por outro funcionário"),
     EMPLOYEE_CPF_IN_USE("O campo CPF com valor '%s' já está em uso por outro funcionário."),
     EMPLOYEE_CNH_IN_USE("O campo CNH com valor '%s' já está em uso por outro funcionário."),
