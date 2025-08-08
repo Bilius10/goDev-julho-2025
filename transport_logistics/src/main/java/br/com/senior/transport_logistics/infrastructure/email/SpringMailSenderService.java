@@ -29,11 +29,11 @@ public class SpringMailSenderService {
     @Value("${spring.mail.username}")
     private String emailFrom;
 
-    public void enviarEmailDeBoasVindas(EmployeeEntity employee) {
+    public void sendWelcomeEmail(EmployeeEntity employee) {
         sendEmailWithTemplate(
                 employee.getEmail(),
                 String.format(" Seja muito bem-vindo(a), %s ,à equipe LogiTrack", employee.getName()),
-                "email-boas-vindas.html",
+                "welcome-email.html",
                 Map.of("nome", employee.getName())
         );
     }
