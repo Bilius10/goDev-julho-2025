@@ -18,7 +18,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import java.net.URI;
 
 @RestController
-@RequestMapping("/shipments")
+@RequestMapping("api/v1/shipments")
 @RequiredArgsConstructor
 public class ShipmentController {
 
