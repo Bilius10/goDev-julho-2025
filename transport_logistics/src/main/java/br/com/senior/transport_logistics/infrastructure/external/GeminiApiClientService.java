@@ -3,34 +3,22 @@ package br.com.senior.transport_logistics.infrastructure.external;
 import br.com.senior.transport_logistics.domain.shipment.ShipmentEntity;
 import br.com.senior.transport_logistics.domain.truck.TruckEntity;
 import br.com.senior.transport_logistics.infrastructure.dto.GeminiDTO.GeminiResponse;
-import org.springframework.ai.chat.client.ChatClient;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.ai.openai.api.OpenAiApi;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
+import reactor.core.publisher.Mono;
+import java.util.List;
 
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class GeminiApiClientService {
 
-    private ChatClient chatClient;
 
-    @Autowired
-    public void IaController(ChatClient.Builder chatClientBuilder) {
-        this.chatClient = chatClientBuilder.build();
-    }
-
-    public GeminiResponse chosseBetterComputer(String rotaJson, ShipmentEntity shipment, List<TruckEntity> caminhoesCandidatos){
-        String finalPrompt = construirPromptParaIA(rotaJson, shipment, caminhoesCandidatos);
-
-        return chatClient.prompt()
-                .user(finalPrompt)
-                .call()
-                .entity(GeminiResponse.class);
-    }
 
     private String construirPromptParaIA(String rotaJson, ShipmentEntity shipment, List<TruckEntity> caminhoesCandidatos) {
-
         return String.format("""
             Você é um assistente de logística especializado. Sua tarefa é analisar a rota, a carga e uma lista de caminhões pré-qualificados para selecionar o mais eficiente.
 
@@ -58,4 +46,14 @@ public class GeminiApiClientService {
             """, rotaJson, shipment.getProduct().getCategory(),
                 shipment.getWeight(), shipment.getNotes(), caminhoesCandidatos.toString());
     }
+
+    private GeminiResponse parseGeminiResponse(String jsonResponse) {
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            return mapper.readValue(jsonResponse, GeminiResponse.class);
+        } catch (Exception e) {
+            throw new RuntimeException("Falha ao parsear resposta da IA", e);
+        }
+    }
 }
+

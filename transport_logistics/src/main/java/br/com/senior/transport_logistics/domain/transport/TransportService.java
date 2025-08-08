@@ -1,10 +1,13 @@
 package br.com.senior.transport_logistics.domain.transport;
 
+import br.com.senior.transport_logistics.domain.employee.EmployeeEntity;
+import br.com.senior.transport_logistics.domain.employee.EmployeeService;
 import br.com.senior.transport_logistics.domain.hub.HubEntity;
 import br.com.senior.transport_logistics.domain.hub.HubService;
 import br.com.senior.transport_logistics.domain.shipment.ShipmentEntity;
 import br.com.senior.transport_logistics.domain.shipment.ShipmentService;
 import br.com.senior.transport_logistics.domain.transport.dto.request.CreateTransportRequest;
+import br.com.senior.transport_logistics.domain.transport.dto.request.UpdateTransportRequest;
 import br.com.senior.transport_logistics.domain.transport.dto.response.TransportResponseDTO;
 import br.com.senior.transport_logistics.domain.truck.TruckEntity;
 import br.com.senior.transport_logistics.domain.truck.TruckService;
@@ -20,6 +23,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Mono;
 
 import java.util.List;
 
@@ -33,6 +37,7 @@ public class TransportService {
     private final ShipmentService shipmentService;
     private final OpenRouteApiClientService openRouteApiClientService;
     private final GeminiApiClientService geminiApiClientService;
+    private final EmployeeService employeeService;
 
     public PageDTO<TransportResponseDTO> findAll(Pageable pageable){
         Page<TransportEntity> shipments = repository.findAll(pageable);
@@ -47,7 +52,7 @@ public class TransportService {
                 shipments.getTotalPages());
     }
 
-    public GeminiResponse create(CreateTransportRequest request){
+    public Mono<GeminiResponse> create(CreateTransportRequest request){
         AverageDimensionsTrucks averageDimensions = truckService.findAverageDimensionsTrucks();
 
         HubEntity originHub = hubService.findById(request.idOriginHub());
@@ -63,8 +68,33 @@ public class TransportService {
 
         List<TruckEntity> trucks = truckService.findByLoadCapacityGreaterThan(shipment.getWeight());
 
-        GeminiResponse geminiResponse = geminiApiClientService.chosseBetterComputer(route.steps().toString(), shipment, trucks);
+        Mono<GeminiResponse> geminiResponseMono = geminiApiClientService.chooseBetterComputer(route.steps().toString(), shipment, trucks);
 
-        return geminiResponse;
+        return geminiResponseMono;
+    }
+
+    public TransportResponseDTO update(UpdateTransportRequest request, Long id){
+        TransportEntity transportFound = this.findById(id);
+
+        EmployeeEntity employeeFound = employeeService.findById(request.employeeId());
+
+        transportFound.updateTransport(request, employeeFound);
+
+        TransportEntity saveTransport = repository.save(transportFound);
+
+        return TransportResponseDTO.detailed(saveTransport);
+    }
+
+    public void delete(Long id){
+        if(!repository.existsById(id)){
+            throw new RuntimeException("Transporte não existe");
+        }
+
+        repository.deleteById(id);
+    }
+
+    private TransportEntity findById(Long id){
+        return repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Transporte não encontrado"));
     }
 }

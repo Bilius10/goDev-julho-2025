@@ -4,6 +4,7 @@ package br.com.senior.transport_logistics.domain.transport;
 import br.com.senior.transport_logistics.domain.employee.EmployeeEntity;
 import br.com.senior.transport_logistics.domain.hub.HubEntity;
 import br.com.senior.transport_logistics.domain.shipment.ShipmentEntity;
+import br.com.senior.transport_logistics.domain.transport.dto.request.UpdateTransportRequest;
 import br.com.senior.transport_logistics.domain.transport.enums.TransportStatus;
 import br.com.senior.transport_logistics.domain.truck.TruckEntity;
 import jakarta.persistence.*;
@@ -72,4 +73,11 @@ public class TransportEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "destination_hub_id", referencedColumnName = "id")
     private HubEntity destinationHub;
+
+    public void updateTransport(UpdateTransportRequest updateTransportRequest, EmployeeEntity employeeEntity){
+        this.exitDay = updateTransportRequest.exitDay();
+        this.driver = employeeEntity;
+        this.status = updateTransportRequest.status();
+    }
+
 }
