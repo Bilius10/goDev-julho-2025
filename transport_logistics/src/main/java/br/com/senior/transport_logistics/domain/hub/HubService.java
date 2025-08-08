@@ -7,6 +7,8 @@ import br.com.senior.transport_logistics.domain.hub.dto.response.HubSummaryProje
 import br.com.senior.transport_logistics.infrastructure.dto.NominationDTO.CoordinatesDTO;
 import br.com.senior.transport_logistics.infrastructure.dto.PageDTO;
 import br.com.senior.transport_logistics.infrastructure.dto.ViaCepDTO.AddresDTO;
+import br.com.senior.transport_logistics.infrastructure.exception.common.FieldAlreadyExistsException;
+import br.com.senior.transport_logistics.infrastructure.exception.common.ResourceNotFoundException;
 import br.com.senior.transport_logistics.infrastructure.external.NominatimApiClientService;
 import br.com.senior.transport_logistics.infrastructure.external.ViaCepApiCilentService;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +18,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Objects;
+
+import static br.com.senior.transport_logistics.infrastructure.exception.ExceptionMessages.*;
 
 @Service
 @RequiredArgsConstructor
@@ -40,7 +44,7 @@ public class HubService {
 
     public HubSummaryProjection hubSummary(Long id){
         return repository.findHubSummaryById(id)
-                .orElseThrow(() -> new RuntimeException("Sede não encontrada"));
+                .orElseThrow(() -> new ResourceNotFoundException(HUB_NOT_FOUND_BY_ID.getMessage(id)));
     }
 
     @Transactional
@@ -89,8 +93,8 @@ public class HubService {
 
     @Transactional
     public void delete(Long id){
-        if(repository.existsById(id)){
-            throw new RuntimeException("Sede não encontrada");
+        if(!repository.existsById(id)){
+            throw new ResourceNotFoundException(HUB_NOT_FOUND_BY_ID.getMessage(id));
         }
 
         repository.deleteById(id);
@@ -103,24 +107,24 @@ public class HubService {
 
     private void verifyIfNameIsUsed(String name){
         if(repository.existsByName(name)){
-            throw new RuntimeException("Nome ja em uso");
+            throw new FieldAlreadyExistsException(HUB_NAME_IN_USE.getMessage(name));
         }
     }
 
     private void verifyIfCnpjIsUsed(String cnpj){
         if(repository.existsByCnpj(cnpj)){
-            throw new RuntimeException("Cnpj ja em uso");
+            throw new FieldAlreadyExistsException(HUB_CNPJ_IN_USE.getMessage(cnpj));
         }
     }
 
     private void checkIfThereIsAHubInTheCity(String cidade){
         if(repository.existsByCity(cidade)){
-            throw new RuntimeException("Já existe uma sede nessa cidade");
+            throw new FieldAlreadyExistsException(HUB_ALREADY_EXISTS_IN_CITY.getMessage(cidade));
         }
     }
 
     public HubEntity findById(Long id) {
         return repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Nenhuma filial encontrada"));
+                .orElseThrow(() -> new ResourceNotFoundException(HUB_NOT_FOUND_BY_ID.getMessage(id)));
     }
 }

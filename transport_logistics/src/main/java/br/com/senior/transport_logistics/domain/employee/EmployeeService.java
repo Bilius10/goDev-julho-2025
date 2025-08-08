@@ -7,6 +7,7 @@ import br.com.senior.transport_logistics.domain.employee.dto.response.EmployeeRe
 import br.com.senior.transport_logistics.domain.hub.HubEntity;
 import br.com.senior.transport_logistics.domain.hub.HubService;
 import br.com.senior.transport_logistics.infrastructure.dto.PageDTO;
+import br.com.senior.transport_logistics.infrastructure.exception.ExceptionMessages;
 import br.com.senior.transport_logistics.infrastructure.email.SpringMailSenderService;
 import br.com.senior.transport_logistics.infrastructure.exception.common.FieldAlreadyExistsException;
 import br.com.senior.transport_logistics.infrastructure.exception.common.ResourceNotFoundException;
@@ -18,6 +19,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.domain.Pageable;
+
+import static br.com.senior.transport_logistics.infrastructure.exception.ExceptionMessages.*;
 
 @Service
 @RequiredArgsConstructor
@@ -32,7 +35,7 @@ public class EmployeeService {
     @Transactional
     public void signUp(EmployeeCreateRequestDTO dto) {
         if (repository.existsByEmail(dto.email())) {
-            throw new FieldAlreadyExistsException("Usuário", "Email", dto.email());
+            throw new FieldAlreadyExistsException(EMPLOYEE_EMAIL_IN_USE.getMessage(dto.email()));
         }
 
         createValidation(dto);
@@ -56,7 +59,7 @@ public class EmployeeService {
     @Transactional(readOnly = true)
     public EmployeeResponseDTO signIn(EmployeeLoginRequestDTO dto) {
         var employee = repository.findByEmail(dto.email())
-                .orElseThrow(() -> new ResourceNotFoundException("Usuário", "Email", dto.email()));
+                .orElseThrow(() -> new ResourceNotFoundException(EMPLOYEE_EMAIL_IN_USE.getMessage(dto.email())));
 
         if (!passwordEncoder.matches(dto.password(), employee.getPassword())) {
             throw new WrongPasswordException("Senha informada incorreta.");
@@ -97,7 +100,7 @@ public class EmployeeService {
 
     public EmployeeEntity findById(Long id) {
         return repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Nenhum funcionário encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException(EMPLOYEE_NOT_FOUND_BY_ID.getMessage(id)));
     }
 
     private void createValidation(EmployeeCreateRequestDTO request) {
@@ -108,19 +111,19 @@ public class EmployeeService {
 
     private void verifyIfCpfIsUsed(String cpf){
         if(repository.existsByCpf(cpf)){
-            throw new RuntimeException("Cpf ja esta em uso");
+            throw new FieldAlreadyExistsException(EMPLOYEE_CPF_IN_USE.getMessage(cpf));
         }
     }
 
     private void verifyIfEmailIsUsed(String email){
         if(repository.existsByEmail(email)){
-            throw new RuntimeException("Email ja esta em uso");
+            throw new FieldAlreadyExistsException(EMPLOYEE_EMAIL_IN_USE.getMessage(email));
         }
     }
 
     private void verifyIfCnhIsUsed(String cnh){
         if(repository.existsByCnh(cnh)){
-            throw  new RuntimeException("Cnh ja esta em uso");
+            throw new FieldAlreadyExistsException(EMPLOYEE_CNH_IN_USE.getMessage(cnh));
         }
     }
 }
