@@ -24,7 +24,8 @@ public record TransportResponseDTO(
         String destinationHubName,
         HubResponseDTO originHub,
         HubResponseDTO destinationHub,
-        TruckResponseDTO truck
+        TruckResponseDTO truck,
+        String response
 ) {
 
     public static TransportResponseDTO basic(TransportEntity entity) {
@@ -35,6 +36,18 @@ public record TransportResponseDTO(
                 .expectedArrivalDay(entity.getExpectedArrivalDay())
                 .truckModel(entity.getTruck().getModel())
                 .shipmentTrackingCode(entity.getShipment().getId())
+                .build();
+    }
+
+    public static TransportResponseDTO geminiResponse(TransportEntity entity, String response){
+        return TransportResponseDTO.builder()
+                .id(entity.getId())
+                .status(entity.getStatus().getDescription())
+                .exitDay(entity.getExitDay())
+                .expectedArrivalDay(entity.getExpectedArrivalDay())
+                .truckModel(entity.getTruck().getModel())
+                .shipmentTrackingCode(entity.getShipment().getId())
+                .response(response)
                 .build();
     }
 

@@ -39,7 +39,6 @@ public class TruckEntity {
     @Column(name = "model", nullable = false)
     private String model;
 
-    @NotNull(message = "{truck.hub.notNull}")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "hub_id")
     private HubEntity hub;

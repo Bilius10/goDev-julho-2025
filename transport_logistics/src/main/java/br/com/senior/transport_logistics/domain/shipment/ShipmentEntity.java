@@ -41,7 +41,7 @@ public class ShipmentEntity {
     private boolean isHazardous;
 
     @NotNull(message = "{shipment.product.notNull}")
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "product_id", referencedColumnName = "id")
     private ProductEntity product;
 

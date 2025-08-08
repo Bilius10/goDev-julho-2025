@@ -17,84 +17,142 @@ import br.com.senior.transport_logistics.infrastructure.dto.NominationDTO.Coordi
 import br.com.senior.transport_logistics.infrastructure.dto.OpenRouteDTO.ResponseForGemini;
 import br.com.senior.transport_logistics.infrastructure.dto.OpenRouteDTO.request.RestrictionsRecord;
 import br.com.senior.transport_logistics.infrastructure.dto.PageDTO;
+import br.com.senior.transport_logistics.infrastructure.exception.common.ResourceNotFoundException;
 import br.com.senior.transport_logistics.infrastructure.external.GeminiApiClientService;
 import br.com.senior.transport_logistics.infrastructure.external.OpenRouteApiClientService;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import reactor.core.publisher.Mono;
 
+import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
 public class TransportService {
 
-    private final TransportRepository repository;
+    private final TransportRepository transportRepository;
     private final TruckService truckService;
     private final HubService hubService;
     private final ShipmentService shipmentService;
     private final OpenRouteApiClientService openRouteApiClientService;
     private final GeminiApiClientService geminiApiClientService;
     private final EmployeeService employeeService;
+    private final ObjectMapper objectMapper;
 
-    public PageDTO<TransportResponseDTO> findAll(Pageable pageable){
-        Page<TransportEntity> shipments = repository.findAll(pageable);
 
-        Page<TransportResponseDTO> dtosPage = shipments.map(TransportResponseDTO::basic);
+    public PageDTO<TransportResponseDTO> findAll(Pageable pageable) {
+
+        Page<TransportEntity> transportPage = transportRepository.findAll(pageable);
+
+        Page<TransportResponseDTO> dtoPage = transportPage.map(TransportResponseDTO::basic);
 
         return new PageDTO<>(
-                dtosPage.getContent(),
-                shipments.getNumber(),
-                shipments.getSize(),
-                shipments.getTotalElements(),
-                shipments.getTotalPages());
+                dtoPage.getContent(),
+                transportPage.getNumber(),
+                transportPage.getSize(),
+                transportPage.getTotalElements(),
+                transportPage.getTotalPages());
     }
 
-    public Mono<GeminiResponse> create(CreateTransportRequest request){
-        AverageDimensionsTrucks averageDimensions = truckService.findAverageDimensionsTrucks();
-
+    public TransportResponseDTO create(CreateTransportRequest request) throws JsonProcessingException {
         HubEntity originHub = hubService.findById(request.idOriginHub());
         HubEntity destinationHub = hubService.findById(request.idDestinationHub());
-
-        ResponseForGemini route = openRouteApiClientService.obterDistancia(
-                new CoordinatesDTO(originHub.getLongitude(), originHub.getLatitude()),
-                new CoordinatesDTO(destinationHub.getLongitude(), destinationHub.getLatitude()),
-                new RestrictionsRecord(averageDimensions.heightAvarege(), averageDimensions.weightAvarege(),
-                        averageDimensions.lengthAvarege(), request.isHazmat()));
-
         ShipmentEntity shipment = shipmentService.findById(request.idShipment());
 
-        List<TruckEntity> trucks = truckService.findByLoadCapacityGreaterThan(shipment.getWeight());
+        ResponseForGemini route = getRouteData(originHub, destinationHub, shipment, request.isHazmat());
 
-        Mono<GeminiResponse> geminiResponseMono = geminiApiClientService.chooseBetterComputer(route.steps().toString(), shipment, trucks);
+        long travelDays = (long) Math.ceil(route.duration() / 86400.0);
 
-        return geminiResponseMono;
+        LocalDate availabilityDeadline = request.exitDay().plusDays(travelDays * 2);
+
+        GeminiResponse truckSuggestion = selectIdealTruck(request, shipment, originHub, route, availabilityDeadline);
+
+        TruckEntity chosenTruck = truckService.findById(truckSuggestion.caminhaoSugerido());
+
+        EmployeeEntity chosenDriver = employeeService.findDriversOrderedByHistoryScore(
+                truckSuggestion.caminhaoSugerido(),
+                destinationHub.getId(),
+                originHub.getId()
+        );
+
+        TransportEntity newTransport = new TransportEntity(
+                chosenDriver, originHub, destinationHub, shipment,
+                chosenTruck, route.distance(), truckSuggestion.litrosGastos(), request.exitDay(),
+                availabilityDeadline
+        );
+
+        TransportEntity savedTransport = transportRepository.save(newTransport);
+
+        return TransportResponseDTO.geminiResponse(savedTransport, truckSuggestion.justificativa());
     }
 
-    public TransportResponseDTO update(UpdateTransportRequest request, Long id){
-        TransportEntity transportFound = this.findById(id);
+    public TransportResponseDTO update(UpdateTransportRequest request, Long id) {
+        TransportEntity transportToUpdate = this.findById(id);
+        EmployeeEntity assignedEmployee = employeeService.findById(request.employeeId());
 
-        EmployeeEntity employeeFound = employeeService.findById(request.employeeId());
+        transportToUpdate.updateTransport(request, assignedEmployee);
 
-        transportFound.updateTransport(request, employeeFound);
+        TransportEntity updatedTransport = transportRepository.save(transportToUpdate);
 
-        TransportEntity saveTransport = repository.save(transportFound);
-
-        return TransportResponseDTO.detailed(saveTransport);
+        return TransportResponseDTO.detailed(updatedTransport);
     }
 
-    public void delete(Long id){
-        if(!repository.existsById(id)){
-            throw new RuntimeException("Transporte não existe");
+    public void delete(Long id) {
+        if (!transportRepository.existsById(id)) {
+            throw new RuntimeException("Transport not found with id: " + id);
+        }
+        transportRepository.deleteById(id);
+    }
+
+
+    private TransportEntity findById(Long id) {
+        return transportRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Transport not found with id: " + id));
+    }
+
+    private ResponseForGemini getRouteData(HubEntity originHub, HubEntity destinationHub, ShipmentEntity shipment, boolean isHazmat) {
+        AverageDimensionsTrucks averageDimensions = truckService.findAverageDimensionsTrucks();
+
+        RestrictionsRecord restrictions = new RestrictionsRecord(
+                averageDimensions.heightAvarege(),
+                averageDimensions.weightAvarege() + shipment.getWeight(),
+                averageDimensions.lengthAvarege(),
+                isHazmat
+        );
+
+        return openRouteApiClientService.obterDistancia(
+                new CoordinatesDTO(originHub.getLongitude(), originHub.getLatitude()),
+                new CoordinatesDTO(destinationHub.getLongitude(), destinationHub.getLatitude()),
+                restrictions
+        );
+    }
+
+    private GeminiResponse selectIdealTruck(CreateTransportRequest request, ShipmentEntity shipment,
+                                             HubEntity originHub, ResponseForGemini route, LocalDate availabilityDeadline) throws JsonProcessingException {
+
+        List<TruckEntity> candidateTrucks = truckService.findByLoadCapacityGreaterThan(
+                shipment.getWeight(),
+                originHub.getId(),
+                request.exitDay(),
+                availabilityDeadline
+        );
+
+        if (candidateTrucks.isEmpty()){
+            throw new RuntimeException("No candidate trucks found for the specified criteria.");
         }
 
-        repository.deleteById(id);
-    }
+        String routeStepsJson = objectMapper.writeValueAsString(route.steps());
 
-    private TransportEntity findById(Long id){
-        return repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Transporte não encontrado"));
+        return geminiApiClientService.chooseBestTruck(
+                routeStepsJson,
+                route.distance(),
+                shipment,
+                candidateTrucks
+        );
     }
 }

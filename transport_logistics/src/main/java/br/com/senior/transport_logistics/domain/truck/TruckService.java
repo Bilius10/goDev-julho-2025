@@ -71,13 +71,19 @@ public class TruckService {
         return String.format("TR-%s-%s-%04d", type.name(), dateTimeCode, timeMillisSuffix);
     }
 
+    public TruckEntity findById(Long id){
+        return repository.findById(id).orElseThrow(() -> new RuntimeException("Caminhão não existe"));
+    }
+
     public AverageDimensionsTrucks findAverageDimensionsTrucks(){
         return repository.findAverageDimensionsTrucks()
                 .orElseThrow(() -> new RuntimeException("Nenhum caminhão cadastrado"));
     }
 
-    public List<TruckEntity> findByLoadCapacityGreaterThan(Double loadCapacity){
-        List<TruckEntity> trucks = repository.findByLoadCapacityGreaterThan(loadCapacity);
+    public List<TruckEntity> findByLoadCapacityGreaterThan(Double loadCapacity, Long idHUb, LocalDate exitDay, LocalDate expectArrivalDay){
+        System.out.println(loadCapacity);
+        List<TruckEntity> trucks
+                = repository.findAvailableTrucksByCapacityAndHubNotInRouteBetween(loadCapacity, idHUb);
 
         if (trucks.isEmpty()) {
             throw new RuntimeException("Nenhum caminhão encontrado que suporte essa carga.");

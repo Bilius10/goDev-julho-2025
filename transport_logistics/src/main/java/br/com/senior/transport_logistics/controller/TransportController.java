@@ -1,11 +1,13 @@
 package br.com.senior.transport_logistics.controller;
 
+import br.com.senior.transport_logistics.domain.transport.TransportEntity;
 import br.com.senior.transport_logistics.domain.transport.TransportService;
 import br.com.senior.transport_logistics.domain.transport.dto.request.CreateTransportRequest;
 import br.com.senior.transport_logistics.domain.transport.dto.request.UpdateTransportRequest;
 import br.com.senior.transport_logistics.domain.transport.dto.response.TransportResponseDTO;
 import br.com.senior.transport_logistics.infrastructure.dto.GeminiDTO.GeminiResponse;
 import br.com.senior.transport_logistics.infrastructure.dto.PageDTO;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -40,8 +42,8 @@ public class TransportController {
     }
 
     @PostMapping
-    public ResponseEntity<Mono<GeminiResponse>> create(@RequestBody @Valid CreateTransportRequest request){
-        Mono<GeminiResponse> createdTransport = service.create(request);
+    public ResponseEntity<TransportResponseDTO> create(@RequestBody @Valid CreateTransportRequest request) throws JsonProcessingException {
+        TransportResponseDTO createdTransport = service.create(request);
 
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()

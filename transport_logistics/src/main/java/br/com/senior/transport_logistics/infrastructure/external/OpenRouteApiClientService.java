@@ -42,7 +42,7 @@ public class OpenRouteApiClientService {
                 "recommended",
                 options
         );
-        System.out.println(requestBody.toString());
+
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", this.chaveApi);
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -66,6 +66,7 @@ public class OpenRouteApiClientService {
 
             return new ResponseForGemini(
                     responseBody.routes().get(0).summary().distance(),
+                    responseBody.routes().get(0).summary().duration(),
                     responseBody.routes().stream()
                             .flatMap(route -> route.segments().stream())
                             .flatMap(segment -> segment.steps().stream())

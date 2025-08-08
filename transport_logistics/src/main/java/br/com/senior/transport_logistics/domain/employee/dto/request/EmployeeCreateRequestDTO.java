@@ -14,7 +14,6 @@ public record EmployeeCreateRequestDTO(
         @Pattern(regexp = "^\\d{11}$", message = "{employee.cnh.format}")
         String cnh,
 
-        @Size(max = 11, message = "{employee.cpf.size}")
         @CPF(message = "{employee.cpf.format}")
         String cpf,
 

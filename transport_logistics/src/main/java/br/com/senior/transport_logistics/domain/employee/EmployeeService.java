@@ -84,6 +84,11 @@ public class EmployeeService {
         return EmployeeResponseDTO.basic(saveEmployee, saveEmployee.getHub());
     }
 
+    public EmployeeEntity findDriversOrderedByHistoryScore(Long idTruck, Long idDestinationHub, Long idHub){
+        return repository.findDriversOrderedByHistoryScore(idTruck, idDestinationHub, idHub)
+                .orElseThrow(() -> new RuntimeException("Nenhum driver encontrado"));
+    }
+
     @Transactional
     public void delete(Long id) {
         EmployeeEntity employeeFound = this.findById(id);

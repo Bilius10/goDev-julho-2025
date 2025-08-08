@@ -4,9 +4,11 @@ package br.com.senior.transport_logistics.domain.transport;
 import br.com.senior.transport_logistics.domain.employee.EmployeeEntity;
 import br.com.senior.transport_logistics.domain.hub.HubEntity;
 import br.com.senior.transport_logistics.domain.shipment.ShipmentEntity;
+import br.com.senior.transport_logistics.domain.transport.dto.request.CreateTransportRequest;
 import br.com.senior.transport_logistics.domain.transport.dto.request.UpdateTransportRequest;
 import br.com.senior.transport_logistics.domain.transport.enums.TransportStatus;
 import br.com.senior.transport_logistics.domain.truck.TruckEntity;
+import br.com.senior.transport_logistics.infrastructure.dto.GeminiDTO.GeminiResponse;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -50,29 +52,51 @@ public class TransportEntity {
     private TransportStatus status;
 
     @NotNull(message = "{transport.truck.notNull}")
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "truck_id", referencedColumnName = "id")
     private TruckEntity truck;
 
     @NotNull(message = "{transport.shipment.notNull}")
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne
     @JoinColumn(name = "shipment_id", referencedColumnName = "id")
     private ShipmentEntity shipment;
 
     @NotNull(message = "{transport.driver.notNull}")
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "driver_id", referencedColumnName = "id")
     private EmployeeEntity driver;
 
     @NotNull(message = "{transport.originHub.notNull}")
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "origin_hub_id", referencedColumnName = "id")
     private HubEntity originHub;
 
     @NotNull(message = "{transport.destinationHub.notNull}")
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "destination_hub_id", referencedColumnName = "id")
     private HubEntity destinationHub;
+
+    public TransportEntity(EmployeeEntity driver,
+                           HubEntity originHub,
+                           HubEntity destinationHub,
+                           ShipmentEntity shipment,
+                           TruckEntity truck,
+                           Double distance,
+                           Double fuelConsumption,
+                           LocalDate exitDay,
+                           LocalDate expectedArrivalDay) {
+
+        this.driver = driver;
+        this.originHub = originHub;
+        this.destinationHub = destinationHub;
+        this.shipment = shipment;
+        this.truck = truck;
+        this.distance = distance;
+        this.fuelConsumption = fuelConsumption;
+        this.exitDay = exitDay;
+        this.expectedArrivalDay = expectedArrivalDay;
+        this.status = TransportStatus.ASSIGNED;
+    }
 
     public void updateTransport(UpdateTransportRequest updateTransportRequest, EmployeeEntity employeeEntity){
         this.exitDay = updateTransportRequest.exitDay();

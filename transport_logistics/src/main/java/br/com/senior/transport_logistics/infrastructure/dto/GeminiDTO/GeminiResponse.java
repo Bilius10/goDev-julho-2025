@@ -1,8 +1,8 @@
 package br.com.senior.transport_logistics.infrastructure.dto.GeminiDTO;
 
 public record GeminiResponse(
-        String caminhaoSugerido,
+        Long caminhaoSugerido,
         String justificativa,
-        String litrosGastos
+        Double litrosGastos
 ) {
 }
