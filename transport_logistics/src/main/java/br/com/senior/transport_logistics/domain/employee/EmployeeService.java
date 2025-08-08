@@ -33,11 +33,7 @@ public class EmployeeService {
     private final SpringMailSenderService mailSenderService;
 
     @Transactional
-    public void signUp(EmployeeCreateRequestDTO dto) {
-        if (repository.existsByEmail(dto.email())) {
-            throw new FieldAlreadyExistsException(EMPLOYEE_EMAIL_IN_USE.getMessage(dto.email()));
-        }
-
+    public EmployeeResponseDTO signUp(EmployeeCreateRequestDTO dto) {
         createValidation(dto);
         HubEntity hub = hubService.findById(dto.idHub());
 
@@ -54,6 +50,7 @@ public class EmployeeService {
 
         repository.save(employee);
         mailSenderService.sendWelcomeEmail(employee);
+        return EmployeeResponseDTO.basic(employee, hub);
     }
 
     @Transactional(readOnly = true)
