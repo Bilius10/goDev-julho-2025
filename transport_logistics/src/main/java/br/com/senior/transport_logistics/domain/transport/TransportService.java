@@ -2,6 +2,7 @@ package br.com.senior.transport_logistics.domain.transport;
 
 import br.com.senior.transport_logistics.domain.employee.EmployeeEntity;
 import br.com.senior.transport_logistics.domain.employee.EmployeeService;
+import br.com.senior.transport_logistics.domain.employee.enums.Role;
 import br.com.senior.transport_logistics.domain.hub.HubEntity;
 import br.com.senior.transport_logistics.domain.hub.HubService;
 import br.com.senior.transport_logistics.domain.shipment.ShipmentEntity;
@@ -30,6 +31,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -104,7 +106,7 @@ public class TransportService {
         return TransportResponseDTO.basic(savedTransport);
     }
 
-    @Scheduled(fixedRate = 604800000)
+    @Scheduled(cron = "0 0 9 * * SAT")
     public void sendWeeklySchedule(){
         List<TransportEntity> weeklyTransport
                 = repository.findAllByExitDay(LocalDate.now(), LocalDate.now().plusDays(6));
@@ -115,6 +117,38 @@ public class TransportService {
         transportsByDriver.forEach((driver, driverTransports) -> {
             emailService.sendWeeklyScheduleEmail(driverTransports);
         });
+    }
+
+    @Scheduled(cron = "0 0 9 1 * ?")
+    public void sendMonthReport() {
+        List<EmployeeEntity> managers = employeeService.findAllByRole(Role.ADMIN);
+
+        YearMonth previousMonth = YearMonth.now().minusMonths(1);
+        LocalDate startDate = previousMonth.atDay(1);
+        LocalDate endDate = previousMonth.atEndOfMonth();
+
+        for (EmployeeEntity manager : managers) {
+            HubEntity hub = manager.getHub();
+
+            List<TransportEntity> monthlyTransports = repository.findAllByExitDayAndOriginHub(LocalDate.now(), LocalDate.now().plusDays(6), hub.getId());
+            List<EmployeeEntity> hubDrivers = employeeService.findAllByRoleAndHub(Role.DRIVER, hub);
+            List<TruckEntity> hubTrucks = truckService.findAllByHub(hub);
+
+            double totalDistance = monthlyTransports.stream()
+                    .filter(transport -> transport.getDistance() != null)
+                    .filter(transport -> transport.getStatus() == TransportStatus.DELIVERED)
+                    .mapToDouble(TransportEntity::getDistance)
+                    .sum();
+
+            Map<String, Double> fuelByTruck = monthlyTransports.stream()
+                    .collect(Collectors.groupingBy(
+                            transport -> transport.getTruck().getModel(),
+                            Collectors.summingDouble(TransportEntity::getFuelConsumption)
+                    ));
+
+            emailService.sendMonthReportEmail(manager, monthlyTransports, hubDrivers, hubTrucks, fuelByTruck, totalDistance);
+        }
+
     }
 
     public TransportResponseDTO updateStatus(Long id, TransportStatus status){

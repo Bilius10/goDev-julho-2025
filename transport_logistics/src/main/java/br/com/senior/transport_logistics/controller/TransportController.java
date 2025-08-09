@@ -62,6 +62,13 @@ public class TransportController {
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
+    @PostMapping("/send-month-report")
+    public ResponseEntity<Void> sendMonthReport(){
+        service.sendMonthReport();
+
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
     @PatchMapping("/confirm-transport/{id}")
     public ResponseEntity<TransportResponseDTO> confirmTransport(@PathVariable Long id){
         return ResponseEntity.status(HttpStatus.OK).body(service.confirmTransport(id));

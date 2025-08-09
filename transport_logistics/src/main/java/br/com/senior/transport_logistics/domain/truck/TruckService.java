@@ -1,5 +1,6 @@
 package br.com.senior.transport_logistics.domain.truck;
 
+import br.com.senior.transport_logistics.domain.hub.HubEntity;
 import br.com.senior.transport_logistics.domain.hub.HubService;
 import br.com.senior.transport_logistics.domain.truck.dto.request.TruckRequestDTO;
 import br.com.senior.transport_logistics.domain.truck.dto.response.AverageDimensionsTrucks;
@@ -65,6 +66,10 @@ public class TruckService {
     public TruckEntity findEntityByCode(String code) {
         return repository.findByCode(code)
                 .orElseThrow(() -> new ResourceNotFoundException(TRUCK_NOT_FOUND_BY_CODE.getMessage(code)));
+    }
+
+    public List<TruckEntity> findAllByHub(HubEntity hub){
+        return repository.findAllByHub(hub);
     }
 
     private String generateTruckCode(TruckType type) {

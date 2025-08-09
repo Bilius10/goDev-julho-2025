@@ -55,7 +55,7 @@
                 </tr>
                 <tr>
                     <td><strong>Carga Perigosa:</strong></td>
-                    <td><span th:text="${transport.shipment.is_hazardous ? 'Sim' : 'Não'}" style="font-weight: bold; color: #e74c3c;">Sim</span></td>
+                    <td><span th:text="${transport.shipment.isHazardous ? 'Sim' : 'Não'}" style="font-weight: bold; color: #e74c3c;">Sim</span></td>
                 </tr>
                 <tr>
                     <td><strong>Observações:</strong></td>
@@ -71,11 +71,11 @@
                 </tr>
                 <tr>
                     <td><strong>Dia de Saída:</strong></td>
-                    <td th:text="${#dates.format(transport.exit_day, 'dd/MM/yyyy')}">20/10/2025</td>
+                    <td th:text="${#temporals.format(transport.exitDay, 'dd/MM/yyyy')}">20/10/2025</td>
                 </tr>
                 <tr>
                     <td><strong>Chegada Prevista:</strong></td>
-                    <td th:text="${#dates.format(transport.expected_arrival_day, 'dd/MM/yyyy')}">22/10/2025</td>
+                    <td th:text="${#temporals.format(transport.expectedArrivalDay, 'dd/MM/yyyy')}">22/10/2025</td>
                 </tr>
             </table>
 

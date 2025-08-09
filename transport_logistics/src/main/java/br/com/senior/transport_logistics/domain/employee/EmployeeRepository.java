@@ -1,5 +1,7 @@
 package br.com.senior.transport_logistics.domain.employee;
 
+import br.com.senior.transport_logistics.domain.employee.enums.Role;
+import br.com.senior.transport_logistics.domain.hub.HubEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -26,5 +28,9 @@ public interface EmployeeRepository extends JpaRepository<EmployeeEntity, Long> 
         DESC limit 1
     """)
     Optional<EmployeeEntity> findDriversOrderedByHistoryScore(Long idTruck, Long idDestinationHub, Long idHub);
+
+    List<EmployeeEntity> findAllByRole(Role role);
+
+    List<EmployeeEntity> findAllByRoleAndHub(Role role, HubEntity hub);
 
 }

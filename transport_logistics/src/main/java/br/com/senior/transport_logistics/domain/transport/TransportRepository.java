@@ -17,4 +17,11 @@ public interface TransportRepository extends JpaRepository<TransportEntity, Long
             """)
     List<TransportEntity> findAllByExitDay (LocalDate startDate, LocalDate finishDate);
 
+    @Query("""
+            SELECT t 
+            FROM Transport t
+            where t.exitDay  between :startDate and :finishDate and t.originHub.id = :idHub
+            """)
+    List<TransportEntity> findAllByExitDayAndOriginHub (LocalDate startDate, LocalDate finishDate, Long idHub);
+
 }

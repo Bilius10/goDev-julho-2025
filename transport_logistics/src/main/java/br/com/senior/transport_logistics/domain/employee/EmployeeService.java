@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.domain.Pageable;
 
+import java.util.List;
 import java.util.Objects;
 
 import static br.com.senior.transport_logistics.infrastructure.exception.ExceptionMessages.*;
@@ -132,6 +133,15 @@ public class EmployeeService {
         return repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(EMPLOYEE_NOT_FOUND_BY_ID.getMessage(id)));
     }
+
+    public List<EmployeeEntity> findAllByRole(Role role){
+        return repository.findAllByRole(role);
+    }
+
+    public List<EmployeeEntity> findAllByRoleAndHub(Role role, HubEntity idHub){
+        return repository.findAllByRoleAndHub(role, idHub);
+    }
+
 
     private void createValidation(EmployeeCreateRequestDTO request) {
         verifyIfCnhIsUsed(request.cnh());

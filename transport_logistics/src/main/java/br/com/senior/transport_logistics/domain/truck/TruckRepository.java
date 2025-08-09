@@ -1,5 +1,6 @@
 package br.com.senior.transport_logistics.domain.truck;
 
+import br.com.senior.transport_logistics.domain.hub.HubEntity;
 import br.com.senior.transport_logistics.domain.truck.dto.response.AverageDimensionsTrucks;
 import br.com.senior.transport_logistics.domain.truck.enums.TruckStatus;
 import org.springframework.data.domain.Page;
@@ -44,6 +45,8 @@ public interface TruckRepository extends JpaRepository<TruckEntity, Long> {
             @Param("idHub") Long idHub
 
     );
+
+    List<TruckEntity> findAllByHub(HubEntity hub);
 
 
 
