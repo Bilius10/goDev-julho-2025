@@ -1,6 +1,7 @@
 package br.com.senior.transport_logistics.infrastructure.email;
 
 import br.com.senior.transport_logistics.domain.employee.EmployeeEntity;
+import br.com.senior.transport_logistics.domain.transport.TransportEntity;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
@@ -38,6 +39,28 @@ public class SpringMailSenderService {
         );
     }
 
+    public void sendConfirmTransportEmail(TransportEntity transport){
+        sendEmailWithTemplate(
+                transport.getDriver().getEmail(),
+                String.format("Olá, %s voce possui uma nova entrega", transport.getDriver().getName()),
+                "confirm-transport.html",
+                Map.ofEntries(
+                        Map.entry("driver.name", transport.getDriver().getName()),
+                        Map.entry("transport.id", transport.getId()),
+                        Map.entry("transport.originHub.name", transport.getOriginHub().getName()),
+                        Map.entry("transport.destinationHub.name", transport.getDestinationHub().getName()),
+                        Map.entry("transport.shipment.product.name", transport.getShipment().getProduct().getName()),
+                        Map.entry("transport.shipment.quantity", transport.getShipment().getQuantity()),
+                        Map.entry("transport.shipment.weight", transport.getShipment().getWeight()),
+                        Map.entry("transport.shipment.is_hazardous", transport.getShipment().isHazardous()),
+                        Map.entry("transport.shipment.notes", transport.getShipment().getNotes()),
+                        Map.entry("transport.truck.model", transport.getTruck().getModel()),
+                        Map.entry("transport.truck.code", transport.getTruck().getCode()),
+                        Map.entry("transport.exit_day", transport.getExitDay()),
+                        Map.entry("transport.expected_arrival_day", transport.getExpectedArrivalDay())
+                )
+        );
+    }
 
     private void sendEmailWithTemplate(String to, String subject, String templateName, Map<String, Object> variables) {
         try {
