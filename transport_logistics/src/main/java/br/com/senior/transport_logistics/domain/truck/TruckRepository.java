@@ -35,15 +35,27 @@ public interface TruckRepository extends JpaRepository<TruckEntity, Long> {
 
     @Query("""
     SELECT t
-        FROM Truck t
+    FROM Truck t
     WHERE t.loadCapacity > :loadCapacity
       AND t.hub.id = :idHub
-      AND t.status = "AVAILABLE"
+      AND t.status = 'AVAILABLE'
+      AND t.id NOT IN (
+          SELECT tr.truck.id
+          FROM Transport tr
+          WHERE tr.status <> 'DELIVERED'
+            AND (
+                (tr.exitDay BETWEEN :exitDay AND :returnDay)
+                OR (tr.expectedArrivalDay BETWEEN :exitDay AND :returnDay)
+                OR (:exitDay BETWEEN tr.exitDay AND tr.expectedArrivalDay)
+                OR (:returnDay BETWEEN tr.exitDay AND tr.expectedArrivalDay)
+            )
+      )
     """)
     List<TruckEntity> findAvailableTrucksByCapacityAndHubNotInRouteBetween(
             @Param("loadCapacity") Double loadCapacity,
-            @Param("idHub") Long idHub
-
+            @Param("idHub") Long idHub,
+            @Param("exitDay") LocalDate exitDay,
+            @Param("returnDay") LocalDate returnDay
     );
 
     List<TruckEntity> findAllByHub(HubEntity hub);

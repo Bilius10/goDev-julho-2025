@@ -20,6 +20,7 @@ import br.com.senior.transport_logistics.infrastructure.dto.OpenRouteDTO.Respons
 import br.com.senior.transport_logistics.infrastructure.dto.OpenRouteDTO.request.RestrictionsRecord;
 import br.com.senior.transport_logistics.infrastructure.dto.PageDTO;
 import br.com.senior.transport_logistics.infrastructure.email.SpringMailSenderService;
+import br.com.senior.transport_logistics.infrastructure.exception.common.ResourceNotFoundException;
 import br.com.senior.transport_logistics.infrastructure.external.GeminiApiClientService;
 import br.com.senior.transport_logistics.infrastructure.external.OpenRouteApiClientService;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -35,6 +36,8 @@ import java.time.YearMonth;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import static br.com.senior.transport_logistics.infrastructure.exception.ExceptionMessages.TRANSPORT_NOT_FOUND_BY_ID;
 
 @Service
 @RequiredArgsConstructor
@@ -75,7 +78,7 @@ public class TransportService {
 
         LocalDate availabilityDeadline = request.exitDay().plusDays(travelDays * 2);
 
-        GeminiResponse truckSuggestion = selectIdealTruck(request, shipment, originHub, route, availabilityDeadline);
+        GeminiResponse truckSuggestion = this.selectIdealTruck(request, shipment, originHub, route, availabilityDeadline);
 
         TruckEntity chosenTruck = truckService.findById(truckSuggestion.caminhaoSugerido());
 
@@ -130,7 +133,7 @@ public class TransportService {
         for (EmployeeEntity manager : managers) {
             HubEntity hub = manager.getHub();
 
-            List<TransportEntity> monthlyTransports = repository.findAllByExitDayAndOriginHub(LocalDate.now(), LocalDate.now().plusDays(6), hub.getId());
+            List<TransportEntity> monthlyTransports = repository.findAllByExitDayAndOriginHub(startDate, endDate, hub.getId());
             List<EmployeeEntity> hubDrivers = employeeService.findAllByRoleAndHub(Role.DRIVER, hub);
             List<TruckEntity> hubTrucks = truckService.findAllByHub(hub);
 
@@ -173,7 +176,7 @@ public class TransportService {
 
     public void delete(Long id) {
         if (!repository.existsById(id)) {
-            throw new RuntimeException("Transport not found with id: " + id);
+            throw new ResourceNotFoundException(TRANSPORT_NOT_FOUND_BY_ID.getMessage(id));
         }
         repository.deleteById(id);
     }
@@ -181,7 +184,7 @@ public class TransportService {
 
     private TransportEntity findById(Long id) {
         return repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Transport not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException(TRANSPORT_NOT_FOUND_BY_ID.getMessage(id)));
     }
 
     private ResponseForGemini getRouteData(HubEntity originHub, HubEntity destinationHub, ShipmentEntity shipment, boolean isHazmat) {

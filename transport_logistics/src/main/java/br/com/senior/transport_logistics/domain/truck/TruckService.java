@@ -18,7 +18,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
-import static br.com.senior.transport_logistics.infrastructure.exception.ExceptionMessages.TRUCK_NOT_FOUND_BY_CODE;
+import static br.com.senior.transport_logistics.infrastructure.exception.ExceptionMessages.*;
 
 @Service
 @RequiredArgsConstructor
@@ -80,21 +80,21 @@ public class TruckService {
     }
 
     public TruckEntity findById(Long id){
-        return repository.findById(id).orElseThrow(() -> new RuntimeException("Caminhão não existe"));
+        return repository.findById(id).orElseThrow(() -> new ResourceNotFoundException(TRUCK_NOT_FOUND_BY_ID.getMessage(id)));
     }
 
     public AverageDimensionsTrucks findAverageDimensionsTrucks(){
         return repository.findAverageDimensionsTrucks()
-                .orElseThrow(() -> new RuntimeException("Nenhum caminhão cadastrado"));
+                .orElseThrow(() -> new ResourceNotFoundException(NO_TRUCK_IN_THE_SYSTEM.getMessage()));
     }
 
     public List<TruckEntity> findByLoadCapacityGreaterThan(Double loadCapacity, Long idHUb, LocalDate exitDay, LocalDate expectArrivalDay){
-        System.out.println(loadCapacity);
+
         List<TruckEntity> trucks
-                = repository.findAvailableTrucksByCapacityAndHubNotInRouteBetween(loadCapacity, idHUb);
+                = repository.findAvailableTrucksByCapacityAndHubNotInRouteBetween(loadCapacity, idHUb, exitDay, expectArrivalDay);
 
         if (trucks.isEmpty()) {
-            throw new RuntimeException("Nenhum caminhão encontrado que suporte essa carga.");
+            throw new ResourceNotFoundException(TRUCK_NOT_SUPPORT_LOAD.getMessage(loadCapacity));
         }
 
         return trucks;
