@@ -58,7 +58,7 @@ public class EmployeeService {
     @Transactional(readOnly = true)
     public EmployeeResponseDTO signIn(EmployeeLoginRequestDTO dto) {
         var employee = repository.findByEmail(dto.email())
-                .orElseThrow(() -> new ResourceNotFoundException(EMPLOYEE_EMAIL_IN_USE.getMessage(dto.email())));
+                .orElseThrow(() -> new ResourceNotFoundException(EMPLOYEE_NOT_FOUND_BY_EMAIL.getMessage(dto.email())));
 
         if (!passwordEncoder.matches(dto.password(), employee.getPassword())) {
             throw new WrongPasswordException("Senha informada incorreta.");
