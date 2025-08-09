@@ -59,7 +59,7 @@ public class TransportService {
                 transportPage.getTotalPages());
     }
 
-    public TransportResponseDTO create(CreateTransportRequest request) throws JsonProcessingException {
+    public TransportResponseDTO optimizeAllocation(CreateTransportRequest request) throws JsonProcessingException {
         HubEntity originHub = hubService.findById(request.idOriginHub());
         HubEntity destinationHub = hubService.findById(request.idDestinationHub());
         ShipmentEntity shipment = shipmentService.findById(request.idShipment());

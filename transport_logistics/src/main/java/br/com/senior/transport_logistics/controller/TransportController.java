@@ -41,9 +41,9 @@ public class TransportController {
         return ResponseEntity.status(HttpStatus.OK).body(service.findAll(pageable));
     }
 
-    @PostMapping
-    public ResponseEntity<TransportResponseDTO> create(@RequestBody @Valid CreateTransportRequest request) throws JsonProcessingException {
-        TransportResponseDTO createdTransport = service.create(request);
+    @PostMapping("optimize-allocation")
+    public ResponseEntity<TransportResponseDTO> optimizeAllocation(@RequestBody @Valid CreateTransportRequest request) throws JsonProcessingException {
+        TransportResponseDTO createdTransport = service.optimizeAllocation(request);
 
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()

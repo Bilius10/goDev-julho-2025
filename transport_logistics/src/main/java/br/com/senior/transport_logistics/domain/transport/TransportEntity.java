@@ -95,7 +95,7 @@ public class TransportEntity {
         this.fuelConsumption = fuelConsumption;
         this.exitDay = exitDay;
         this.expectedArrivalDay = expectedArrivalDay;
-        this.status = TransportStatus.ASSIGNED;
+        this.status = TransportStatus.PENDING;
     }
 
     public void updateTransport(UpdateTransportRequest updateTransportRequest, EmployeeEntity employeeEntity){
