@@ -73,7 +73,7 @@ public class EmployeeEntity implements UserDetails {
         this.cpf = request.cpf();
         this.email = request.email();
         this.active = true;
-        this.role = request.role();
+        this.role = Role.DRIVER;
         this.hub = hub;
     }
 

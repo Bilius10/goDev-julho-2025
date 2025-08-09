@@ -20,9 +20,9 @@ public class AuthController {
 
     private final EmployeeService service;
 
-    @PostMapping("/sign-up")
-    public ResponseEntity<Void> signUp(@Valid @RequestBody EmployeeCreateRequestDTO dto) {
-        service.signUp(dto);
+    @PostMapping("/create")
+    public ResponseEntity<Void> create(@Valid @RequestBody EmployeeCreateRequestDTO dto) {
+        service.create(dto);
 
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
