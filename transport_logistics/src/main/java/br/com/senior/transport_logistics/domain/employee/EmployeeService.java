@@ -2,8 +2,10 @@ package br.com.senior.transport_logistics.domain.employee;
 
 import br.com.senior.transport_logistics.domain.employee.dto.request.EmployeeCreateRequestDTO;
 import br.com.senior.transport_logistics.domain.employee.dto.request.EmployeeLoginRequestDTO;
+import br.com.senior.transport_logistics.domain.employee.dto.request.EmployeePasswordUpdateDTO;
 import br.com.senior.transport_logistics.domain.employee.dto.request.EmployeeUpdateRequestDTO;
 import br.com.senior.transport_logistics.domain.employee.dto.response.EmployeeResponseDTO;
+import br.com.senior.transport_logistics.domain.employee.enums.Role;
 import br.com.senior.transport_logistics.domain.hub.HubEntity;
 import br.com.senior.transport_logistics.domain.hub.HubService;
 import br.com.senior.transport_logistics.infrastructure.dto.PageDTO;
@@ -19,6 +21,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.domain.Pageable;
+
+import java.util.Objects;
 
 import static br.com.senior.transport_logistics.infrastructure.exception.ExceptionMessages.*;
 
@@ -42,7 +46,7 @@ public class EmployeeService {
                 .cnh(dto.cnh())
                 .cpf(dto.cpf())
                 .email(dto.email())
-                .password(passwordEncoder.encode(dto.password()))
+                .password(passwordEncoder.encode(dto.cpf()))
                 .hub(hub)
                 .role(dto.role())
                 .active(true)
@@ -57,6 +61,10 @@ public class EmployeeService {
     public EmployeeResponseDTO signIn(EmployeeLoginRequestDTO dto) {
         var employee = repository.findByEmail(dto.email())
                 .orElseThrow(() -> new ResourceNotFoundException(EMPLOYEE_EMAIL_IN_USE.getMessage(dto.email())));
+
+        if(Objects.equals(employee.getCpf(), dto.password())){
+            mailSenderService.sendUpdatePasswordEmail(employee);
+        }
 
         if (!passwordEncoder.matches(dto.password(), employee.getPassword())) {
             throw new WrongPasswordException("Senha informada incorreta.");
@@ -87,9 +95,24 @@ public class EmployeeService {
         return EmployeeResponseDTO.basic(saveEmployee, saveEmployee.getHub());
     }
 
-    public EmployeeEntity findDriversOrderedByHistoryScore(Long idTruck, Long idDestinationHub, Long idHub){
-        return repository.findDriversOrderedByHistoryScore(idTruck, idDestinationHub, idHub)
-                .orElseThrow(() -> new RuntimeException("Nenhum driver encontrado"));
+    public void updatePassword(EmployeeEntity employee, EmployeePasswordUpdateDTO employeePasswordUpdateDTO) {
+        if (!employeePasswordUpdateDTO.newPassword().equals(employeePasswordUpdateDTO.confirmNewPassword())) {
+            throw new RuntimeException("Nova senha e confirmação não coincidem.");
+        }
+
+        if (!passwordEncoder.matches(employeePasswordUpdateDTO.currentPassword(), employee.getPassword())) {
+            throw new WrongPasswordException("Senha atual incorreta.");
+        }
+
+        employee.setPassword(passwordEncoder.encode(employeePasswordUpdateDTO.newPassword()));
+        repository.save(employee);
+    }
+
+    @Transactional
+    public void updateRole(Long id, Role role) {
+        EmployeeEntity employee = this.findById(id);
+        employee.setRole(role);
+        repository.save(employee);
     }
 
     @Transactional
@@ -98,6 +121,11 @@ public class EmployeeService {
         employeeFound.setActive(false);
 
         repository.save(employeeFound);
+    }
+
+    public EmployeeEntity findDriversOrderedByHistoryScore(Long idTruck, Long idDestinationHub, Long idHub){
+        return repository.findDriversOrderedByHistoryScore(idTruck, idDestinationHub, idHub)
+                .orElseThrow(() -> new RuntimeException("Nenhum driver encontrado"));
     }
 
     public EmployeeEntity findById(Long id) {

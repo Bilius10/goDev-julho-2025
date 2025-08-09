@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Relatório Mensal de Operações</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #f6f6f6; font-family: Arial, sans-serif;">
+
+<table align="center" border="0" cellpadding="0" cellspacing="0" width="600" style="border-collapse: collapse; background-color: #ffffff; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-top: 20px; margin-bottom: 20px;">
+
+    <tr>
+        <td align="center" style="padding: 40px 0 30px 0;">
+            <span style="font-size: 80px;">📊</span>
+            <h1 style="color: #2c3e50; margin: 10px 0 0 0;">Relatório Mensal - <span th:text="${hubName}">Nome da Filial</span></h1>
+            <p style="color: #555555; margin: 5px 0 0 0;" th:text="'Período: ' + ${reportMonth}"></p>
+        </td>
+    </tr>
+
+    <tr>
+        <td style="padding: 20px 30px;">
+            <h2 style="color: #2c3e50;">Olá, <span th:text="${managerName}">Nome do Gerente</span>!</h2>
+            <p style="color: #555555; line-height: 1.6;">
+                Segue o relatório consolidado com os dados operacionais da sua filial referentes ao último mês.
+            </p>
+
+            <h3 style="color: #3498db; border-bottom: 2px solid #ecf0f1; padding-bottom: 5px;">Resumo Geral</h3>
+            <table width="100%" border="0" cellspacing="0" cellpadding="5" style="color: #555555;">
+                <tr>
+                    <td width="50%"><strong>Total de Entregas Realizadas:</strong></td>
+                    <td th:text="${totalTransports}">0</td>
+                </tr>
+                <tr>
+                    <td><strong>Distância Total Percorrida:</strong></td>
+                    <td th:text="${#numbers.formatDecimal(totalDistance, 1, 'POINT', 2, 'COMMA')} + ' km'">0 km</td>
+                </tr>
+                <tr>
+                    <td><strong>Gasto Total de Combustível:</strong></td>
+                    <td th:text="${#numbers.formatDecimal(totalFuelConsumed, 1, 'POINT', 2, 'COMMA')} + ' L'">0 L</td>
+                </tr>
+            </table>
+
+            <h3 style="color: #3498db; border-bottom: 2px solid #ecf0f1; padding-bottom: 5px; margin-top: 25px;">Detalhes dos Transportes do Mês</h3>
+            <div th:if="${!transports.isEmpty()}" style="max-height: 300px; overflow-y: auto; border: 1px solid #ecf0f1; padding: 10px; border-radius: 5px;">
+                <table width="100%" border="0" cellspacing="0" cellpadding="5" style="color: #555555; font-size: 14px;">
+                    <thead>
+                    <tr style="text-align: left;">
+                        <th>ID</th>
+                        <th>Rota</th>
+                        <th>Data Saída</th>
+                        <th>Status</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="transport : ${transports}" style="border-top: 1px solid #f2f2f2;">
+                        <td th:text="${transport.id}">TRN-001</td>
+                        <td th:text="${transport.originHub.name} + ' → ' + ${transport.destinationHub.name}">Rota</td>
+                        <td th:text="${#temporals.format(transport.exitDay, 'dd/MM')}">Data</td>
+                        <td th:text="${transport.status}">Status</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <p th:if="${transports.isEmpty()}" style="color: #555555;">Nenhum transporte foi registrado neste período.</p>
+
+            <h3 style="color: #3498db; border-bottom: 2px solid #ecf0f1; padding-bottom: 5px; margin-top: 25px;">Recursos Utilizados</h3>
+            <table width="100%" border="0" cellspacing="0" cellpadding="0" style="color: #555555;">
+                <tr>
+                    <td width="48%" valign="top">
+                        <strong>Motoristas Ativos:</strong>
+                        <ul style="margin-top: 5px; padding-left: 20px;">
+                            <li th:each="driver : ${drivers}" th:text="${driver.name}">Nome do Motorista</li>
+                        </ul>
+                    </td>
+                    <td width="4%"></td>
+                    <td width="48%" valign="top">
+                        <strong>Frota de Caminhões:</strong>
+                        <ul style="margin-top: 5px; padding-left: 20px;">
+                            <li th:each="truck : ${trucks}" th:text="${truck.model}">Modelo do Caminhão</li>
+                        </ul>
+                    </td>
+                </tr>
+            </table>
+
+
+            <h3 style="color: #3498db; border-bottom: 2px solid #ecf0f1; padding-bottom: 5px; margin-top: 25px;">Consumo de Combustível por Caminhão</h3>
+            <table width="100%" border="0" cellspacing="0" cellpadding="5" style="color: #555555; font-size: 14px;">
+                <thead>
+                <tr style="text-align: left;">
+                    <th>Modelo do Caminhão</th>
+                    <th>Gasto Total</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="fuelEntry : ${fuelConsumptionByTruck.entrySet()}" style="border-top: 1px solid #f2f2f2;">
+                    <td th:text="${fuelEntry.key}">Volvo FH 460</td>
+                    <td th:text="${#numbers.formatDecimal(fuelEntry.value, 1, 'POINT', 2, 'COMMA')} + ' L'">1500.00 L</td>
+                </tr>
+                </tbody>
+            </table>
+
+            <p style="color: #555555; line-height: 1.6; margin-top: 30px;">
+                Este relatório foi gerado automaticamente. Para análises mais aprofundadas, acesse o dashboard de BI da LogiTrack.
+            </p>
+        </td>
+    </tr>
+
+    <tr>
+        <td align="center" style="padding: 20px 30px; background-color: #ecf0f1; border-bottom-left-radius: 8px; border-bottom-right-radius: 8px;">
+            <p style="margin: 0; font-size: 12px; color: #888;">
+                © 2025 LogiTrack. Todos os direitos reservados.
+            </p>
+        </td>
+    </tr>
+</table>
+
+</body>
+</html>

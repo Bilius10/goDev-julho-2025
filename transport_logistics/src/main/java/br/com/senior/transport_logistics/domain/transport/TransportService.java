@@ -26,10 +26,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -99,6 +102,19 @@ public class TransportService {
         emailService.sendConfirmTransportEmail(savedTransport);
 
         return TransportResponseDTO.basic(savedTransport);
+    }
+
+    @Scheduled(fixedRate = 604800000)
+    public void sendWeeklySchedule(){
+        List<TransportEntity> weeklyTransport
+                = repository.findAllByExitDay(LocalDate.now(), LocalDate.now().plusDays(6));
+
+        Map<EmployeeEntity, List<TransportEntity>> transportsByDriver = weeklyTransport.stream()
+                .collect(Collectors.groupingBy(TransportEntity::getDriver));
+
+        transportsByDriver.forEach((driver, driverTransports) -> {
+            emailService.sendWeeklyScheduleEmail(driverTransports);
+        });
     }
 
     public TransportResponseDTO updateStatus(Long id, TransportStatus status){

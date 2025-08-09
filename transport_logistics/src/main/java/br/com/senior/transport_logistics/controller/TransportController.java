@@ -42,7 +42,7 @@ public class TransportController {
         return ResponseEntity.status(HttpStatus.OK).body(service.findAll(pageable));
     }
 
-    @PostMapping("optimize-allocation")
+    @PostMapping("/optimize-allocation")
     public ResponseEntity<TransportResponseDTO> optimizeAllocation(@RequestBody @Valid CreateTransportRequest request) throws JsonProcessingException {
         TransportResponseDTO createdTransport = service.optimizeAllocation(request);
 
@@ -53,6 +53,13 @@ public class TransportController {
                 .toUri();
 
         return ResponseEntity.created(location).body(createdTransport);
+    }
+
+    @PostMapping("/send-weekly-schedule")
+    public ResponseEntity<Void> sendWeeklySchedule(){
+        service.sendWeeklySchedule();
+
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 
     @PatchMapping("/confirm-transport/{id}")

@@ -29,9 +29,5 @@ public class AuthController {
         return ResponseEntity.status(HttpStatus.OK).body(service.signIn(dto));
     }
 
-    @PatchMapping("/update-password")
-    public ResponseEntity<Void> updatePassword(){
-        return null;
-    }
 }
 

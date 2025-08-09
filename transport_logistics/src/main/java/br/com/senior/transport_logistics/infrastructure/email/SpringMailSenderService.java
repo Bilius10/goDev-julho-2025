@@ -2,6 +2,7 @@ package br.com.senior.transport_logistics.infrastructure.email;
 
 import br.com.senior.transport_logistics.domain.employee.EmployeeEntity;
 import br.com.senior.transport_logistics.domain.transport.TransportEntity;
+import br.com.senior.transport_logistics.domain.truck.TruckEntity;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +15,10 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
+
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.Map;
 
 
@@ -58,6 +63,46 @@ public class SpringMailSenderService {
                         Map.entry("transport.truck.code", transport.getTruck().getCode()),
                         Map.entry("transport.exit_day", transport.getExitDay()),
                         Map.entry("transport.expected_arrival_day", transport.getExpectedArrivalDay())
+                )
+        );
+    }
+
+    public void sendUpdatePasswordEmail(EmployeeEntity employee){
+        sendEmailWithTemplate(
+                employee.getEmail(),
+                "Redefinir senha padrão",
+                "update-password.html",
+                 Map.of("nome", employee.getName())
+        );
+    }
+
+    public void sendMonthReportEmail(List<TransportEntity> transports, List<EmployeeEntity> drivers,
+                                     List<TruckEntity> trucks, Map<String, Double> fuelByTruck){
+
+    }
+
+    public void sendWeeklyScheduleEmail(List<TransportEntity> transportEntities) {
+
+        if (transportEntities == null || transportEntities.isEmpty()) {
+            log.info("A lista de transportes está vazia. Nenhum e-mail de resumo semanal será enviado.");
+            return;
+        }
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM");
+        LocalDate today = LocalDate.now();
+        LocalDate nextSevenDays = today.plusDays(7);
+        String dateRange = String.format("de %s a %s", today.format(formatter), nextSevenDays.format(formatter));
+
+        String subject = "Seu Resumo Semanal de Entregas - LogiTrack";
+
+        sendEmailWithTemplate(
+                transportEntities.get(0).getDriver().getEmail(),
+                subject,
+                "weekly-schedule.html",
+                Map.of(
+                        "driverName", transportEntities.get(0).getDriver().getName(),
+                        "transports", transportEntities,
+                        "dateRange", dateRange
                 )
         );
     }
