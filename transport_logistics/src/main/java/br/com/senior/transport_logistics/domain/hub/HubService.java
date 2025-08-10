@@ -100,6 +100,11 @@ public class HubService {
         repository.deleteById(id);
     }
 
+    public HubEntity findById(Long id) {
+        return repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(HUB_NOT_FOUND_BY_ID.getMessage(id)));
+    }
+
     private void createValidation(HubCreateRequestDTO request){
         verifyIfCnpjIsUsed(request.cnpj());
         verifyIfNameIsUsed(request.name());
@@ -121,10 +126,5 @@ public class HubService {
         if(repository.existsByCity(cidade)){
             throw new FieldAlreadyExistsException(HUB_ALREADY_EXISTS_IN_CITY.getMessage(cidade));
         }
-    }
-
-    public HubEntity findById(Long id) {
-        return repository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(HUB_NOT_FOUND_BY_ID.getMessage(id)));
     }
 }
