@@ -5,6 +5,7 @@ import br.com.senior.transport_logistics.domain.transport.TransportService;
 import br.com.senior.transport_logistics.domain.transport.dto.request.CreateTransportRequest;
 import br.com.senior.transport_logistics.domain.transport.dto.request.UpdateTransportRequest;
 import br.com.senior.transport_logistics.domain.transport.dto.response.TransportResponseDTO;
+import br.com.senior.transport_logistics.domain.transport.enums.TransportStatus;
 import br.com.senior.transport_logistics.infrastructure.dto.GeminiDTO.GeminiResponse;
 import br.com.senior.transport_logistics.infrastructure.dto.PageDTO;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -41,9 +42,9 @@ public class TransportController {
         return ResponseEntity.status(HttpStatus.OK).body(service.findAll(pageable));
     }
 
-    @PostMapping
-    public ResponseEntity<TransportResponseDTO> create(@RequestBody @Valid CreateTransportRequest request) throws JsonProcessingException {
-        TransportResponseDTO createdTransport = service.create(request);
+    @PostMapping("/optimize-allocation")
+    public ResponseEntity<TransportResponseDTO> optimizeAllocation(@RequestBody @Valid CreateTransportRequest request) throws JsonProcessingException {
+        TransportResponseDTO createdTransport = service.optimizeAllocation(request);
 
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
@@ -52,6 +53,33 @@ public class TransportController {
                 .toUri();
 
         return ResponseEntity.created(location).body(createdTransport);
+    }
+
+    @PostMapping("/send-weekly-schedule")
+    public ResponseEntity<Void> sendWeeklySchedule(){
+        service.sendWeeklySchedule();
+
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    @PostMapping("/send-month-report")
+    public ResponseEntity<Void> sendMonthReport(){
+        service.sendMonthReport();
+
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    @PatchMapping("/confirm-transport/{id}")
+    public ResponseEntity<TransportResponseDTO> confirmTransport(@PathVariable Long id){
+        return ResponseEntity.status(HttpStatus.OK).body(service.confirmTransport(id));
+    }
+
+    @PatchMapping("/update-status/{id}")
+    public ResponseEntity<TransportResponseDTO> updateStatus(
+            @PathVariable Long id,
+            @RequestBody @Valid TransportStatus status
+    ){
+        return ResponseEntity.status(HttpStatus.OK).body(service.updateStatus(id, status));
     }
 
     @PutMapping("/{id}")

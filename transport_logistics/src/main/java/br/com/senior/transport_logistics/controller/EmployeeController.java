@@ -43,6 +43,19 @@ public class EmployeeController {
         return ResponseEntity.status(HttpStatus.OK).body(service.update(id, employeeUpdateDTO));
     }
 
+    @PatchMapping("/password")
+    public ResponseEntity<EmployeeResponseDTO> updatePassword(@AuthenticationPrincipal EmployeeEntity employee,
+                                                              @RequestBody @Valid EmployeePasswordUpdateDTO employeePasswordUpdateDTO) {
+        service.updatePassword(employee, employeePasswordUpdateDTO);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
+    @PatchMapping("/{id}/role")
+    public ResponseEntity<EmployeeResponseDTO> updateRole(@PathVariable Long id, @RequestParam Role role) {
+        service.updateRole(id, role);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
     @DeleteMapping("/{id}")
     @Transactional
     public ResponseEntity<EmployeeResponseDTO> delete(@PathVariable Long id){

@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Novo Transporte Atribuído</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #f6f6f6; font-family: Arial, sans-serif;">
+
+<table align="center" border="0" cellpadding="0" cellspacing="0" width="600" style="border-collapse: collapse; background-color: #ffffff; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-top: 20px; margin-bottom: 20px;">
+
+    <tr>
+        <td align="center" style="padding: 40px 0 30px 0;">
+            <span style="font-size: 80px;">📦</span>
+            <h1 style="color: #2c3e50; margin: 10px 0 0 0;">Novo Transporte Confirmado</h1>
+        </td>
+    </tr>
+
+    <tr>
+        <td style="padding: 20px 30px;">
+            <h2 style="color: #2c3e50;">Olá, <span th:text="${driver.name}">Nome do Motorista</span>!</h2>
+
+            <p style="color: #555555; line-height: 1.6;">
+                Um novo transporte foi confirmado e atribuído a você. Por favor, revise todos os detalhes abaixo e prepare-se para a rota.
+            </p>
+
+            <h3 style="color: #3498db; border-bottom: 2px solid #ecf0f1; padding-bottom: 5px;">Detalhes da Rota</h3>
+            <table width="100%" border="0" cellspacing="0" cellpadding="5" style="color: #555555;">
+                <tr>
+                    <td width="30%"><strong>Transporte ID:</strong></td>
+                    <td th:text="${transport.id}">TRN-00123</td>
+                </tr>
+                <tr>
+                    <td><strong>Origem:</strong></td>
+                    <td th:text="${transport.originHub.name}">Hub de Origem</td>
+                </tr>
+                <tr>
+                    <td><strong>Destino:</strong></td>
+                    <td th:text="${transport.destinationHub.name}">Hub de Destino</td>
+                </tr>
+            </table>
+
+            <h3 style="color: #3498db; border-bottom: 2px solid #ecf0f1; padding-bottom: 5px; margin-top: 20px;">Detalhes da Carga</h3>
+            <table width="100%" border="0" cellspacing="0" cellpadding="5" style="color: #555555;">
+                <tr>
+                    <td width="30%"><strong>Produto:</strong></td>
+                    <td th:text="${transport.shipment.product.name}">Nome do Produto</td>
+                </tr>
+                <tr>
+                    <td><strong>Quantidade:</strong></td>
+                    <td th:text="${transport.shipment.quantity}">150 unidades</td>
+                </tr>
+                <tr>
+                    <td><strong>Peso Total:</strong></td>
+                    <td th:text="${transport.shipment.weight} + ' kg'">500 kg</td>
+                </tr>
+                <tr>
+                    <td><strong>Carga Perigosa:</strong></td>
+                    <td><span th:text="${transport.shipment.isHazardous ? 'Sim' : 'Não'}" style="font-weight: bold; color: #e74c3c;">Sim</span></td>
+                </tr>
+                <tr>
+                    <td><strong>Observações:</strong></td>
+                    <td th:text="${transport.shipment.notes}">Notas sobre a carga</td>
+                </tr>
+            </table>
+
+            <h3 style="color: #3498db; border-bottom: 2px solid #ecf0f1; padding-bottom: 5px; margin-top: 20px;">Veículo e Agenda</h3>
+            <table width="100%" border="0" cellspacing="0" cellpadding="5" style="color: #555555;">
+                <tr>
+                    <td width="30%"><strong>Caminhão:</strong></td>
+                    <td th:text="${transport.truck.model} + ' (' + ${transport.truck.code} + ')'">Volvo FH (ABC-1234)</td>
+                </tr>
+                <tr>
+                    <td><strong>Dia de Saída:</strong></td>
+                    <td th:text="${#temporals.format(transport.exitDay, 'dd/MM/yyyy')}">20/10/2025</td>
+                </tr>
+                <tr>
+                    <td><strong>Chegada Prevista:</strong></td>
+                    <td th:text="${#temporals.format(transport.expectedArrivalDay, 'dd/MM/yyyy')}">22/10/2025</td>
+                </tr>
+            </table>
+
+            <p style="color: #555555; line-height: 1.6; margin-top: 30px;">
+                Por favor, realize a inspeção do veículo antes da partida e siga todas as diretrizes de segurança.
+                <br>
+                Boa viagem!
+            </p>
+        </td>
+    </tr>
+
+    <tr>
+        <td align="center" style="padding: 20px 30px; background-color: #ecf0f1; border-bottom-left-radius: 8px; border-bottom-right-radius: 8px;">
+            <p style="margin: 0; font-size: 12px; color: #888;">
+                Esta é uma notificação automática do sistema LogiTrack.
+                <br>
+                © 2025 LogiTrack. Todos os direitos reservados.
+            </p>
+        </td>
+    </tr>
+</table>
+
+</body>
+</html>

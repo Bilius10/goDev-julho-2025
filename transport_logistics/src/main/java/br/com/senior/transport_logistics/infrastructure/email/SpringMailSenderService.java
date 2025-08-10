@@ -1,6 +1,10 @@
 package br.com.senior.transport_logistics.infrastructure.email;
 
 import br.com.senior.transport_logistics.domain.employee.EmployeeEntity;
+import br.com.senior.transport_logistics.domain.hub.HubEntity;
+import br.com.senior.transport_logistics.domain.transport.TransportEntity;
+import br.com.senior.transport_logistics.domain.transport.enums.TransportStatus;
+import br.com.senior.transport_logistics.domain.truck.TruckEntity;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
@@ -13,7 +17,11 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
-import java.util.Map;
+
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.TextStyle;
+import java.util.*;
 
 
 @Service
@@ -38,6 +46,86 @@ public class SpringMailSenderService {
         );
     }
 
+    public void sendConfirmTransportEmail(TransportEntity transport){
+        sendEmailWithTemplate(
+                transport.getDriver().getEmail(),
+                String.format("Olá, %s voce possui uma nova entrega", transport.getDriver().getName()),
+                "confirm-transport.html",
+                Map.of(
+                        "driver", transport.getDriver(),
+                        "transport", transport
+                )
+        );
+    }
+
+    public void sendUpdatePasswordEmail(EmployeeEntity employee){
+        sendEmailWithTemplate(
+                employee.getEmail(),
+                "Redefinir senha padrão",
+                "update-password.html",
+                 Map.of("nome", employee.getName())
+        );
+    }
+
+    public void sendMonthReportEmail(EmployeeEntity manager, List<TransportEntity> transports, List<EmployeeEntity> drivers,
+                                     List<TruckEntity> trucks, Map<String, Double> fuelByTruck, double totalDistance) {
+
+        HubEntity hub = transports.get(0).getOriginHub();
+
+        LocalDate reportDate = transports.get(0).getExitDay();
+        String reportMonth = reportDate.getMonth().getDisplayName(TextStyle.FULL, new Locale("pt", "BR"))
+                + " de " + reportDate.getYear();
+
+        double totalFuelConsumed = transports.stream()
+                .filter(transport -> transport.getStatus() == TransportStatus.DELIVERED)
+                .mapToDouble(TransportEntity::getFuelConsumption)
+                .sum();
+
+        Map<String, Object> variables = new HashMap<>();
+        variables.put("hubName", hub.getName());
+        variables.put("reportMonth", reportMonth);
+        variables.put("totalTransports", transports.size());
+        variables.put("totalDistance", totalDistance/1000);
+        variables.put("totalFuelConsumed", totalFuelConsumed);
+        variables.put("transports", transports);
+        variables.put("drivers", drivers);
+        variables.put("trucks", trucks);
+        variables.put("fuelConsumptionByTruck", fuelByTruck);
+
+        String subject = String.format("Relatório Mensal de Operações - %s - %s", hub.getName(), reportMonth);
+        String templateName = "month-report.html";
+
+        sendEmailWithTemplate(
+                manager.getEmail(),
+                subject,
+                templateName,
+                variables
+        );
+    }
+
+    public void sendWeeklyScheduleEmail(List<TransportEntity> transportEntities) {
+
+        if (transportEntities == null || transportEntities.isEmpty()) {
+            log.info("A lista de transportes está vazia. Nenhum e-mail de resumo semanal será enviado.");
+            return;
+        }
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM");
+        LocalDate today = LocalDate.now();
+        LocalDate nextSevenDays = today.plusDays(7);
+        String dateRange = String.format("de %s a %s", today.format(formatter), nextSevenDays.format(formatter));
+
+        sendEmailWithTemplate(
+                transportEntities.get(0).getDriver().getEmail(),
+                "Seu Resumo Semanal de Entregas - LogiTrack",
+                "weekly-schedule.html",
+                Map.of(
+                        "driverName", transportEntities.get(0).getDriver().getName(),
+                        "transports", transportEntities,
+                        "dateRange", dateRange
+                )
+        );
+    }
 
     private void sendEmailWithTemplate(String to, String subject, String templateName, Map<String, Object> variables) {
         try {

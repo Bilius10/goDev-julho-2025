@@ -361,7 +361,6 @@ class EmployeeServiceTest {
                 "12145676101",
                 "685.928.470-60",
                 "employee@email.com",
-                "securePassword123",
                 1L,
                 Role.DRIVER
         );

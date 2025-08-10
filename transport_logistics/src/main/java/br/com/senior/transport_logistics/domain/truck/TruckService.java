@@ -1,5 +1,6 @@
 package br.com.senior.transport_logistics.domain.truck;
 
+import br.com.senior.transport_logistics.domain.hub.HubEntity;
 import br.com.senior.transport_logistics.domain.hub.HubService;
 import br.com.senior.transport_logistics.domain.truck.dto.request.TruckRequestDTO;
 import br.com.senior.transport_logistics.domain.truck.dto.response.AverageDimensionsTrucks;
@@ -17,7 +18,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
-import static br.com.senior.transport_logistics.infrastructure.exception.ExceptionMessages.TRUCK_NOT_FOUND_BY_CODE;
+import static br.com.senior.transport_logistics.infrastructure.exception.ExceptionMessages.*;
 
 @Service
 @RequiredArgsConstructor
@@ -67,6 +68,10 @@ public class TruckService {
                 .orElseThrow(() -> new ResourceNotFoundException(TRUCK_NOT_FOUND_BY_CODE.getMessage(code)));
     }
 
+    public List<TruckEntity> findAllByHub(HubEntity hub){
+        return repository.findAllByHub(hub);
+    }
+
     private String generateTruckCode(TruckType type) {
         long timeMillisSuffix = System.currentTimeMillis() % 10000;
         String dateTimeCode = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
@@ -75,21 +80,21 @@ public class TruckService {
     }
 
     public TruckEntity findById(Long id){
-        return repository.findById(id).orElseThrow(() -> new RuntimeException("Caminhão não existe"));
+        return repository.findById(id).orElseThrow(() -> new ResourceNotFoundException(TRUCK_NOT_FOUND_BY_ID.getMessage(id)));
     }
 
     public AverageDimensionsTrucks findAverageDimensionsTrucks(){
         return repository.findAverageDimensionsTrucks()
-                .orElseThrow(() -> new RuntimeException("Nenhum caminhão cadastrado"));
+                .orElseThrow(() -> new ResourceNotFoundException(NO_TRUCK_IN_THE_SYSTEM.getMessage()));
     }
 
     public List<TruckEntity> findByLoadCapacityGreaterThan(Double loadCapacity, Long idHUb, LocalDate exitDay, LocalDate expectArrivalDay){
-        System.out.println(loadCapacity);
+
         List<TruckEntity> trucks
-                = repository.findAvailableTrucksByCapacityAndHubNotInRouteBetween(loadCapacity, idHUb);
+                = repository.findAvailableTrucksByCapacityAndHubNotInRouteBetween(loadCapacity, idHUb, exitDay, expectArrivalDay);
 
         if (trucks.isEmpty()) {
-            throw new RuntimeException("Nenhum caminhão encontrado que suporte essa carga.");
+            throw new ResourceNotFoundException(TRUCK_NOT_SUPPORT_LOAD.getMessage(loadCapacity));
         }
 
         return trucks;
