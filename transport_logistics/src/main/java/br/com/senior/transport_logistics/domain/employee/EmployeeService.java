@@ -63,7 +63,7 @@ public class EmployeeService {
         var employee = repository.findByEmail(dto.email())
                 .orElseThrow(() -> new ResourceNotFoundException(EMPLOYEE_NOT_FOUND_BY_EMAIL.getMessage(dto.email())));
 
-        if(Objects.equals(employee.getCpf(), dto.password())){
+        if(passwordEncoder.matches(employee.getCpf(), dto.password())){
             mailSenderService.sendUpdatePasswordEmail(employee);
         }
 
