@@ -9,12 +9,12 @@ import br.com.senior.transport_logistics.domain.employee.enums.Role;
 import br.com.senior.transport_logistics.domain.hub.HubEntity;
 import br.com.senior.transport_logistics.domain.hub.HubService;
 import br.com.senior.transport_logistics.infrastructure.dto.PageDTO;
-import br.com.senior.transport_logistics.infrastructure.exception.ExceptionMessages;
 import br.com.senior.transport_logistics.infrastructure.email.SpringMailSenderService;
 import br.com.senior.transport_logistics.infrastructure.exception.common.FieldAlreadyExistsException;
 import br.com.senior.transport_logistics.infrastructure.exception.common.ResourceNotFoundException;
 import br.com.senior.transport_logistics.infrastructure.exception.common.WrongPasswordException;
 import br.com.senior.transport_logistics.infrastructure.security.TokenService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -38,7 +38,7 @@ public class EmployeeService {
     private final SpringMailSenderService mailSenderService;
 
     @Transactional
-    public EmployeeResponseDTO signUp(EmployeeCreateRequestDTO dto) {
+    public EmployeeResponseDTO create(EmployeeCreateRequestDTO dto) {
         createValidation(dto);
         HubEntity hub = hubService.findById(dto.idHub());
 
@@ -49,8 +49,8 @@ public class EmployeeService {
                 .email(dto.email())
                 .password(passwordEncoder.encode(dto.cpf()))
                 .hub(hub)
-                .role(dto.role())
                 .active(true)
+                .role(Role.DRIVER)
                 .build();
 
         repository.save(employee);
@@ -61,8 +61,8 @@ public class EmployeeService {
     @Transactional(readOnly = true)
     public EmployeeResponseDTO signIn(EmployeeLoginRequestDTO dto) {
         var employee = repository.findByEmail(dto.email())
-                .orElseThrow(() -> new ResourceNotFoundException(EMPLOYEE_NOT_FOUND_BY_EMAIL.getMessage(dto.email())));
-
+                .orElseThrow(() -> new ResourceNotFoundException(EMPLOYEE_NOT_FOUND_BY_EMAIL.getMessage(dto.email()))); 
+        
         if(passwordEncoder.matches(employee.getCpf(), dto.password())){
             mailSenderService.sendUpdatePasswordEmail(employee);
         }
@@ -135,7 +135,7 @@ public class EmployeeService {
         return repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(EMPLOYEE_NOT_FOUND_BY_ID.getMessage(id)));
     }
-
+  
     public List<EmployeeEntity> findAllByRole(Role role){
         return repository.findAllByRole(role);
     }
@@ -143,8 +143,8 @@ public class EmployeeService {
     public List<EmployeeEntity> findAllByRoleAndHub(Role role, HubEntity idHub){
         return repository.findAllByRoleAndHub(role, idHub);
     }
-
-
+    
+   
     private void createValidation(EmployeeCreateRequestDTO request) {
         verifyIfCnhIsUsed(request.cnh());
         verifyIfCpfIsUsed(request.cpf());

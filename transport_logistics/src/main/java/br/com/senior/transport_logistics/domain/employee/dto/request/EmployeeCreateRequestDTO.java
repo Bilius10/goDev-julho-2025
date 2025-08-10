@@ -1,6 +1,5 @@
 package br.com.senior.transport_logistics.domain.employee.dto.request;
 
-import br.com.senior.transport_logistics.domain.employee.enums.Role;
 import jakarta.validation.constraints.*;
 import org.hibernate.validator.constraints.br.CPF;
 
@@ -24,9 +23,6 @@ public record EmployeeCreateRequestDTO(
 
         @NotNull(message = "{employee.idHub.notNull}")
         @Positive(message = "{employee.idHub.Positive}")
-        Long idHub,
-
-        @NotNull(message = "{employee.role.notNull}")
-        Role role
+        Long idHub
 ) {
 }

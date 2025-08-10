@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/v1/employees")
 public class EmployeeController {
 
-    private EmployeeService service;
+    private final EmployeeService service;
 
     @GetMapping
     public ResponseEntity<PageDTO<EmployeeResponseDTO>> findAll(
@@ -59,9 +59,19 @@ public class EmployeeController {
     @DeleteMapping("/{id}")
     @Transactional
     public ResponseEntity<EmployeeResponseDTO> delete(@PathVariable Long id){
-
         service.delete(id);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
 
+    @PatchMapping("/password")
+    public ResponseEntity<EmployeeResponseDTO> updatePassword(@AuthenticationPrincipal EmployeeEntity employee, @RequestBody @Valid EmployeePasswordUpdateDTO employeePasswordUpdateDTO) {
+        service.updatePassword(employee, employeePasswordUpdateDTO);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
+    @PatchMapping("/{id}/role")
+    public ResponseEntity<EmployeeResponseDTO> updateRole(@PathVariable Long id, @RequestParam Role role) {
+        service.updateRole(id, role);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 }
