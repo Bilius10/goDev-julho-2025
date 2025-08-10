@@ -93,7 +93,7 @@ class EmployeeServiceTest {
 
         when(repository.save(any(EmployeeEntity.class))).thenReturn(employee);
 
-        var response = service.signUp(request);
+        var response = service.create(request);
 
         assertNotNull(response);
         assertEquals(response.name(), employee.getName());
@@ -116,7 +116,7 @@ class EmployeeServiceTest {
 
         when(repository.existsByEmail(employee.getEmail())).thenReturn(true);
 
-        var exception = assertThrows(FieldAlreadyExistsException.class, () -> service.signUp(request));
+        var exception = assertThrows(FieldAlreadyExistsException.class, () -> service.create(request));
 
         assertEquals(ExceptionMessages.EMPLOYEE_EMAIL_IN_USE.getMessage(employee.getEmail()), exception.getMessage());
 
@@ -131,7 +131,7 @@ class EmployeeServiceTest {
 
         when(repository.existsByCpf(employee.getCpf())).thenReturn(true);
 
-        var exception = assertThrows(FieldAlreadyExistsException.class, () -> service.signUp(request));
+        var exception = assertThrows(FieldAlreadyExistsException.class, () -> service.create(request));
 
         assertEquals(ExceptionMessages.EMPLOYEE_CPF_IN_USE.getMessage(employee.getCpf()), exception.getMessage());
 
@@ -146,7 +146,7 @@ class EmployeeServiceTest {
 
         when(repository.existsByCnh(employee.getCnh())).thenReturn(true);
 
-        var exception = assertThrows(FieldAlreadyExistsException.class, () -> service.signUp(request));
+        var exception = assertThrows(FieldAlreadyExistsException.class, () -> service.create(request));
 
         assertEquals(ExceptionMessages.EMPLOYEE_CNH_IN_USE.getMessage(employee.getCnh()), exception.getMessage());
 
@@ -361,9 +361,7 @@ class EmployeeServiceTest {
                 "12145676101",
                 "685.928.470-60",
                 "employee@email.com",
-                "securePassword123",
-                1L,
-                Role.DRIVER
+                1L
         );
     }
 
