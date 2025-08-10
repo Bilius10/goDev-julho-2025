@@ -63,7 +63,7 @@ public class HubService {
 
         HubEntity saveHub = repository.save(hubEntity);
 
-        return HubResponseDTO.basic(saveHub);
+        return HubResponseDTO.detailed(saveHub);
     }
 
     @Transactional
@@ -88,7 +88,7 @@ public class HubService {
 
         HubEntity saveHub = repository.save(hubFound);
 
-        return HubResponseDTO.basic(saveHub);
+        return HubResponseDTO.detailed(saveHub);
     }
 
     @Transactional
