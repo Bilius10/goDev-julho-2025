@@ -85,6 +85,7 @@ public class EmployeeService {
                 employees.getTotalPages());
     }
 
+    @Transactional
     public EmployeeResponseDTO update(Long id, EmployeeUpdateRequestDTO request) {
         verifyIfEmailIsUsed(request.email());
 
@@ -96,6 +97,7 @@ public class EmployeeService {
         return EmployeeResponseDTO.basic(saveEmployee, saveEmployee.getHub());
     }
 
+    @Transactional
     public void updatePassword(EmployeeEntity employee, EmployeePasswordUpdateDTO employeePasswordUpdateDTO) {
         if (!employeePasswordUpdateDTO.newPassword().equals(employeePasswordUpdateDTO.confirmNewPassword())) {
             throw new RuntimeException("Nova senha e confirmação não coincidem.");
