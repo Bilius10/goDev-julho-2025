@@ -83,9 +83,12 @@ public class EmployeeService {
 
     @Transactional
     public EmployeeResponseDTO update(Long id, EmployeeUpdateRequestDTO request) {
-        verifyIfEmailIsUsed(request.email());
-
         EmployeeEntity employeeFound = this.findById(id);
+
+        if(!employeeFound.getEmail().equals(request.email())){
+            verifyIfEmailIsUsed(request.email());
+        }
+        
         employeeFound.updateEmployee(request);
 
         EmployeeEntity savedEmployee = repository.save(employeeFound);
