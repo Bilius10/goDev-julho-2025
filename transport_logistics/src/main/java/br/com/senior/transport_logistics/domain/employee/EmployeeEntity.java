@@ -41,7 +41,6 @@ public class EmployeeEntity implements UserDetails {
     private String cnh;
 
     @Column(name = "cpf")
-    @Size(max = 11, message = "{employee.cpf.size}")
     @CPF(message = "{employee.cpf.format}")
     private String cpf;
 
