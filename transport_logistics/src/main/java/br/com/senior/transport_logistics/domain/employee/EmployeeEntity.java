@@ -12,14 +12,15 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
 @Getter
 @Setter
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @Table(name = "employees")
 @Entity(name = "Employee")
 public class EmployeeEntity implements UserDetails {
@@ -68,15 +69,14 @@ public class EmployeeEntity implements UserDetails {
     private Role role;
 
     public EmployeeEntity(EmployeeCreateRequestDTO request, HubEntity hub) {
-        EmployeeEntity.builder()
-                .name(request.name())
-                .cnh(request.cnh())
-                .cpf(request.cpf())
-                .email(request.email())
-                .active(true)
-                .role(Role.DRIVER)
-                .hub(hub)
-                .build();
+        this.name = request.name();
+        this.cnh = request.cnh();
+        this.cpf = request.cpf();
+        this.email = request.email();
+        this.password = request.cpf();
+        this.active = true;
+        this.role = Role.DRIVER;
+        this.hub = hub;
     }
 
     public void updateEmployee(EmployeeUpdateRequestDTO request) {
@@ -86,7 +86,20 @@ public class EmployeeEntity implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority("ROLE_" + role.name()));
+        List<GrantedAuthority> authorities = new ArrayList<>();
+
+        if (this.role == Role.MANAGER) {
+            authorities.add(new SimpleGrantedAuthority("ROLE_MANAGER"));
+            authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
+            authorities.add(new SimpleGrantedAuthority("ROLE_DRIVER"));
+        } else if (this.role == Role.ADMIN) {
+            authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
+            authorities.add(new SimpleGrantedAuthority("ROLE_DRIVER"));
+        } else {
+            authorities.add(new SimpleGrantedAuthority("ROLE_DRIVER"));
+        }
+
+        return authorities;
     }
 
     @Override

@@ -21,7 +21,6 @@ import java.time.LocalDate;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 @Entity(name = "Transport")
 @Table(name = "transports")
 public class TransportEntity {
@@ -85,18 +84,16 @@ public class TransportEntity {
                            Double fuelConsumption,
                            LocalDate exitDay,
                            LocalDate expectedArrivalDay) {
-        TransportEntity.builder()
-                .driver(driver)
-                .originHub(originHub)
-                .destinationHub(destinationHub)
-                .shipment(shipment)
-                .truck(truck)
-                .distance(distance)
-                .fuelConsumption(fuelConsumption)
-                .exitDay(exitDay)
-                .expectedArrivalDay(expectedArrivalDay)
-                .status(TransportStatus.PENDING)
-                .build();
+        this.driver = driver;
+        this.originHub = originHub;
+        this.destinationHub = destinationHub;
+        this.shipment = shipment;
+        this.truck = truck;
+        this.distance = distance;
+        this.fuelConsumption = fuelConsumption;
+        this.exitDay = exitDay;
+        this.expectedArrivalDay = expectedArrivalDay;
+        this.status = TransportStatus.PENDING;
     }
 
     public void updateTransport(UpdateTransportRequest updateTransportRequest, EmployeeEntity employeeEntity){

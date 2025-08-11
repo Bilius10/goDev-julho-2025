@@ -8,6 +8,7 @@ import br.com.senior.transport_logistics.domain.employee.dto.response.EmployeeRe
 import br.com.senior.transport_logistics.domain.employee.enums.Role;
 import br.com.senior.transport_logistics.infrastructure.dto.PageDTO;
 import jakarta.validation.Valid;
+import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;

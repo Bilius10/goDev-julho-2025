@@ -23,6 +23,7 @@ import br.com.senior.transport_logistics.infrastructure.email.SpringMailSenderSe
 import br.com.senior.transport_logistics.infrastructure.exception.common.ResourceNotFoundException;
 import br.com.senior.transport_logistics.infrastructure.external.GeminiApiClientService;
 import br.com.senior.transport_logistics.infrastructure.external.OpenRouteApiClientService;
+import br.com.senior.transport_logistics.infrastructure.pdf.PdfGenerationService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -53,6 +54,7 @@ public class TransportService {
     private final EmployeeService employeeService;
     private final ObjectMapper objectMapper;
     private final SpringMailSenderService emailService;
+    private final PdfGenerationService pdfGenerationService;
 
     @Transactional(readOnly = true)
     public PageDTO<TransportResponseDTO> findAll(Pageable pageable) {
@@ -108,7 +110,10 @@ public class TransportService {
         transport.setStatus(TransportStatus.ASSIGNED);
 
         TransportEntity savedTransport = repository.save(transport);
-        emailService.sendConfirmTransportEmail(savedTransport);
+
+        byte[] bytes = pdfGenerationService.generateTransportManifestPdf(savedTransport);
+
+        emailService.sendConfirmTransportEmail(savedTransport, bytes);
 
         return TransportResponseDTO.detailed(savedTransport);
     }

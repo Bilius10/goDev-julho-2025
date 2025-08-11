@@ -9,7 +9,6 @@ import lombok.*;
 
 @Getter
 @Setter
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity(name = "Shipment")
@@ -44,13 +43,11 @@ public class ShipmentEntity {
     private ProductEntity product;
 
     public ShipmentEntity(ShipmentCreateDTO request, ProductEntity product) {
-        ShipmentEntity.builder()
-                .weight(request.quantity() * product.getWeight())
-                .quantity(request.quantity())
-                .notes(request.notes())
-                .isHazardous(request.isHazardous())
-                .product(product)
-                .build();
+        this.weight = request.quantity() * product.getWeight();
+        this.quantity = request.quantity();
+        this.notes = request.notes();
+        this.isHazardous = request.isHazardous();
+        this.product = product;
     }
 
     public void updateShipment(ShipmentUpdateDTO request, ProductEntity product) {
