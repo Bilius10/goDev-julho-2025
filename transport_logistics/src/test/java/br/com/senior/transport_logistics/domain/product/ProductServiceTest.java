@@ -121,7 +121,7 @@ class ProductServiceTest {
     }
 
     @Test
-    @DisplayName("Deve fazer o delete logico")
+    @DisplayName("Deve fazer o delete fisico")
     void delete() {
 
         Long productId = 1L;
