@@ -36,6 +36,7 @@ class ProductControllerTest {
     private ProductService service;
 
     @Test
+    @DisplayName("Deve retornar todos com filtragem")
     void findAllWithFilters() {
         ProductCategory category = ProductCategory.AUTOMOTIVE;
         Float limitWeight = 0.5f;
@@ -54,7 +55,6 @@ class ProductControllerTest {
 
         PageDTO<ProductResponseDTO> mockedPageDTO = new PageDTO<>(list, 1,1,1,1);
 
-        // When
         when(service.findAllWithFilters(
                 eq(category),
                 eq(limitWeight),
@@ -70,13 +70,13 @@ class ProductControllerTest {
                 ascending
         );
 
-        // Then
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(mockedPageDTO, response.getBody());
         assertEquals(1, response.getBody().totalElements());
     }
 
     @Test
+    @DisplayName("Deve retornar status created e o recurso")
     void create() {
 
         MockHttpServletRequest request = new MockHttpServletRequest();
@@ -96,6 +96,7 @@ class ProductControllerTest {
     }
 
     @Test
+    @DisplayName("Deve retornar o produto atualizado")
     void update() {
 
         Long productId = 1L;
@@ -115,6 +116,7 @@ class ProductControllerTest {
     }
 
     @Test
+    @DisplayName("Deve retornar no content")
     void delete() {
 
         Long productId = 1L;
