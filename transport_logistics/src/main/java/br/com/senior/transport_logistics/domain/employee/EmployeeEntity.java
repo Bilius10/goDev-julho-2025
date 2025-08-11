@@ -68,12 +68,12 @@ public class EmployeeEntity implements UserDetails {
     @NotNull(message = "{employee.role.notNull}")
     private Role role;
 
-    public EmployeeEntity(EmployeeCreateRequestDTO request, HubEntity hub) {
+    public EmployeeEntity(EmployeeCreateRequestDTO request, HubEntity hub, String password) {
         this.name = request.name();
         this.cnh = request.cnh();
         this.cpf = request.cpf();
         this.email = request.email();
-        this.password = request.cpf();
+        this.password = password;
         this.active = true;
         this.role = Role.DRIVER;
         this.hub = hub;

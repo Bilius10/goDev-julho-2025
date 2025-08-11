@@ -42,7 +42,9 @@ public class EmployeeService {
         createValidation(request);
         HubEntity hub = hubService.findById(request.idHub());
 
-        EmployeeEntity employeeEntity = new EmployeeEntity(request, hub);
+        String encode = passwordEncoder.encode(request.cpf());
+
+        EmployeeEntity employeeEntity = new EmployeeEntity(request, hub, encode);
 
         EmployeeEntity savedEmployee = repository.save(employeeEntity);
         mailSenderService.sendWelcomeEmail(savedEmployee);
@@ -55,7 +57,7 @@ public class EmployeeService {
         var employee = repository.findByEmail(request.email())
                 .orElseThrow(() -> new ResourceNotFoundException(EMPLOYEE_NOT_FOUND_BY_EMAIL.getMessage(request.email())));
         
-        if(passwordEncoder.matches(employee.getCpf(), request.password())){
+        if(passwordEncoder.matches(request.password(), employee.getPassword())){
             mailSenderService.sendUpdatePasswordEmail(employee);
         }
 
@@ -88,7 +90,7 @@ public class EmployeeService {
         if(!employeeFound.getEmail().equals(request.email())){
             verifyIfEmailIsUsed(request.email());
         }
-        
+
         employeeFound.updateEmployee(request);
 
         EmployeeEntity savedEmployee = repository.save(employeeFound);
