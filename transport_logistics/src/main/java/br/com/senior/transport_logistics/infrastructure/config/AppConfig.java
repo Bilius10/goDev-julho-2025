@@ -1,4 +1,4 @@
-package br.com.senior.transport_logistics.config;
+package br.com.senior.transport_logistics.infrastructure.config;
 
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
@@ -12,7 +12,7 @@ public class AppConfig {
     public RestTemplate restTemplate(RestTemplateBuilder builder) {
         return builder
 
-                .defaultHeader("User-Agent", "bike-api/1.0 (teste@exemplo.com)")
+                .defaultHeader("User-Agent", "transport_logistics/1.0 (teste@exemplo.com)")
                 .build();
     }
 }
