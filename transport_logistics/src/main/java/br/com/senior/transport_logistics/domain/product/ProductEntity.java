@@ -10,7 +10,6 @@ import lombok.*;
 
 @Getter
 @Setter
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "products")
@@ -39,12 +38,10 @@ public class ProductEntity {
     private boolean active;
 
     public ProductEntity(ProductRequestDTO productCreateDTO) {
-        ProductEntity.builder()
-                .name(productCreateDTO.name())
-                .category(productCreateDTO.productCategory())
-                .weight(productCreateDTO.weight())
-                .active(true)
-                .build();
+        this.name = productCreateDTO.name();
+        this.category = productCreateDTO.productCategory();
+        this.weight = productCreateDTO.weight();
+        this.active = true;
     }
 
 }

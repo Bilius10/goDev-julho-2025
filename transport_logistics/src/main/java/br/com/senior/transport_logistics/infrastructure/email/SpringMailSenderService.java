@@ -44,14 +44,12 @@ public class SpringMailSenderService {
                 employee.getEmail(),
                 String.format(" Seja muito bem-vindo(a), %s ,à equipe LogiTrack", employee.getName()),
                 "welcome-email.html",
-                Map.of("nome", employee.getName()),
-                null,
-                null
+                Map.of("nome", employee.getName())
         );
     }
 
     public void sendConfirmTransportEmail(TransportEntity transport, byte[] pdf){
-        sendEmailWithTemplate(
+        sendEmailWithTemplateAndPdf(
                 transport.getDriver().getEmail(),
                 String.format("Olá, %s voce possui uma nova entrega", transport.getDriver().getName()),
                 "confirm-transport.html",
@@ -69,9 +67,7 @@ public class SpringMailSenderService {
                 employee.getEmail(),
                 "Redefinir senha padrão",
                 "update-password.html",
-                 Map.of("nome", employee.getName()),
-                null,
-                null
+                 Map.of("nome", employee.getName())
         );
     }
 
@@ -107,9 +103,7 @@ public class SpringMailSenderService {
                 manager.getEmail(),
                 subject,
                 templateName,
-                variables,
-                null,
-                null
+                variables
         );
     }
 
@@ -133,13 +127,35 @@ public class SpringMailSenderService {
                         "driverName", transportEntities.get(0).getDriver().getName(),
                         "transports", transportEntities,
                         "dateRange", dateRange
-                ),
-                null,
-                null
+                )
         );
     }
 
     private void sendEmailWithTemplate(String to, String subject, String templateName,
+                                       Map<String, Object> variables) {
+        try {
+            Context context = new Context();
+            context.setVariables(variables);
+            String htmlContent = templateEngine.process(templateName, context);
+
+            MimeMessage mimeMessage = mailSender.createMimeMessage();
+
+            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
+
+            helper.setFrom(emailFrom);
+            helper.setTo(to);
+            helper.setSubject(subject);
+            helper.setText(htmlContent, true);
+
+            mailSender.send(mimeMessage);
+            log.info("E-mail com template '{}' enviado com sucesso para {}", templateName, to);
+
+        } catch (MessagingException e) {
+            log.error("Erro ao enviar e-mail com template '{}' para {}: {}", templateName, to, e.getMessage());
+        }
+    }
+
+    private void sendEmailWithTemplateAndPdf(String to, String subject, String templateName,
                                        Map<String, Object> variables, byte[] pdfAttachment, String attachmentName) {
         try {
             Context context = new Context();
