@@ -25,9 +25,10 @@ public class ShipmentService {
     public PageDTO<ShipmentResponseDTO> findAll(Pageable pageable){
         Page<ShipmentEntity> shipments = repository.findAll(pageable);
 
+        Page<ShipmentResponseDTO> shipmentsResponse = shipments.map(ShipmentResponseDTO::detailed);
+
         return new PageDTO<>(
-                shipments.map(s -> new ShipmentResponseDTO(s.getId(), s.getWeight(),
-                        s.getQuantity(), s.getNotes(), s.getProduct().getName(), s.isHazardous())).toList(),
+                shipmentsResponse.getContent(),
                 shipments.getNumber(),
                 shipments.getSize(),
                 shipments.getTotalElements(),
@@ -41,26 +42,18 @@ public class ShipmentService {
 
         ShipmentEntity shipmentEntity = new ShipmentEntity(request, product);
 
-        ShipmentEntity saveShipment = repository.save(shipmentEntity);
+        ShipmentEntity savedShipment = repository.save(shipmentEntity);
 
-        return new ShipmentResponseDTO(
-                saveShipment.getId(), saveShipment.getWeight(),
-                saveShipment.getQuantity(), saveShipment.getNotes(),
-                saveShipment.getProduct().getName(), saveShipment.isHazardous()
-        );
+        return ShipmentResponseDTO.detailed(savedShipment);
     }
 
     public ShipmentResponseDTO update(Long id, ShipmentUpdateDTO request) {
         ShipmentEntity shipmentFound = this.findById(id);
         shipmentFound.updateShipment(request, shipmentFound.getProduct());
 
-        ShipmentEntity saveShipment = repository.save(shipmentFound);
+        ShipmentEntity savedShipment = repository.save(shipmentFound);
 
-        return new ShipmentResponseDTO(
-                saveShipment.getId(), saveShipment.getWeight(),
-                saveShipment.getQuantity(), saveShipment.getNotes(),
-                saveShipment.getProduct().getName(), saveShipment.isHazardous()
-        );
+        return ShipmentResponseDTO.detailed(savedShipment);
     }
 
     public void delete(Long id){

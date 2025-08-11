@@ -68,13 +68,15 @@ public class EmployeeEntity implements UserDetails {
     private Role role;
 
     public EmployeeEntity(EmployeeCreateRequestDTO request, HubEntity hub) {
-        this.name = request.name();
-        this.cnh = request.cnh();
-        this.cpf = request.cpf();
-        this.email = request.email();
-        this.active = true;
-        this.role = Role.DRIVER;
-        this.hub = hub;
+        EmployeeEntity.builder()
+                .name(request.name())
+                .cnh(request.cnh())
+                .cpf(request.cpf())
+                .email(request.email())
+                .active(true)
+                .role(Role.DRIVER)
+                .hub(hub)
+                .build();
     }
 
     public void updateEmployee(EmployeeUpdateRequestDTO request) {
@@ -97,23 +99,4 @@ public class EmployeeEntity implements UserDetails {
         return email;
     }
 
-    @Override
-    public boolean isAccountNonExpired() {
-        return true;
-    }
-
-    @Override
-    public boolean isAccountNonLocked() {
-        return true;
-    }
-
-    @Override
-    public boolean isCredentialsNonExpired() {
-        return true;
-    }
-
-    @Override
-    public boolean isEnabled() {
-        return active;
-    }
 }

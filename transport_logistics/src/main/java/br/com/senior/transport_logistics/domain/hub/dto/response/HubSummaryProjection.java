@@ -1,5 +1,7 @@
 package br.com.senior.transport_logistics.domain.hub.dto.response;
 
+import lombok.Builder;
+
 import java.util.List;
 
 public record HubSummaryProjection(

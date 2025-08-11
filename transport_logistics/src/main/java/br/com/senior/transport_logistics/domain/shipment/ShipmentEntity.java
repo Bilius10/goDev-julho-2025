@@ -5,13 +5,11 @@ import br.com.senior.transport_logistics.domain.shipment.dto.request.ShipmentCre
 import br.com.senior.transport_logistics.domain.shipment.dto.request.ShipmentUpdateDTO;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Getter
 @Setter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity(name = "Shipment")
@@ -46,11 +44,13 @@ public class ShipmentEntity {
     private ProductEntity product;
 
     public ShipmentEntity(ShipmentCreateDTO request, ProductEntity product) {
-        this.weight = request.quantity() * product.getWeight();
-        this.quantity = request.quantity();
-        this.notes = request.notes();
-        this.isHazardous = request.isHazardous();
-        this.product = product;
+        ShipmentEntity.builder()
+                .weight(request.quantity() * product.getWeight())
+                .quantity(request.quantity())
+                .notes(request.notes())
+                .isHazardous(request.isHazardous())
+                .product(product)
+                .build();
     }
 
     public void updateShipment(ShipmentUpdateDTO request, ProductEntity product) {

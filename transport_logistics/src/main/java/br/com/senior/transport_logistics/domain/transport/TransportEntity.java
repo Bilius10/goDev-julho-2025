@@ -85,17 +85,18 @@ public class TransportEntity {
                            Double fuelConsumption,
                            LocalDate exitDay,
                            LocalDate expectedArrivalDay) {
-
-        this.driver = driver;
-        this.originHub = originHub;
-        this.destinationHub = destinationHub;
-        this.shipment = shipment;
-        this.truck = truck;
-        this.distance = distance;
-        this.fuelConsumption = fuelConsumption;
-        this.exitDay = exitDay;
-        this.expectedArrivalDay = expectedArrivalDay;
-        this.status = TransportStatus.PENDING;
+        TransportEntity.builder()
+                .driver(driver)
+                .originHub(originHub)
+                .destinationHub(destinationHub)
+                .shipment(shipment)
+                .truck(truck)
+                .distance(distance)
+                .fuelConsumption(fuelConsumption)
+                .exitDay(exitDay)
+                .expectedArrivalDay(expectedArrivalDay)
+                .status(TransportStatus.PENDING)
+                .build();
     }
 
     public void updateTransport(UpdateTransportRequest updateTransportRequest, EmployeeEntity employeeEntity){
