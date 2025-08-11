@@ -6,7 +6,7 @@ import br.com.senior.transport_logistics.domain.product.enums.ProductCategory;
 import br.com.senior.transport_logistics.infrastructure.dto.PageDTO;
 import br.com.senior.transport_logistics.infrastructure.exception.common.FieldAlreadyExistsException;
 import br.com.senior.transport_logistics.infrastructure.exception.common.ResourceNotFoundException;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -21,6 +21,7 @@ public class ProductService {
 
     private final ProductRepository repository;
 
+    @Transactional(readOnly = true)
     public PageDTO<ProductResponseDTO> findAllWithFilters(ProductCategory category, Float limitWeight, Pageable pageable) {
 
         Page<ProductEntity> productsWithFilter
@@ -51,6 +52,7 @@ public class ProductService {
         return ProductResponseDTO.detailed(savedProduct);
     }
 
+    @Transactional
     public ProductResponseDTO update(Long id, ProductRequestDTO request){
         this.findById(id);
 
@@ -70,6 +72,7 @@ public class ProductService {
         repository.save(productFound);
     }
 
+    @Transactional(readOnly = true)
     public ProductEntity findById(Long id){
         return repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(PRODUCT_NOT_FOUND_BY_ID.getMessage(id)));
