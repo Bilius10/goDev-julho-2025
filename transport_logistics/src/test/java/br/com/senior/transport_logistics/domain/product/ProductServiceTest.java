@@ -37,6 +37,7 @@ class ProductServiceTest {
     private ProductRepository repository;
 
     @Test
+    @DisplayName("Deve listar todos usando filtros")
     void findAllWithFilters() {
 
         ProductCategory category = ProductCategory.AUTOMOTIVE;
@@ -98,6 +99,7 @@ class ProductServiceTest {
     }
 
     @Test
+    @DisplayName("Deve atualizar produto")
     void update() {
         Long productId = 1L;
 
@@ -119,6 +121,7 @@ class ProductServiceTest {
     }
 
     @Test
+    @DisplayName("Deve listar todos usando filtros")
     void delete() {
 
         Long productId = 1L;
@@ -128,7 +131,13 @@ class ProductServiceTest {
 
         when(repository.findById(productId)).thenReturn(Optional.of(celular));
 
+        var before = service.findById(productId);
         service.delete(productId);
+        var after = service.findById(productId);
+
+        assertNotEquals(before, after);
+        assertTrue(before);
+        assertFalse(after);
 
         verify(repository).save(celular);
     }
