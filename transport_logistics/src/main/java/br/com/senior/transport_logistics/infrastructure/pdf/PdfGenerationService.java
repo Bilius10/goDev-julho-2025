@@ -57,6 +57,11 @@ public class PdfGenerationService {
                     .setTextAlignment(TextAlignment.CENTER));
             document.add(new Paragraph("Assinatura do Motorista")
                     .setTextAlignment(TextAlignment.CENTER));
+            document.add(new Paragraph("\n\n\n"));
+            document.add(new Paragraph("_________________________")
+                    .setTextAlignment(TextAlignment.CENTER));
+            document.add(new Paragraph("Assinatura do Fiscal")
+                    .setTextAlignment(TextAlignment.CENTER));
 
 
             document.close();
