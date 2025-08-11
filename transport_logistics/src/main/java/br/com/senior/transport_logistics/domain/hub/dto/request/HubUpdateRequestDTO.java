@@ -10,7 +10,7 @@ public record HubUpdateRequestDTO(
         String name,
 
         @NotBlank(message = "{hub.cep.notBlank}")
-        @Pattern(message = "{hub.cep.pattern}", regexp = "^\\d{8}$")
+        @Pattern(message = "{hub.request.cep.pattern}", regexp = "^\\d{8}$")
         String cep,
 
         @NotBlank(message = "{hub.number.notBlank}")
