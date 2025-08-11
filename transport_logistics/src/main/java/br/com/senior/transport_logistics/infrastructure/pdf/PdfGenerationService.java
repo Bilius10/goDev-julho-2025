@@ -34,7 +34,7 @@ public class PdfGenerationService {
 
             PdfFont bold = PdfFontFactory.createFont("Helvetica-Bold");
 
-            document.add(new Paragraph("MANIFESTO DE TRANSPORTE")
+            document.add(new Paragraph("Confirmação de transporte")
                     .setFont(bold).setFontSize(18).setTextAlignment(TextAlignment.CENTER));
             document.add(new Paragraph("ID do Transporte: " + transport.getId())
                     .setTextAlignment(TextAlignment.CENTER));
@@ -56,6 +56,11 @@ public class PdfGenerationService {
             document.add(new Paragraph("_________________________")
                     .setTextAlignment(TextAlignment.CENTER));
             document.add(new Paragraph("Assinatura do Motorista")
+                    .setTextAlignment(TextAlignment.CENTER));
+            document.add(new Paragraph("\n\n\n"));
+            document.add(new Paragraph("_________________________")
+                    .setTextAlignment(TextAlignment.CENTER));
+            document.add(new Paragraph("Assinatura do Fiscal")
                     .setTextAlignment(TextAlignment.CENTER));
 
 
