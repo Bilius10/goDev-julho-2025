@@ -34,7 +34,7 @@ public class PdfGenerationService {
 
             PdfFont bold = PdfFontFactory.createFont("Helvetica-Bold");
 
-            document.add(new Paragraph("MANIFESTO DE TRANSPORTE")
+            document.add(new Paragraph("Confirmação de transporte")
                     .setFont(bold).setFontSize(18).setTextAlignment(TextAlignment.CENTER));
             document.add(new Paragraph("ID do Transporte: " + transport.getId())
                     .setTextAlignment(TextAlignment.CENTER));

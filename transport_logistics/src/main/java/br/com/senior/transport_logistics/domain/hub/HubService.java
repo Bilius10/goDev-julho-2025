@@ -76,10 +76,12 @@ public class HubService {
             hubFound.setName(request.name());
         }
 
-        if(!Objects.equals(hubFound.getCep(), request.cep())){
+        if(!Objects.equals(hubFound.getCep(), request.cep()) && !Objects.equals(hubFound.getNumber(), request.number())){
             AddresDTO address = viaCepApiCilentService.getAddress(request.cep());
 
-            checkIfThereIsAHubInTheCity(address.localidade());
+            if(!Objects.equals(address.localidade(), hubFound.getCity())){
+                checkIfThereIsAHubInTheCity(address.localidade());
+            }
 
             hubFound.updateAddres(address, request.number());
 

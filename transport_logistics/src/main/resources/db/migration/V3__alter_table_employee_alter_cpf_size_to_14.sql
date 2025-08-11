@@ -1,2 +1,0 @@
-ALTER TABLE employees
-ALTER COLUMN cpf TYPE CHAR(11);
