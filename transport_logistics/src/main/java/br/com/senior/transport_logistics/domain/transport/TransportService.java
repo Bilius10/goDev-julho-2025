@@ -106,7 +106,7 @@ public class TransportService {
         TransportEntity savedTransport = repository.save(transport);
         emailService.sendConfirmTransportEmail(savedTransport);
 
-        return TransportResponseDTO.basic(savedTransport);
+        return TransportResponseDTO.detailed(savedTransport);
     }
 
     @Scheduled(cron = "0 0 9 * * SAT")

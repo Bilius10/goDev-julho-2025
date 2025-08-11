@@ -6,13 +6,11 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Getter
 @Setter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "products")
@@ -41,10 +39,12 @@ public class ProductEntity {
     private boolean active;
 
     public ProductEntity(ProductRequestDTO productCreateDTO) {
-        this.name = productCreateDTO.name();
-        this.category = productCreateDTO.productCategory();
-        this.weight = productCreateDTO.weight();
-        this.active = true;
+        ProductEntity.builder()
+                .name(productCreateDTO.name())
+                .category(productCreateDTO.productCategory())
+                .weight(productCreateDTO.weight())
+                .active(true)
+                .build();
     }
 
 }

@@ -38,36 +38,28 @@ public class EmployeeService {
     private final SpringMailSenderService mailSenderService;
 
     @Transactional
-    public EmployeeResponseDTO create(EmployeeCreateRequestDTO dto) {
-        createValidation(dto);
-        HubEntity hub = hubService.findById(dto.idHub());
+    public EmployeeResponseDTO create(EmployeeCreateRequestDTO request) {
+        createValidation(request);
+        HubEntity hub = hubService.findById(request.idHub());
 
-        var employee = EmployeeEntity.builder()
-                .name(dto.name())
-                .cnh(dto.cnh())
-                .cpf(dto.cpf())
-                .email(dto.email())
-                .password(passwordEncoder.encode(dto.cpf()))
-                .hub(hub)
-                .active(true)
-                .role(Role.DRIVER)
-                .build();
+        EmployeeEntity employeeEntity = new EmployeeEntity(request, hub);
 
-        repository.save(employee);
-        mailSenderService.sendWelcomeEmail(employee);
-        return EmployeeResponseDTO.basic(employee, hub);
+        EmployeeEntity savedEmployee = repository.save(employeeEntity);
+        mailSenderService.sendWelcomeEmail(savedEmployee);
+
+        return EmployeeResponseDTO.basic(savedEmployee);
     }
 
     @Transactional(readOnly = true)
-    public EmployeeResponseDTO signIn(EmployeeLoginRequestDTO dto) {
-        var employee = repository.findByEmail(dto.email())
-                .orElseThrow(() -> new ResourceNotFoundException(EMPLOYEE_NOT_FOUND_BY_EMAIL.getMessage(dto.email()))); 
+    public EmployeeResponseDTO signIn(EmployeeLoginRequestDTO request) {
+        var employee = repository.findByEmail(request.email())
+                .orElseThrow(() -> new ResourceNotFoundException(EMPLOYEE_NOT_FOUND_BY_EMAIL.getMessage(request.email())));
         
-        if(passwordEncoder.matches(employee.getCpf(), dto.password())){
+        if(passwordEncoder.matches(employee.getCpf(), request.password())){
             mailSenderService.sendUpdatePasswordEmail(employee);
         }
 
-        if (!passwordEncoder.matches(dto.password(), employee.getPassword())) {
+        if (!passwordEncoder.matches(request.password(), employee.getPassword())) {
             throw new WrongPasswordException("Senha informada incorreta.");
         }
 
@@ -78,7 +70,10 @@ public class EmployeeService {
 
         Page<EmployeeEntity> employees = repository.findAll(pageable);
 
-        return new PageDTO<>(employees.map(p -> EmployeeResponseDTO.basic(p, p.getHub())).toList(),
+        Page<EmployeeResponseDTO> employeesResponse = employees.map(EmployeeResponseDTO::basic);
+
+        return new PageDTO<>(
+                employeesResponse.getContent(),
                 employees.getNumber(),
                 employees.getSize(),
                 employees.getTotalElements(),
@@ -92,29 +87,32 @@ public class EmployeeService {
         EmployeeEntity employeeFound = this.findById(id);
         employeeFound.updateEmployee(request);
 
-        EmployeeEntity saveEmployee = repository.save(employeeFound);
+        EmployeeEntity savedEmployee = repository.save(employeeFound);
 
-        return EmployeeResponseDTO.basic(saveEmployee, saveEmployee.getHub());
+        return EmployeeResponseDTO.basic(savedEmployee);
     }
 
     @Transactional
-    public void updatePassword(EmployeeEntity employee, EmployeePasswordUpdateDTO employeePasswordUpdateDTO) {
-        if (!employeePasswordUpdateDTO.newPassword().equals(employeePasswordUpdateDTO.confirmNewPassword())) {
+    public void updatePassword(EmployeeEntity employee, EmployeePasswordUpdateDTO request) {
+        if (!request.newPassword().equals(request.confirmNewPassword())) {
             throw new RuntimeException("Nova senha e confirmação não coincidem.");
         }
 
-        if (!passwordEncoder.matches(employeePasswordUpdateDTO.currentPassword(), employee.getPassword())) {
+        if (!passwordEncoder.matches(request.currentPassword(), employee.getPassword())) {
             throw new WrongPasswordException("Senha atual incorreta.");
         }
 
-        employee.setPassword(passwordEncoder.encode(employeePasswordUpdateDTO.newPassword()));
+        employee.setPassword(passwordEncoder.encode(request.newPassword()));
+
         repository.save(employee);
     }
 
     @Transactional
     public void updateRole(Long id, Role role) {
         EmployeeEntity employee = this.findById(id);
+
         employee.setRole(role);
+
         repository.save(employee);
     }
 

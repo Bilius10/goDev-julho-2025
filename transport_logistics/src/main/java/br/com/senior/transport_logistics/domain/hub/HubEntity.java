@@ -69,15 +69,17 @@ public class HubEntity {
     private String cep;
 
     public HubEntity(HubCreateRequestDTO request, AddresDTO addresDTO){
-        this.name = request.name();
-        this.cnpj = request.cnpj();
-        this.cep = request.cep();
-        this.street = addresDTO.logradouro();
-        this.number = request.number();
-        this.neighborhood = addresDTO.bairro();
-        this.city = addresDTO.localidade();
-        this.state = addresDTO.uf();
-        this.country = "Brasil";
+        HubEntity.builder()
+                .name(request.name())
+                .cnpj(request.cnpj())
+                .cep(request.cep())
+                .street(addresDTO.logradouro())
+                .number(request.number())
+                .neighborhood(addresDTO.bairro())
+                .city(addresDTO.localidade())
+                .state(addresDTO.uf())
+                .country("Brasil")
+                .build();
     }
 
     public void updateAddres(AddresDTO addresDTO, String number){

@@ -61,9 +61,9 @@ public class HubService {
 
         hubEntity.updateCoordinates(coordinates);
 
-        HubEntity saveHub = repository.save(hubEntity);
+        HubEntity savedHub = repository.save(hubEntity);
 
-        return HubResponseDTO.detailed(saveHub);
+        return HubResponseDTO.detailed(savedHub);
     }
 
     @Transactional
@@ -86,9 +86,9 @@ public class HubService {
             hubFound.updateCoordinates(coordinates);
         }
 
-        HubEntity saveHub = repository.save(hubFound);
+        HubEntity savedHub = repository.save(hubFound);
 
-        return HubResponseDTO.detailed(saveHub);
+        return HubResponseDTO.detailed(savedHub);
     }
 
     @Transactional

@@ -1,9 +1,13 @@
 package br.com.senior.transport_logistics.domain.product.dto.response;
 
+import br.com.senior.transport_logistics.domain.hub.HubEntity;
+import br.com.senior.transport_logistics.domain.hub.dto.response.HubResponseDTO;
+import br.com.senior.transport_logistics.domain.product.ProductEntity;
 import br.com.senior.transport_logistics.domain.product.enums.ProductCategory;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.Builder;
 
-@JsonInclude(JsonInclude.Include.NON_NULL)
+@Builder
 public record ProductResponseDTO(
         long id,
         String name,
@@ -11,10 +15,14 @@ public record ProductResponseDTO(
         double weight
 ) {
 
-    public ProductResponseDTO(long id, String name, ProductCategory category, double weight) {
-        this.id = id;
-        this.name = name;
-        this.category = category;
-        this.weight = weight;
+    public static ProductResponseDTO detailed(ProductEntity entity) {
+        return ProductResponseDTO
+                .builder()
+                .id(entity.getId())
+                .name(entity.getName())
+                .category(entity.getCategory())
+                .weight(entity.getWeight())
+                .build();
+
     }
 }

@@ -26,9 +26,10 @@ public class ProductService {
         Page<ProductEntity> productsWithFilter
                 = repository.findAllProductsWithFilters(category, limitWeight, pageable);
 
+        Page<ProductResponseDTO> productResponse = productsWithFilter.map(ProductResponseDTO::detailed);
+
         return new PageDTO<>(
-                productsWithFilter.map(p -> new ProductResponseDTO(p.getId(), p.getName(), p.getCategory(),
-                        p.getWeight())).toList(),
+                productResponse.getContent(),
                 productsWithFilter.getNumber(),
                 productsWithFilter.getSize(),
                 productsWithFilter.getTotalElements(),
@@ -45,11 +46,9 @@ public class ProductService {
 
         ProductEntity productEntity = new ProductEntity(request);
 
-        ProductEntity saveProduct = repository.save(productEntity);
+        ProductEntity savedProduct = repository.save(productEntity);
 
-        return new ProductResponseDTO(
-                saveProduct.getId(), saveProduct.getName(), saveProduct.getCategory(), saveProduct.getWeight()
-        );
+        return ProductResponseDTO.detailed(savedProduct);
     }
 
     public ProductResponseDTO update(Long id, ProductRequestDTO request){
@@ -58,11 +57,9 @@ public class ProductService {
         ProductEntity productEntity = new ProductEntity(request);
         productEntity.setId(id);
 
-        ProductEntity saveProduct = repository.save(productEntity);
+        ProductEntity savedProduct = repository.save(productEntity);
 
-        return new ProductResponseDTO(
-                saveProduct.getId(), saveProduct.getName(), saveProduct.getCategory(), saveProduct.getWeight()
-        );
+        return ProductResponseDTO.detailed(savedProduct);
     }
 
     @Transactional
