@@ -30,6 +30,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.YearMonth;
@@ -53,6 +54,7 @@ public class TransportService {
     private final ObjectMapper objectMapper;
     private final SpringMailSenderService emailService;
 
+    @Transactional(readOnly = true)
     public PageDTO<TransportResponseDTO> findAll(Pageable pageable) {
 
         Page<TransportEntity> transportPage = repository.findAll(pageable);
@@ -67,6 +69,7 @@ public class TransportService {
                 transportPage.getTotalPages());
     }
 
+    @Transactional
     public TransportResponseDTO optimizeAllocation(CreateTransportRequest request) throws JsonProcessingException {
         HubEntity originHub = hubService.findById(request.idOriginHub());
         HubEntity destinationHub = hubService.findById(request.idDestinationHub());
@@ -99,6 +102,7 @@ public class TransportService {
         return TransportResponseDTO.geminiResponse(savedTransport, truckSuggestion.justificativa());
     }
 
+    @Transactional
     public TransportResponseDTO confirmTransport(Long id){
         TransportEntity transport = this.findById(id);
         transport.setStatus(TransportStatus.ASSIGNED);
@@ -110,6 +114,7 @@ public class TransportService {
     }
 
     @Scheduled(cron = "0 0 9 * * SAT")
+    @Transactional(readOnly = true)
     public void sendWeeklySchedule(){
         List<TransportEntity> weeklyTransport
                 = repository.findAllByExitDay(LocalDate.now(), LocalDate.now().plusDays(6));
@@ -123,8 +128,9 @@ public class TransportService {
     }
 
     @Scheduled(cron = "0 0 9 1 * ?")
+    @Transactional(readOnly = true)
     public void sendMonthReport() {
-        List<EmployeeEntity> managers = employeeService.findAllByRole(Role.ADMIN);
+        List<EmployeeEntity> managers = employeeService.findAllByRole(Role.MANAGER);
 
         YearMonth previousMonth = YearMonth.now().minusMonths(1);
         LocalDate startDate = previousMonth.atDay(1);
@@ -154,6 +160,7 @@ public class TransportService {
 
     }
 
+    @Transactional
     public TransportResponseDTO updateStatus(Long id, TransportStatus status){
         TransportEntity transport = this.findById(id);
         transport.setStatus(status);
@@ -163,6 +170,7 @@ public class TransportService {
         return TransportResponseDTO.basic(savedTransport);
     }
 
+    @Transactional
     public TransportResponseDTO update(UpdateTransportRequest request, Long id) {
         TransportEntity transportToUpdate = this.findById(id);
         EmployeeEntity assignedEmployee = employeeService.findById(request.employeeId());
@@ -174,13 +182,13 @@ public class TransportService {
         return TransportResponseDTO.detailed(updatedTransport);
     }
 
+    @Transactional
     public void delete(Long id) {
         if (!repository.existsById(id)) {
             throw new ResourceNotFoundException(TRANSPORT_NOT_FOUND_BY_ID.getMessage(id));
         }
         repository.deleteById(id);
     }
-
 
     private TransportEntity findById(Long id) {
         return repository.findById(id)

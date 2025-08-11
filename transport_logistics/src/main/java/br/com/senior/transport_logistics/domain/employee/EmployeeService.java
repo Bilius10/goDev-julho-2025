@@ -66,6 +66,7 @@ public class EmployeeService {
         return EmployeeResponseDTO.token(tokenService.generateToken(employee));
     }
 
+    @Transactional(readOnly = true)
     public PageDTO<EmployeeResponseDTO> findAll(Pageable pageable) {
 
         Page<EmployeeEntity> employees = repository.findAll(pageable);

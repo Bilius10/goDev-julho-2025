@@ -49,6 +49,7 @@ public class TruckService {
         );
     }
 
+    @Transactional(readOnly = true)
     public TruckResponseDTO findByCode(String code) {
         return TruckResponseDTO.detailed(this.findEntityByCode(code));
     }

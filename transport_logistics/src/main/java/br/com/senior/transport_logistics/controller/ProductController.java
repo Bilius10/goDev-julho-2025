@@ -41,7 +41,6 @@ public class ProductController {
     }
 
     @PostMapping
-    @Transactional
     public ResponseEntity<ProductResponseDTO> create(@RequestBody @Valid ProductRequestDTO productCreateDTO){
 
         ProductResponseDTO createdProduct = service.create(productCreateDTO);
@@ -64,7 +63,6 @@ public class ProductController {
     }
 
     @DeleteMapping("/{id}")
-    @Transactional
     public ResponseEntity<Void> delete(@PathVariable Long id){
 
         service.delete(id);

@@ -29,6 +29,7 @@ public class HubService {
     private final ViaCepApiCilentService viaCepApiCilentService;
     private final NominatimApiClientService nominatimApiClientService;
 
+    @Transactional(readOnly = true)
     public PageDTO<HubResponseDTO> findAll(Pageable pageable) {
         Page<HubEntity> hubs = repository.findAll(pageable);
 
