@@ -77,6 +77,12 @@ public class HubController {
         return ResponseEntity.created(location).body(createdHub);
     }
 
+    @Operation(summary = "Endpoint para atualizar endereço de filial")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Filial foi atualizada com sucesso"),
+            @ApiResponse(responseCode = "400", description = "Dados de entrada inválidos ou não informados"),
+            @ApiResponse(responseCode = "404", description = "Nenhuma filial localizada com o ID informado")
+    })
     @PutMapping("/{id}")
     public ResponseEntity<HubResponseDTO> update(
             @PathVariable Long id,
@@ -86,6 +92,12 @@ public class HubController {
         return ResponseEntity.status(HttpStatus.OK).body(service.update(hubUpdateRequestDTO, id));
     }
 
+    @Operation(summary = "Endpoint para remover uma filial (delete físico)")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Filial foi deletada com sucesso"),
+            @ApiResponse(responseCode = "404", description = "Nenhuma filial localizada com o ID informado"),
+            @ApiResponse(responseCode = "409", description = "Filial tem outras entidades envolvidas")
+    })
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         service.delete(id);
