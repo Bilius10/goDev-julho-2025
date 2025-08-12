@@ -9,22 +9,22 @@ import java.time.LocalDate;
 public record CreateTransportRequest(
 
         @NotNull(message = "{transport.exitDay.notNull}")
-        @Future(message = "{transport.exitDay.future}")
+        @Future(message = "{transport.request.exitDay.future}")
         LocalDate exitDay,
 
-        @NotNull(message = "{transport.idShipment.notNull}")
-        @Positive(message = "{transport.idShipment.positive}")
+        @NotNull(message = "{transport.request.idShipment.notNull}")
+        @Positive(message = "{transport.request.idShipment.positive}")
         Long idShipment,
 
-        @NotNull(message = "{transport.idOriginHub.notNull}")
-        @Positive(message = "{transport.idOriginHub.positive}")
+        @NotNull(message = "{transport.request.idOriginHub.notNull}")
+        @Positive(message = "{transport.request.idOriginHub.positive}")
         Long idOriginHub,
 
-        @NotNull(message = "{transport.idDestinationHub.notNull}")
-        @Positive(message = "{transport.idDestinationHub.positive}")
+        @NotNull(message = "{transport.request.idDestinationHub.notNull}")
+        @Positive(message = "{transport.request.idDestinationHub.positive}")
         Long idDestinationHub,
 
-        @NotNull(message = "{transport.isHazmat.notNull}")
+        @NotNull(message = "{transport.request.isHazmat.notNull}")
         boolean isHazmat
 ) {
 }

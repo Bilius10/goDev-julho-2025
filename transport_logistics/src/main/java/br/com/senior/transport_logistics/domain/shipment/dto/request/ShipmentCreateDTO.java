@@ -17,7 +17,7 @@ public record ShipmentCreateDTO(
         boolean isHazardous,
 
         @NotNull(message = "{shipment.product.notNull}")
-        @Positive(message = "{shipment.idProduct.positive}")
+        @Positive(message = "{shipment.request.idProduct.positive}")
         Long idProduct
 ) {
 }
