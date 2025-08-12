@@ -23,7 +23,6 @@ public class GeminiApiClientService {
                                           List<TruckEntity> caminhoesCandidatos, List<ShipmentEntity> pendingShipments) {
 
         String promptString = construirPromptParaIA(rotaJson, distance, shipment, caminhoesCandidatos, pendingShipments);
-        System.out.println(promptString);
         Prompt prompt = new Prompt(promptString);
 
         ChatResponse response = chatModel.call(prompt);
