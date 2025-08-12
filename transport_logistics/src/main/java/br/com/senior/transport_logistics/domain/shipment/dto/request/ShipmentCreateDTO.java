@@ -18,6 +18,10 @@ public record ShipmentCreateDTO(
 
         @NotNull(message = "{shipment.product.notNull}")
         @Positive(message = "{shipment.request.idProduct.positive}")
-        Long idProduct
+        Long idProduct,
+
+        long idOriginHub,
+
+        long idDestinationHub
 ) {
 }

@@ -2,6 +2,7 @@ package br.com.senior.transport_logistics.domain.shipment.dto.request;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 
 public record ShipmentUpdateDTO(
@@ -13,6 +14,10 @@ public record ShipmentUpdateDTO(
         String notes,
 
         @NotNull(message = "{shipment.isHazardous.notNull}")
-        boolean isHazardous
+        boolean isHazardous,
+
+        @NotNull(message = "{shipment.request.idDestinationHub.notNull}")
+        @Positive(message = "{shipment.request.idDestinationHub.positive}")
+        long idDestinationHub
 ) {
 }
