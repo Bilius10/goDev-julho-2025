@@ -7,6 +7,7 @@ import br.com.senior.transport_logistics.domain.product.ProductService;
 import br.com.senior.transport_logistics.domain.shipment.dto.request.ShipmentCreateDTO;
 import br.com.senior.transport_logistics.domain.shipment.dto.request.ShipmentUpdateDTO;
 import br.com.senior.transport_logistics.domain.shipment.dto.response.ShipmentResponseDTO;
+import br.com.senior.transport_logistics.domain.transport.enums.TransportStatus;
 import br.com.senior.transport_logistics.infrastructure.dto.PageDTO;
 import br.com.senior.transport_logistics.infrastructure.exception.common.ResourceNotFoundException;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,6 +15,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 import static br.com.senior.transport_logistics.infrastructure.exception.ExceptionMessages.SHIPMENT_NOT_FOUND_BY_ID;
 
@@ -83,4 +86,10 @@ public class ShipmentService {
         return repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(SHIPMENT_NOT_FOUND_BY_ID.getMessage(id)));
     }
+
+    public List<ShipmentEntity> findAllByIdHubAndDestinationHubAndStatus(TransportStatus status, Long idOriginHub, Long idDestinationHub) {
+        return repository.findAllByIdHubAndDestinationHubAndStatus(status, idOriginHub, idDestinationHub);
+    }
+
+
 }

@@ -37,7 +37,6 @@ public class TransportEntity {
     @Column(name = "distance")
     private Double distance;
 
-    @NotNull(message = "{transport.exitDay.notNull}")
     @Column(name = "exit_day", nullable = false)
     private LocalDate exitDay;
 
@@ -94,6 +93,7 @@ public class TransportEntity {
         this.exitDay = exitDay;
         this.expectedArrivalDay = expectedArrivalDay;
         this.status = TransportStatus.PENDING;
+        this.shipment.setStatus(TransportStatus.ASSIGNED);
     }
 
     public void updateTransport(UpdateTransportRequest updateTransportRequest, EmployeeEntity employeeEntity){

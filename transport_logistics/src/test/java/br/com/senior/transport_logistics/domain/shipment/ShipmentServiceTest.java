@@ -6,6 +6,7 @@ import br.com.senior.transport_logistics.domain.product.enums.ProductCategory;
 import br.com.senior.transport_logistics.domain.shipment.dto.request.ShipmentCreateDTO;
 import br.com.senior.transport_logistics.domain.shipment.dto.request.ShipmentUpdateDTO;
 import br.com.senior.transport_logistics.domain.shipment.dto.response.ShipmentResponseDTO;
+import br.com.senior.transport_logistics.domain.transport.enums.TransportStatus;
 import br.com.senior.transport_logistics.infrastructure.dto.PageDTO;
 import br.com.senior.transport_logistics.infrastructure.exception.common.ResourceNotFoundException;
 import org.junit.jupiter.api.DisplayName;
@@ -20,6 +21,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 import static br.com.senior.transport_logistics.infrastructure.exception.ExceptionMessages.SHIPMENT_NOT_FOUND_BY_ID;
@@ -44,7 +46,7 @@ class ShipmentServiceTest {
 
         Pageable pageable = PageRequest.of(0, 10);
         ProductEntity product = new ProductEntity(1L, "Produto Teste", ProductCategory.AUTOMOTIVE, 1.2f, true);
-        ShipmentEntity shipment = new ShipmentEntity(1L, 10.0, 5, "Notas", false, product);
+        ShipmentEntity shipment = new ShipmentEntity(1L, 10.0, 5, "Notas", false, product, TransportStatus.PENDING, null, null);
         Page<ShipmentEntity> shipmentsPage = new PageImpl<>(Collections.singletonList(shipment), pageable, 1);
 
         when(repository.findAll(pageable)).thenReturn(shipmentsPage);
@@ -63,8 +65,8 @@ class ShipmentServiceTest {
     void create_context1() {
 
         ProductEntity product = new ProductEntity(1L, "Produto Teste", ProductCategory.AUTOMOTIVE, 1.2f, true);
-        ShipmentCreateDTO requestDTO = new ShipmentCreateDTO(5, "Notas", false, 1L);
-        ShipmentEntity shipmentEntity = new ShipmentEntity(1L, 6.0, 5, "Notas", false, product);
+        ShipmentCreateDTO requestDTO = new ShipmentCreateDTO(5, "Notas", false, 1L, null, null);
+        ShipmentEntity shipmentEntity = new ShipmentEntity(1L, 6.0, 5, "Notas", false, product, TransportStatus.PENDING, null, null);
 
         when(productService.findById(1L)).thenReturn(product);
         when(repository.save(any(ShipmentEntity.class))).thenReturn(shipmentEntity);
@@ -84,10 +86,10 @@ class ShipmentServiceTest {
 
         Long shipmentId = 1L;
         ProductEntity product = new ProductEntity(1L, "Produto Teste", ProductCategory.AUTOMOTIVE, 1.2f, true);
-        ShipmentEntity shipmentFound = new ShipmentEntity(shipmentId, 10.0, 5, "Notas Antigas", false, product);
-        ShipmentUpdateDTO requestDTO = new ShipmentUpdateDTO(10, "Notas Novas", true);
+        ShipmentEntity shipmentFound = new ShipmentEntity(shipmentId, 10.0, 5, "Notas Antigas", false, product, TransportStatus.PENDING, null, null);
+        ShipmentUpdateDTO requestDTO = new ShipmentUpdateDTO(10, "Notas Novas", true, 1L);
 
-        ShipmentEntity shipmentUpdated = new ShipmentEntity(shipmentId, 10.0, 10, "Notas Novas", true, product);
+        ShipmentEntity shipmentUpdated = new ShipmentEntity(shipmentId, 10.0, 10, "Notas Novas", true, product, TransportStatus.PENDING, null, null);
 
         when(repository.findById(shipmentId)).thenReturn(Optional.of(shipmentFound));
         when(repository.save(any(ShipmentEntity.class))).thenReturn(shipmentUpdated);
@@ -134,7 +136,7 @@ class ShipmentServiceTest {
 
         Long shipmentId = 1L;
         ProductEntity product = new ProductEntity(1L, "Produto Teste", ProductCategory.AUTOMOTIVE, 1.2f, true);
-        ShipmentEntity shipmentFound = new ShipmentEntity(shipmentId, 10.0, 5, "Notas", false, product);
+        ShipmentEntity shipmentFound = new ShipmentEntity(shipmentId, 10.0, 5, "Notas", false, product, TransportStatus.PENDING, null, null);
 
         when(repository.findById(shipmentId)).thenReturn(Optional.of(shipmentFound));
 
@@ -158,5 +160,19 @@ class ShipmentServiceTest {
         assertEquals(SHIPMENT_NOT_FOUND_BY_ID.getMessage(shipmentId), exception.getMessage());
 
         verify(repository, times(1)).findById(shipmentId);
+    }
+
+    @Test
+    @DisplayName("Caso em que retorna uma lista de shipments pendentes")
+    void findAllByStatus(){
+        ProductEntity product = new ProductEntity(1L, "Produto Teste", ProductCategory.AUTOMOTIVE, 1.2f, true);
+        ShipmentEntity shipment = new ShipmentEntity(1L, 10.0, 5,
+                "Notas", false, product, TransportStatus.PENDING, null, null);
+
+        when(repository.findAllByIdHubAndDestinationHubAndStatus(TransportStatus.PENDING, null, null)).thenReturn(List.of(shipment));
+
+        List<ShipmentEntity> allByStatus = service.findAllByIdHubAndDestinationHubAndStatus(TransportStatus.PENDING, null, null);
+
+        assertNotNull(allByStatus);
     }
 }
