@@ -5,6 +5,11 @@ import br.com.senior.transport_logistics.domain.shipment.dto.request.ShipmentCre
 import br.com.senior.transport_logistics.domain.shipment.dto.request.ShipmentUpdateDTO;
 import br.com.senior.transport_logistics.domain.shipment.dto.response.ShipmentResponseDTO;
 import br.com.senior.transport_logistics.infrastructure.dto.PageDTO;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -20,10 +25,16 @@ import java.net.URI;
 @RestController
 @RequestMapping("api/v1/shipments")
 @RequiredArgsConstructor
+@SecurityRequirement(name = "bearer-key")
+@Tag(name = "ShipmentController", description = "Endpoints de criação, listagem, atualização e remoção física de cargas")
 public class ShipmentController {
 
     private final ShipmentService service;
 
+    @Operation(summary = "Endpoint para listar cargas com paginação")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Listagem paginada das cargas")
+    })
     @GetMapping
     public ResponseEntity<PageDTO<ShipmentResponseDTO>> findAll(
             @RequestParam(defaultValue = "0", required = false) int page,
@@ -37,6 +48,11 @@ public class ShipmentController {
         return ResponseEntity.status(HttpStatus.OK).body(service.findAll(pageable));
     }
 
+    @Operation(summary = "Endpoint para criar carga")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Carga criada com sucesso"),
+            @ApiResponse(responseCode = "400", description = "Dados inválidos ou não fornecidos")
+    })
     @PostMapping
     public ResponseEntity<ShipmentResponseDTO> create(@RequestBody @Valid ShipmentCreateDTO shipmentRequestDTO) {
         ShipmentResponseDTO createdShipment = service.create(shipmentRequestDTO);
@@ -50,6 +66,12 @@ public class ShipmentController {
         return ResponseEntity.created(location).body(createdShipment);
     }
 
+    @Operation(summary = "Endpoint para atualizar carga")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Carga atualizada com sucesso"),
+            @ApiResponse(responseCode = "400", description = "Dados inválidos ou não fornecidos"),
+            @ApiResponse(responseCode = "404", description = "Carga não encontrada com o ID informado")
+    })
     @PutMapping("/{id}")
     public ResponseEntity<ShipmentResponseDTO> update(
             @PathVariable Long id,
@@ -58,6 +80,11 @@ public class ShipmentController {
         return ResponseEntity.status(HttpStatus.OK).body(service.update(id, shipmentRequestDTO));
     }
 
+    @Operation(summary = "Endpoint para remover carga (delete físico)")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Carga deletada com sucesso"),
+            @ApiResponse(responseCode = "404", description = "Carga não encontrada com o ID informado")
+    })
     @DeleteMapping("/{id}")
     public  ResponseEntity<Void> delete(@PathVariable Long id) {
         service.delete(id);
