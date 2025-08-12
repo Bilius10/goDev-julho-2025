@@ -110,5 +110,6 @@ public class TruckEntity {
         this.height = request.height();
         this.averageFuelConsumption = request.averageFuelConsumption();
         this.features = request.features();
+        this.status = TruckStatus.AVAILABLE;
     }
 }

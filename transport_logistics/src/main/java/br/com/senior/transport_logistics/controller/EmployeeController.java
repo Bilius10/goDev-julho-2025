@@ -63,7 +63,7 @@ public class EmployeeController {
             @ApiResponse(responseCode = "400", description = "Role não informada ou inválida")
     })
     @PatchMapping("/{id}/role")
-    public ResponseEntity<EmployeeResponseDTO> updateRole(@PathVariable Long id, @RequestParam Role role) {
+    public ResponseEntity<Void> updateRole(@PathVariable Long id, @RequestParam Role role) {
         service.updateRole(id, role);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
@@ -74,7 +74,7 @@ public class EmployeeController {
             @ApiResponse(responseCode = "404", description = "Nenhum funcionário localizado com o ID informado")
     })
     @DeleteMapping("/{id}")
-    public ResponseEntity<EmployeeResponseDTO> delete(@PathVariable Long id) {
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
         service.delete(id);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }

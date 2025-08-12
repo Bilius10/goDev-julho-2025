@@ -55,7 +55,7 @@ public class AuthController {
             @ApiResponse(responseCode = "400", description = "Dados de entrada inválidos")
     })
     @PatchMapping("/password")
-    public ResponseEntity<EmployeeResponseDTO> updatePassword(@AuthenticationPrincipal EmployeeEntity employee,
+    public ResponseEntity<Void> updatePassword(@AuthenticationPrincipal EmployeeEntity employee,
                                                               @RequestBody @Valid EmployeePasswordUpdateDTO employeePasswordUpdateDTO) {
         service.updatePassword(employee, employeePasswordUpdateDTO);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
