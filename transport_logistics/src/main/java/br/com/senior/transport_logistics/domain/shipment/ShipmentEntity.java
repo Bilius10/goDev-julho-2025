@@ -45,12 +45,12 @@ public class ShipmentEntity {
 
     @NotNull(message = "{shipment.product.notNull}")
     @ManyToOne
-    @JoinColumn(name = "product_id", referencedColumnName = "id")
+    @JoinColumn(name = "origin_hub_id", referencedColumnName = "id")
     private HubEntity originHub;
 
     @NotNull(message = "{shipment.product.notNull}")
     @ManyToOne
-    @JoinColumn(name = "product_id", referencedColumnName = "id")
+    @JoinColumn(name = "destination_hub_id", referencedColumnName = "id")
     private HubEntity destinationHub;
 
     public ShipmentEntity(ShipmentCreateDTO request, ProductEntity product, HubEntity originHub, HubEntity destinationHub) {
