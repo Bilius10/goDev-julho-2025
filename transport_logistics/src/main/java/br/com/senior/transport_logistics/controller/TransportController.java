@@ -1,13 +1,11 @@
 package br.com.senior.transport_logistics.controller;
 
-import br.com.senior.transport_logistics.domain.transport.TransportEntity;
 import br.com.senior.transport_logistics.domain.transport.TransportService;
 import br.com.senior.transport_logistics.domain.transport.dto.request.CreateTransportRequest;
 import br.com.senior.transport_logistics.domain.transport.dto.request.UpdateTransportRequest;
 import br.com.senior.transport_logistics.domain.transport.dto.response.HubSummaryProjection;
 import br.com.senior.transport_logistics.domain.transport.dto.response.TransportResponseDTO;
 import br.com.senior.transport_logistics.domain.transport.enums.TransportStatus;
-import br.com.senior.transport_logistics.infrastructure.dto.GeminiDTO.GeminiResponse;
 import br.com.senior.transport_logistics.infrastructure.dto.PageDTO;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import jakarta.validation.Valid;
@@ -19,8 +17,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-import reactor.core.publisher.Mono;
-
 import java.net.URI;
 
 @RestController

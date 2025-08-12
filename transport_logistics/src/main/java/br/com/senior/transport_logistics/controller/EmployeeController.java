@@ -42,14 +42,14 @@ public class EmployeeController {
     }
 
     @PatchMapping("/{id}/role")
-    public ResponseEntity<EmployeeResponseDTO> updateRole(@PathVariable Long id, @RequestParam Role role) {
+    public ResponseEntity<Void> updateRole(@PathVariable Long id, @RequestParam Role role) {
         service.updateRole(id, role);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
     @DeleteMapping("/{id}")
     @Transactional
-    public ResponseEntity<EmployeeResponseDTO> delete(@PathVariable Long id){
+    public ResponseEntity<Void> delete(@PathVariable Long id){
         service.delete(id);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
