@@ -8,6 +8,7 @@ import br.com.senior.transport_logistics.domain.truck.enums.TruckBody;
 import br.com.senior.transport_logistics.domain.truck.enums.TruckStatus;
 import br.com.senior.transport_logistics.domain.truck.enums.TruckType;
 import br.com.senior.transport_logistics.infrastructure.dto.PageDTO;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -39,6 +40,7 @@ class TruckControllerTest {
     private TruckService service;
 
     @Test
+    @DisplayName("Deve retornar status CREATED e DTO do caminhão criado")
     void create() {
 
         MockHttpServletRequest request = new MockHttpServletRequest();
@@ -64,6 +66,7 @@ class TruckControllerTest {
     }
 
     @Test
+    @DisplayName("Deve retornar status OK e listar os caminhões com paginação")
     void getAlls() {
 
         int page = 0;
@@ -93,6 +96,7 @@ class TruckControllerTest {
     }
 
     @Test
+    @DisplayName("Deve retornar status OK e DTO do caminhão com código igual ao informado")
     void getByCode() {
 
         String code = "T-123";
@@ -112,6 +116,7 @@ class TruckControllerTest {
     }
 
     @Test
+    @DisplayName("Deve retornar status NO CONTENT e atualizar status com sucesso")
     void updateStatus_ShouldReturnNoContent() {
 
         String code = "T-123";
