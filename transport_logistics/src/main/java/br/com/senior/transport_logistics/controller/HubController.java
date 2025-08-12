@@ -4,7 +4,6 @@ import br.com.senior.transport_logistics.domain.hub.HubService;
 import br.com.senior.transport_logistics.domain.hub.dto.request.HubCreateRequestDTO;
 import br.com.senior.transport_logistics.domain.hub.dto.request.HubUpdateRequestDTO;
 import br.com.senior.transport_logistics.domain.hub.dto.response.HubResponseDTO;
-import br.com.senior.transport_logistics.domain.hub.dto.response.HubSummaryProjection;
 import br.com.senior.transport_logistics.infrastructure.dto.PageDTO;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -37,12 +36,6 @@ public class HubController {
 
         return ResponseEntity.status(HttpStatus.OK).body(service.findAll(pageable));
     }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<HubSummaryProjection> hubSummary(@PathVariable Long id){
-        return ResponseEntity.status(HttpStatus.OK).body(service.hubSummary(id));
-    }
-
 
     @PostMapping
     public ResponseEntity<HubResponseDTO> create(@RequestBody @Valid HubCreateRequestDTO hubCreateRequestDTO){

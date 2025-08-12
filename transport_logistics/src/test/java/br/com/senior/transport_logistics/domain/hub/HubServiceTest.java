@@ -3,8 +3,6 @@ package br.com.senior.transport_logistics.domain.hub;
 import br.com.senior.transport_logistics.domain.hub.dto.request.HubCreateRequestDTO;
 import br.com.senior.transport_logistics.domain.hub.dto.request.HubUpdateRequestDTO;
 import br.com.senior.transport_logistics.domain.hub.dto.response.HubResponseDTO;
-import br.com.senior.transport_logistics.domain.hub.dto.response.HubSummaryProjection;
-import br.com.senior.transport_logistics.domain.product.dto.response.ProductResponseDTO;
 import br.com.senior.transport_logistics.infrastructure.dto.NominationDTO.CoordinatesDTO;
 import br.com.senior.transport_logistics.infrastructure.dto.PageDTO;
 import br.com.senior.transport_logistics.infrastructure.dto.ViaCepDTO.AddresDTO;
@@ -13,19 +11,18 @@ import br.com.senior.transport_logistics.infrastructure.exception.common.FieldAl
 import br.com.senior.transport_logistics.infrastructure.exception.common.ResourceNotFoundException;
 import br.com.senior.transport_logistics.infrastructure.external.NominatimApiClientService;
 import br.com.senior.transport_logistics.infrastructure.external.ViaCepApiCilentService;
-import org.hibernate.mapping.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.ai.chat.client.ResponseEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
+import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.Optional;
 
@@ -67,32 +64,6 @@ class HubServiceTest {
         assertEquals(1, result.totalElements());
         assertEquals(updatedHub.getName(), result.data().get(0).name());;
 
-    }
-
-    @Test
-    @DisplayName("Deve retornar o resumo de um hub com sucesso")
-    void hubSummary_context1() {
-        Long hubId = 1L;
-
-        HubSummaryProjection hubSummary
-                = new HubSummaryProjection(1L, "teste", "teste", null, null, 0.0);
-
-        when(repository.findHubSummaryById(1L)).thenReturn(Optional.of(hubSummary));
-
-        HubSummaryProjection hubSummaryResponse = service.hubSummary(hubId);
-
-        assertEquals(hubSummaryResponse, hubSummaryResponse);
-    }
-
-    @Test
-    @DisplayName("Deve lançar exceção ao buscar resumo de hub inexistente")
-    void hubSummary_context2() {
-        Long hubId = 1L;
-
-        when(repository.findHubSummaryById(hubId)).thenReturn(Optional.empty());
-
-        Exception exception = assertThrows(ResourceNotFoundException.class, () -> service.hubSummary(hubId));
-        assertEquals(ExceptionMessages.HUB_NOT_FOUND_BY_ID.getMessage(hubId), exception.getMessage());
     }
 
     @Test
