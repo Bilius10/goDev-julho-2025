@@ -7,6 +7,7 @@ import br.com.senior.transport_logistics.domain.employee.dto.request.EmployeeLog
 import br.com.senior.transport_logistics.domain.employee.dto.request.EmployeePasswordUpdateDTO;
 import br.com.senior.transport_logistics.domain.employee.dto.response.EmployeeResponseDTO;
 import br.com.senior.transport_logistics.domain.employee.enums.Role;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -31,6 +32,7 @@ class AuthControllerTest {
     private EmployeeService service;
 
     @Test
+    @DisplayName("Deve retornar status CREATED e ")
     void create() {
         EmployeeCreateRequestDTO requestDTO = new EmployeeCreateRequestDTO("John Doe", "000", "000",
                 "john.doe@example.com", 1L);
@@ -44,6 +46,7 @@ class AuthControllerTest {
     }
 
     @Test
+    @DisplayName("Deve retornar status OK e realizar login com sucesso")
     void signIn() {
         EmployeeLoginRequestDTO requestDTO = new EmployeeLoginRequestDTO("john.doe@example.com", "password123");
         EmployeeResponseDTO responseDTO = new EmployeeResponseDTO(1L, "John Doe", "000", "000",
@@ -60,6 +63,7 @@ class AuthControllerTest {
     }
 
     @Test
+    @DisplayName("Deve retornar status NO CONTENT e trocar senha com sucesso")
     void updatePassword() {
         EmployeeEntity employee = new EmployeeEntity();
         employee.setId(1L);
