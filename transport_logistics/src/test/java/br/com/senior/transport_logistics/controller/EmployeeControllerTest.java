@@ -42,11 +42,10 @@ class EmployeeControllerTest {
         int page = 0;
         int size = 10;
 
-        Pageable pageable = PageRequest.of(page, size);
         EmployeeResponseDTO responseDTO = new EmployeeResponseDTO(1L, "John Doe", "000", "000",
                 "john.doe@example.com", false, Role.DRIVER, null, null);
 
-        Page<EmployeeResponseDTO> employeePage = new PageImpl<>(Collections.singletonList(responseDTO), pageable, 1);
+        Page<EmployeeResponseDTO> employeePage = new PageImpl<>(Collections.singletonList(responseDTO));
         PageDTO<EmployeeResponseDTO> pageDTO = new PageDTO<>(employeePage.getContent(), employeePage.getNumber(), employeePage.getSize(), employeePage.getTotalElements(), employeePage.getTotalPages());
 
         when(service.findAll(any(Pageable.class))).thenReturn(pageDTO);
