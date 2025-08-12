@@ -43,12 +43,12 @@ public class ShipmentEntity {
     @ManyToOne
     @JoinColumn(name = "product_id", referencedColumnName = "id")
     private ProductEntity product;
-
+    
     @Enumerated(EnumType.STRING)
     @Column(name = "status")
     @NotNull(message = "{shipment.status.notNull}")
     private TransportStatus status;
-
+  
     @NotNull(message = "{shipment.product.notNull}")
     @ManyToOne
     @JoinColumn(name = "origin_hub_id", referencedColumnName = "id")

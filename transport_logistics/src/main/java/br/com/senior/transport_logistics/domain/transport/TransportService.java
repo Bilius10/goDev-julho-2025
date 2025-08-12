@@ -173,7 +173,7 @@ public class TransportService {
         for (EmployeeEntity manager : managers) {
             HubEntity hub = manager.getHub();
 
-            List<TransportEntity> monthlyTransports = repository.findAllByExitDayAndOriginHub(startDate, endDate, hub.getId());
+            List<TransportEntity> monthlyTransports = repository.findAllByExitDayAndOriginHub(LocalDate.now(), LocalDate.now().plusDays(8), hub.getId());
             List<EmployeeEntity> hubDrivers = employeeService.findAllByRoleAndHub(Role.DRIVER, hub);
             List<TruckEntity> hubTrucks = truckService.findAllByHub(hub);
 
@@ -184,6 +184,7 @@ public class TransportService {
                     .sum();
 
             Map<String, Double> fuelByTruck = monthlyTransports.stream()
+                    .filter(month -> month.getStatus() == TransportStatus.DELIVERED)
                     .collect(Collectors.groupingBy(
                             transport -> transport.getTruck().getModel(),
                             Collectors.summingDouble(TransportEntity::getFuelConsumption)

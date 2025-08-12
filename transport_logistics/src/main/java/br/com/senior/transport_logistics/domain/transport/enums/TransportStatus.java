@@ -1,5 +1,8 @@
 package br.com.senior.transport_logistics.domain.transport.enums;
 
+import lombok.Getter;
+
+@Getter
 public enum TransportStatus {
 
     PENDING("Pendente"),
@@ -15,7 +18,4 @@ public enum TransportStatus {
         this.description = description;
     }
 
-    public String getDescription() {
-        return description;
-    }
 }

@@ -87,11 +87,11 @@ public class EmployeeEntity implements UserDetails {
     public Collection<? extends GrantedAuthority> getAuthorities() {
         List<GrantedAuthority> authorities = new ArrayList<>();
 
-        if (this.role == Role.MANAGER) {
+        if (this.role == Role.ADMIN) {
             authorities.add(new SimpleGrantedAuthority("ROLE_MANAGER"));
             authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
             authorities.add(new SimpleGrantedAuthority("ROLE_DRIVER"));
-        } else if (this.role == Role.ADMIN) {
+        } else if (this.role == Role.MANAGER) {
             authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
             authorities.add(new SimpleGrantedAuthority("ROLE_DRIVER"));
         } else {
