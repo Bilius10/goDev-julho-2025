@@ -14,7 +14,6 @@ import br.com.senior.transport_logistics.infrastructure.exception.common.FieldAl
 import br.com.senior.transport_logistics.infrastructure.exception.common.ResourceNotFoundException;
 import br.com.senior.transport_logistics.infrastructure.exception.common.WrongPasswordException;
 import br.com.senior.transport_logistics.infrastructure.security.TokenService;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -23,7 +22,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
-import java.util.Objects;
 
 import static br.com.senior.transport_logistics.infrastructure.exception.ExceptionMessages.*;
 
@@ -62,7 +60,7 @@ public class EmployeeService {
         }
 
         if (!passwordEncoder.matches(request.password(), employee.getPassword())) {
-            throw new WrongPasswordException("Senha informada incorreta.");
+            throw new WrongPasswordException(EMPLOYEE_WRONG_CURRENT_PASSWORD.getMessage());
         }
 
         return EmployeeResponseDTO.token(tokenService.generateToken(employee));
@@ -101,11 +99,11 @@ public class EmployeeService {
     @Transactional
     public void updatePassword(EmployeeEntity employee, EmployeePasswordUpdateDTO request) {
         if (!request.newPassword().equals(request.confirmNewPassword())) {
-            throw new RuntimeException("Nova senha e confirmação não coincidem.");
+            throw new WrongPasswordException(EMPLOYEE_PASSWORD_CONFIRMATION_MISMATCH.getMessage());
         }
 
         if (!passwordEncoder.matches(request.currentPassword(), employee.getPassword())) {
-            throw new WrongPasswordException("Senha atual incorreta.");
+            throw new WrongPasswordException(EMPLOYEE_WRONG_CURRENT_PASSWORD.getMessage());
         }
 
         employee.setPassword(passwordEncoder.encode(request.newPassword()));
@@ -132,7 +130,7 @@ public class EmployeeService {
 
     public EmployeeEntity findDriversOrderedByHistoryScore(Long idTruck, Long idDestinationHub, Long idHub){
         return repository.findDriversOrderedByHistoryScore(idTruck, idDestinationHub, idHub)
-                .orElseThrow(() -> new RuntimeException("Nenhum driver encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException(DRIVER_NOT_FOUND.getMessage()));
     }
 
     public EmployeeEntity findById(Long id) {
@@ -144,8 +142,8 @@ public class EmployeeService {
         return repository.findAllByRole(role);
     }
 
-    public List<EmployeeEntity> findAllByRoleAndHub(Role role, HubEntity idHub){
-        return repository.findAllByRoleAndHub(role, idHub);
+    public List<EmployeeEntity> findAllByRoleAndHub(Role role, HubEntity hub){
+        return repository.findAllByRoleAndHub(role, hub);
     }
     
    
