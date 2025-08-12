@@ -29,13 +29,57 @@ public class SecurityConfigurations {
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(Customizer.withDefaults())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(
-                        auth -> {
+                .authorizeHttpRequests(auth -> auth
+                        // Autenticação
+                        .requestMatchers(HttpMethod.POST, "/api/v1/auth/create").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/v1/auth/sign-in").permitAll()
 
-                            auth.requestMatchers(HttpMethod.POST, "/api/v1/auth/*").permitAll();
-                            auth.requestMatchers("/v3/api-docs/**", "/swagger-ui.html", "/swagger-ui/**").permitAll();
-                            auth.anyRequest().permitAll();
-                        }
+                        // Produtos
+                        .requestMatchers(HttpMethod.GET, "/api/v1/products").hasRole("MANAGER")
+                        .requestMatchers(HttpMethod.POST, "/api/v1/products").hasRole("MANAGER")
+                        .requestMatchers(HttpMethod.PUT, "/api/v1/products/{id}").hasRole("MANAGER")
+                        .requestMatchers(HttpMethod.DELETE, "/api/v1/products/{id}").hasRole("MANAGER")
+
+                        // Cargas
+                        .requestMatchers(HttpMethod.GET, "/api/v1/shipments").hasRole("MANAGER")
+                        .requestMatchers(HttpMethod.POST, "/api/v1/shipments").hasRole("MANAGER")
+                        .requestMatchers(HttpMethod.PUT, "/api/v1/shipments/{id}").hasRole("MANAGER")
+                        .requestMatchers(HttpMethod.DELETE, "/api/v1/shipments/{id}").hasRole("MANAGER")
+
+                        // Caminhões
+                        .requestMatchers(HttpMethod.GET, "/api/v1/trucks", "/api/v1/trucks/{code}").hasRole("DRIVER")
+                        .requestMatchers(HttpMethod.POST, "/api/v1/trucks").hasRole("MANAGER")
+                        .requestMatchers(HttpMethod.PUT, "/api/v1/trucks/{id}").hasRole("MANAGER")
+                        .requestMatchers(HttpMethod.PATCH, "/api/v1/trucks/{code}/status").hasRole("MANAGER")
+
+                        // Hubs
+                        .requestMatchers(HttpMethod.GET, "/api/v1/hubs").hasRole("DRIVER")
+                        .requestMatchers(HttpMethod.POST, "/api/v1/hubs").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/v1/hubs/{id}").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/v1/hubs/{id}").hasRole("ADMIN")
+
+                        // Funcionários
+                        .requestMatchers(HttpMethod.GET, "/api/v1/employees").hasRole("MANAGER")
+                        .requestMatchers(HttpMethod.PUT, "/api/v1/employees/{id}").hasRole("MANAGER")
+                        .requestMatchers(HttpMethod.DELETE, "/api/v1/employees/{id}").hasRole("MANAGER")
+                        .requestMatchers(HttpMethod.PATCH, "/api/v1/employees/password").hasRole("DRIVER")
+                        .requestMatchers(HttpMethod.PATCH, "/api/v1/employees/{id}/role").hasRole("ADMIN")
+
+                        // Transportes
+                        .requestMatchers(HttpMethod.GET, "/api/v1/transports").hasRole("MANAGER")
+                        .requestMatchers(HttpMethod.POST, "/api/v1/transports/optimize-allocation").hasRole("MANAGER")
+                        .requestMatchers(HttpMethod.PATCH, "/api/v1/transports/confirm-transport/{id}").hasRole("MANAGER")
+                        .requestMatchers(HttpMethod.PUT, "/api/v1/transports/{id}").hasRole("MANAGER")
+                        .requestMatchers(HttpMethod.DELETE, "/api/v1/transports/{id}").hasRole("MANAGER")
+                        .requestMatchers(HttpMethod.PATCH, "/api/v1/transports/update-status/{id}").hasRole("DRIVER")
+                        .requestMatchers(HttpMethod.POST, "/api/v1/transports/send-weekly-schedule").hasRole("MANAGER")
+                        .requestMatchers(HttpMethod.POST, "/api/v1/transports/send-month-report").hasRole("MANAGER")
+
+                        // Swagger
+                        .requestMatchers("/v3/api-docs/**", "/swagger-ui.html", "/swagger-ui/**", "/docs/**").permitAll()
+
+                        // Qualquer outra requisição
+                        .anyRequest().authenticated()
                 )
                 .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
