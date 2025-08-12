@@ -81,7 +81,7 @@ class ShipmentControllerTest {
         MockHttpServletRequest request = new MockHttpServletRequest();
         RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
 
-        ShipmentCreateDTO requestDTO = new ShipmentCreateDTO(5, "Notas do novo shipment", false, 1L);
+        ShipmentCreateDTO requestDTO = new ShipmentCreateDTO(5, "Notas do novo shipment", false, 1L, null, null);
         ShipmentResponseDTO responseDTO = new ShipmentResponseDTO(1L, 10.0, 5, "Notas do novo shipment", "Produto A", false);
 
         when(service.create(requestDTO)).thenReturn(responseDTO);
@@ -100,7 +100,7 @@ class ShipmentControllerTest {
     @Test
     void update() {
         Long shipmentId = 1L;
-        ShipmentUpdateDTO requestDTO = new ShipmentUpdateDTO(10, "Notas atualizadas", true);
+        ShipmentUpdateDTO requestDTO = new ShipmentUpdateDTO(10, "Notas atualizadas", true, 1L);
         ShipmentResponseDTO responseDTO = new ShipmentResponseDTO(shipmentId, 10.0, 10, "Notas atualizadas", "Produto A", true);
 
         when(service.update(shipmentId, requestDTO)).thenReturn(responseDTO);

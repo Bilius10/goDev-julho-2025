@@ -1,8 +1,10 @@
 package br.com.senior.transport_logistics.domain.shipment;
 
+import br.com.senior.transport_logistics.domain.hub.HubEntity;
 import br.com.senior.transport_logistics.domain.product.ProductEntity;
 import br.com.senior.transport_logistics.domain.shipment.dto.request.ShipmentCreateDTO;
 import br.com.senior.transport_logistics.domain.shipment.dto.request.ShipmentUpdateDTO;
+import br.com.senior.transport_logistics.domain.transport.enums.TransportStatus;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.*;
@@ -42,12 +44,30 @@ public class ShipmentEntity {
     @JoinColumn(name = "product_id", referencedColumnName = "id")
     private ProductEntity product;
 
-    public ShipmentEntity(ShipmentCreateDTO request, ProductEntity product) {
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status")
+    @NotNull(message = "{shipment.status.notNull}")
+    private TransportStatus status;
+
+    @NotNull(message = "{shipment.product.notNull}")
+    @ManyToOne
+    @JoinColumn(name = "origin_hub_id", referencedColumnName = "id")
+    private HubEntity originHub;
+
+    @NotNull(message = "{shipment.product.notNull}")
+    @ManyToOne
+    @JoinColumn(name = "destination_hub_id", referencedColumnName = "id")
+    private HubEntity destinationHub;
+
+    public ShipmentEntity(ShipmentCreateDTO request, ProductEntity product, HubEntity originHub, HubEntity destinationHub) {
         this.weight = request.quantity() * product.getWeight();
         this.quantity = request.quantity();
         this.notes = request.notes();
         this.isHazardous = request.isHazardous();
         this.product = product;
+        this.originHub = originHub;
+        this.destinationHub = destinationHub;
+        this.status = TransportStatus.PENDING;
     }
 
     public void updateShipment(ShipmentUpdateDTO request, ProductEntity product) {

@@ -5,6 +5,7 @@ import br.com.senior.transport_logistics.domain.transport.TransportService;
 import br.com.senior.transport_logistics.domain.transport.dto.request.CreateTransportRequest;
 import br.com.senior.transport_logistics.domain.transport.dto.request.UpdateTransportRequest;
 import br.com.senior.transport_logistics.domain.transport.dto.response.HubSummaryProjection;
+import br.com.senior.transport_logistics.domain.transport.dto.response.TransportCreatedResponseDTO;
 import br.com.senior.transport_logistics.domain.transport.dto.response.TransportResponseDTO;
 import br.com.senior.transport_logistics.domain.transport.enums.TransportStatus;
 import br.com.senior.transport_logistics.infrastructure.dto.GeminiDTO.GeminiResponse;
@@ -49,13 +50,13 @@ public class TransportController {
     }
 
     @PostMapping("/optimize-allocation")
-    public ResponseEntity<TransportResponseDTO> optimizeAllocation(@RequestBody @Valid CreateTransportRequest request) throws JsonProcessingException {
-        TransportResponseDTO createdTransport = service.optimizeAllocation(request);
+    public ResponseEntity<TransportCreatedResponseDTO> optimizeAllocation(@RequestBody @Valid CreateTransportRequest request) throws JsonProcessingException {
+        TransportCreatedResponseDTO createdTransport = service.optimizeAllocation(request);
 
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
                 .path("/{id}")
-                .buildAndExpand(createdTransport.id())
+                .buildAndExpand(createdTransport.idTransport())
                 .toUri();
 
         return ResponseEntity.created(location).body(createdTransport);

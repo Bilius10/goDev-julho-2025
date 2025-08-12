@@ -10,6 +10,7 @@ import br.com.senior.transport_logistics.domain.shipment.ShipmentService;
 import br.com.senior.transport_logistics.domain.transport.dto.request.CreateTransportRequest;
 import br.com.senior.transport_logistics.domain.transport.dto.request.UpdateTransportRequest;
 import br.com.senior.transport_logistics.domain.transport.dto.response.HubSummaryProjection;
+import br.com.senior.transport_logistics.domain.transport.dto.response.TransportCreatedResponseDTO;
 import br.com.senior.transport_logistics.domain.transport.dto.response.TransportResponseDTO;
 import br.com.senior.transport_logistics.domain.transport.enums.TransportStatus;
 import br.com.senior.transport_logistics.domain.truck.TruckEntity;
@@ -35,9 +36,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static br.com.senior.transport_logistics.infrastructure.exception.ExceptionMessages.HUB_NOT_FOUND_BY_ID;
@@ -79,18 +82,22 @@ public class TransportService {
     }
 
     @Transactional
-    public TransportResponseDTO optimizeAllocation(CreateTransportRequest request) throws JsonProcessingException {
+    public TransportCreatedResponseDTO optimizeAllocation(CreateTransportRequest request) throws JsonProcessingException {
         HubEntity originHub = hubService.findById(request.idOriginHub());
         HubEntity destinationHub = hubService.findById(request.idDestinationHub());
         ShipmentEntity shipment = shipmentService.findById(request.idShipment());
+
+        List<ShipmentEntity> pendingShipments
+                = shipmentService.findAllByIdHubAndDestinationHubAndStatus(TransportStatus.PENDING, request.idDestinationHub(), request.idOriginHub());
 
         ResponseForGemini route = getRouteData(originHub, destinationHub, shipment, request.isHazmat());
 
         long travelDays = (long) Math.ceil(route.duration() / 86400.0);
 
-        LocalDate availabilityDeadline = request.exitDay().plusDays(travelDays * 2);
+        LocalDate availabilityDeadline = request.exitDay().plusDays(travelDays);
 
-        GeminiResponse truckSuggestion = this.selectIdealTruck(request, shipment, originHub, route, availabilityDeadline);
+        GeminiResponse truckSuggestion
+                = this.selectIdealTruck(request, shipment, originHub, route, availabilityDeadline, pendingShipments);
 
         TruckEntity chosenTruck = truckService.findById(truckSuggestion.caminhaoSugerido());
 
@@ -100,15 +107,30 @@ public class TransportService {
                 originHub.getId()
         );
 
-        TransportEntity newTransport = new TransportEntity(
+        double fuel = truckSuggestion.litrosGastosIda();
+
+        TransportEntity exitTransport = new TransportEntity(
                 chosenDriver, originHub, destinationHub, shipment,
-                chosenTruck, route.distance(), truckSuggestion.litrosGastos(), request.exitDay(),
+                chosenTruck, route.distance(), truckSuggestion.litrosGastosIda(), request.exitDay(),
                 availabilityDeadline
         );
+        repository.save(exitTransport);
 
-        TransportEntity savedTransport = repository.save(newTransport);
+        if (truckSuggestion.produtoSelecionadoRetorno() != null) {
+            fuel += truckSuggestion.litrosGastosVolta();
 
-        return TransportResponseDTO.geminiResponse(savedTransport, truckSuggestion.justificativa());
+            ShipmentEntity shipmentReturn = shipmentService.findById(request.idShipment());
+
+            TransportEntity returnTransport = new TransportEntity(
+                    chosenDriver, destinationHub, originHub, shipmentReturn,
+                    chosenTruck, route.distance()/2, truckSuggestion.litrosGastosVolta(), null,
+                    availabilityDeadline
+            );
+            repository.save(returnTransport);
+        }
+        
+        return TransportCreatedResponseDTO.buildCreatedResponse(exitTransport, truckSuggestion.justificativaCaminhao(), 
+                truckSuggestion.justificativaCargaRetorno(), fuel, route.distance());
     }
 
     @Transactional
@@ -176,6 +198,7 @@ public class TransportService {
     public TransportResponseDTO updateStatus(Long id, TransportStatus status){
         TransportEntity transport = this.findById(id);
         transport.setStatus(status);
+        transport.getShipment().setStatus(status);
 
         TransportEntity savedTransport = repository.save(transport);
 
@@ -225,7 +248,8 @@ public class TransportService {
     }
 
     private GeminiResponse selectIdealTruck(CreateTransportRequest request, ShipmentEntity shipment,
-                                             HubEntity originHub, ResponseForGemini route, LocalDate availabilityDeadline) throws JsonProcessingException {
+                                             HubEntity originHub, ResponseForGemini route, LocalDate availabilityDeadline,
+                                            List<ShipmentEntity> pendingShipments ) throws JsonProcessingException {
 
         List<TruckEntity> candidateTrucks = truckService.findByLoadCapacityGreaterThan(
                 shipment.getWeight(),
@@ -240,7 +264,8 @@ public class TransportService {
                 routeStepsJson,
                 route.distance(),
                 shipment,
-                candidateTrucks
+                candidateTrucks,
+                pendingShipments
         );
     }
 }

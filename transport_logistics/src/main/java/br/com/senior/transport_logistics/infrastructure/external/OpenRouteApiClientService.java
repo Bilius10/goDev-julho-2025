@@ -31,7 +31,8 @@ public class OpenRouteApiClientService {
 
         List<List<Double>> coordinates = List.of(
                 List.of(start.latitude(), start.longitude()),
-                List.of(finish.latitude(), finish.longitude())
+                List.of(finish.latitude(), finish.longitude()),
+                List.of(start.latitude(), start.longitude())
         );
 
         ProfileParamsRecord profileParams = new ProfileParamsRecord(restrictions);
@@ -65,7 +66,7 @@ public class OpenRouteApiClientService {
             }
 
             return new ResponseForGemini(
-                    responseBody.routes().get(0).summary().distance(),
+                    responseBody.routes().get(0).summary().distance()/1000,
                     responseBody.routes().get(0).summary().duration(),
                     responseBody.routes().stream()
                             .flatMap(route -> route.segments().stream())

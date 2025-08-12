@@ -19,15 +19,15 @@ public class GeminiApiClientService {
     private final OpenAiChatModel chatModel;
     private final ObjectMapper objectMapper;
 
-    public GeminiResponse chooseBestTruck(String rotaJson, double distance,
-                                                ShipmentEntity shipment, List<TruckEntity> caminhoesCandidatos) {
+    public GeminiResponse chooseBestTruck(String rotaJson, double distance, ShipmentEntity shipment,
+                                          List<TruckEntity> caminhoesCandidatos, List<ShipmentEntity> pendingShipments) {
 
-        String promptString = construirPromptParaIA(rotaJson, distance, shipment, caminhoesCandidatos);
+        String promptString = construirPromptParaIA(rotaJson, distance, shipment, caminhoesCandidatos, pendingShipments);
+        System.out.println(promptString);
         Prompt prompt = new Prompt(promptString);
 
         ChatResponse response = chatModel.call(prompt);
         String rawResponse = response.getResult().getOutput().getText();
-
 
         String cleanedJson = extrairJsonDaString(rawResponse);
 
@@ -42,43 +42,100 @@ public class GeminiApiClientService {
         }
     }
 
-    private String construirPromptParaIA(String rotaJson, double distance, ShipmentEntity shipment, List<TruckEntity> caminhoesCandidatos) {
+    private String construirPromptParaIA(String rotaJson, double distance, ShipmentEntity shipment,
+                                         List<TruckEntity> caminhoesCandidatos, List<ShipmentEntity> pendingShipments) {
         try {
 
             String caminhoesJson = objectMapper.writeValueAsString(caminhoesCandidatos);
+            String shipmentsJson = objectMapper.writeValueAsString(pendingShipments);
 
             return String.format("""
-                Voce e um Analista de Logistica Senior. Sua missao e analisar os dados para selecionar o caminhao mais eficiente, otimizando seguranca, conformidade e custo.
-    
-                1. DADOS_ROTA (em formato GeoJSON):
-                %s
-                
-                Distancia total: %s
-    
-                2. DADOS_CARGA:
-                - Tipo de Carga: %s
-                - Peso Total: %.2f kg
-                - Condicoes Especiais: %s
-    
-                3. DADOS_CAMINHOES (em formato JSON):
-                %s
-    
-                4. METODOLOGIA (ORDEM ESTRITA DE PRIORIDADE):
-                1-SEGURANCA_CARGA (MAXIMA PRIORIDADE): Avalie a adequacao da carroceria ('body') ao tipo de carga. Cargas frageis/valiosas (ex: ELECTRONICS) exigem carroceria fechada (REEFER_VAN, DRY_VAN). Descarte imediatamente caminhoes inadequados.
-                2-MANOBRABILIDADE_ROTA: Analise os tipos de via (StepRecord[type]). Rotas urbanas/curvas (type 0,1,11) favorecem caminhoes menores (menor 'length'). Rotas rodoviarias (type 7,12) podem usar caminhoes maiores. Use como criterio de desempate.
-                3-EFICIENCIA_COMBUSTIVEL (OTIMIZACAO FINAL): Apos garantir os criterios 1 e 2, selecione o caminhao com maior 'averageFuelConsumption' (em km/L). Calcule a distancia total (km). Calcule os litros gastos: Distancia Total / averageFuelConsumption leve em considereção que a distancia esta em metros.
-    
-                5. FORMATO_RESPOSTA:
-                Forneca apenas um JSON valido, sem nenhum texto ou formatacao externa.
-                ```json
-                {
-                  "caminhaoSugerido": "ID numerico do caminhao escolhido",
-                  "justificativa": "Texto tecnico explicando a escolha, seguindo a metodologia (1.Seguranca, 2.Rota, 3.Eficiencia).",
-                  "litrosGastos": "Valor numerico (string, duas casas decimais) de litros gastos."
-                }
-                ```
-                """, rotaJson, distance, shipment.getProduct().getCategory(),
-                    shipment.getWeight(), shipment.getNotes(), caminhoesJson);
+                    ## PERSONA E MISSAO
+                    
+                    **Persona:** Voce e um Analista de Logistica Senior, especialista em otimizacao de frotas.
+                    **Missao:** Sua tarefa e analisar um conjunto de dados para selecionar o caminhao mais adequado para um transporte especifico. A decisao deve ser estritamente baseada em uma metodologia que prioriza **seguranca, conformidade regulatoria, manobrabilidade e custo-beneficio (eficiencia de combustivel)**.
+                    
+                    ---
+                    
+                    ## DADOS DE ENTRADA
+                    
+                    Voce recebera os seguintes dados para analise:
+                    
+                    1.  **DADOS DA ROTA (Formato GeoJSON):**
+                        ```json
+                        %s
+                        ```
+                        - **Distancia Total da Rota:** %s em KM.
+                    
+                    2.  **DADOS DA CARGA:**
+                        - **Tipo de Carga:** %s
+                        - **Peso Total:** %.2f kg
+                        - **Condicoes Especiais:** %s
+                    
+                    3.  **DADOS DOS CAMINHOES DISPONIVEIS (Formato JSON):**
+                        ```json
+                        %s
+                        ```
+                    
+                    4.  **LISTA DE CARGAS PARA RETORNO (Opcional):**
+                        *Esta lista pode ser nula. Se fornecida, deve ser obrigatoriamente usada para um possivel retorno caso exista uma carga compativel com o suporte do caminhao.*
+                        ```json
+                        %s
+                        ```
+                    
+                    ---
+                    
+                    ## METODOLOGIA DE DECISAO (ORDEM ESTRITA DE PRIORIDADE)
+                    
+                    Siga estes passos em sequencia. Um caminhao deve ser descartado assim que falhar em um criterio.
+                    
+                    **1. FILTRO DE SEGURANCA (Carroceria vs. Tipo de Carga):**
+                       - **Regra:** Avalie a adequacao da carroceria (`body`) ao tipo de carga. Cargas frageis, de alto valor ou sensiveis (ex: `ELECTRONICS`, `CHEMICALS`) exigem carrocerias especificas e seguras (ex: `REEFER_VAN`, `DRY_VAN`, `TANK`).
+                       - **Acao:** Descarte os caminhoes com carrocerias inadequadas para a carga.
+                    
+                    **2. ANALISE DE MANOBRABILIDADE (Desempate):**
+                       - **Contexto:** Use o `length` do caminhao como criterio de desempate se mais de um veiculo passar nos filtros anteriores.
+                       - **Regra:** Analise os tipos de via no GeoJSON (`StepRecord[type]`).
+                         - **Rotas com predominancia urbana/curvas (type 0, 1, 11):** Prefira o caminhao com o **menor** `length`.
+                         - **Rotas com predominancia rodoviaria (type 7, 12):** Caminhoes maiores sao aceitaveis, mas a eficiencia ainda e chave. Se todos os outros criterios forem identicos, o menor `length` ainda e preferivel para versatilidade.
+                       - **Acao:** Ordene os caminhoes restantes com base neste criterio.
+                    
+                    **3. OTIMIZACAO DE CUSTO (Selecao Final):**
+                       - **Contexto:** Dentre os caminhoes que restaram, selecione o mais eficiente.
+                       - **Regra:** Escolha o caminhao com o **maior** `averageFuelConsumption` (km/L).
+                       - **Calculo de Consumo:**            
+                         1. Calcule os litros necessarios: `Litros_Gastos = Distancia_KM / averageFuelConsumption`.
+                    
+                    **4. OTIMIZACAO DE CARGA DE RETORNO (Bonus):**
+                       - **Contexto:** Se um caminhao ja foi selecionado nos passos anteriores, verifique se ha uma carga de retorno compativel (em peso e tipo) que tenha como destino o `hub` de origem do caminhao.
+                       - **Acao:** Mencione na justificativa se uma carga de retorno foi identificada, reforcando o valor da escolha. Este passo **nao** deve alterar a selecao feita no passo 3.
+                    
+                    ---
+                    
+                    ## FORMATO DA RESPOSTA (JSON)
+                    
+                    Forneca **apenas um JSON valido**, sem nenhum texto ou formatacao externa. Se nenhum caminhao for adequado, retorne `null` nos campos.
+                    
+                    ```json
+                    {
+                      "caminhaoSugerido": "ID numerico do caminhao escolhido ou null",
+                      "produtoSelecionadoRetorno": "ID numerico da CARGA ou null",
+                      "justificativaCaminhao": "Texto tecnico e conciso explicando a escolha, seguindo a metodologia. Ex: '1. Seguranca: Aprovado (Carroceria DRY_VAN compativel com ELECTRONICS). 2. Manobrabilidade: Criterio de desempate nao foi necessario. 3. Eficiencia: Selecionado por ter o maior consumo medio (2.8 km/L) entre os finalistas.'",
+                      "justificativaCargaRetorno": "Texto tecnico e conciso explicando a escolha, seguindo a metodologia.",
+                      "litrosGastosIda": "Valor numerico (string, duas casas decimais) de litros gastos, ou null."
+                      "litrosGastosVolta": "Valor numerico (string, duas casas decimais) de litros gastos, ou null."
+                    }
+                    ```
+                    """,
+
+                    rotaJson,
+                    distance,
+                    shipment.getProduct().getCategory(),
+                    shipment.getWeight(),
+                    shipment.getNotes(),
+                    caminhoesJson,
+                    shipmentsJson
+            );
 
         } catch (JsonProcessingException e) {
             throw new RuntimeException("Erro ao serializar a lista de caminhões para JSON.", e);
