@@ -5,6 +5,11 @@ import br.com.senior.transport_logistics.domain.truck.dto.request.TruckRequestDT
 import br.com.senior.transport_logistics.domain.truck.dto.response.TruckResponseDTO;
 import br.com.senior.transport_logistics.domain.truck.enums.TruckStatus;
 import br.com.senior.transport_logistics.infrastructure.dto.PageDTO;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -19,10 +24,17 @@ import java.net.URI;
 @RestController
 @RequestMapping("/api/v1/trucks")
 @RequiredArgsConstructor
+@SecurityRequirement(name = "bearer-key")
+@Tag(name = "TruckController", description = "Endpoints de criação, listagem, busca por código e atualização do status")
 public class TruckController {
 
     private final TruckService service;
 
+    @Operation(summary = "Endpoint para criar caminhão")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Caminhão criado com sucesso"),
+            @ApiResponse(responseCode = "400", description = "Dados inválidos ou não fornecidos")
+    })
     @PostMapping
     public ResponseEntity<TruckResponseDTO> create(@Valid @RequestBody TruckRequestDTO request) {
         var createdTruck = service.create(request);
@@ -36,6 +48,10 @@ public class TruckController {
         return ResponseEntity.created(location).body(createdTruck);
     }
 
+    @Operation(summary = "Endpoint para listar caminhões com paginação, podendo filtrar por status")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Listagem paginada das cargas")
+    })
     @GetMapping
     public ResponseEntity<PageDTO<TruckResponseDTO>> getAll(
             @RequestParam(required = false) TruckStatus status,
@@ -50,11 +66,22 @@ public class TruckController {
         return ResponseEntity.ok(service.findAll(status, pageable));
     }
 
+    @Operation(summary = "Endpoint para buscar caminhão por código")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Retorna caminhão com código informado"),
+            @ApiResponse(responseCode = "404", description = "Nenhum caminhão localizado com código informado")
+    })
     @GetMapping("/{code}")
     public ResponseEntity<TruckResponseDTO> getByCode(@PathVariable String code) {
         return ResponseEntity.ok(service.findByCode(code));
     }
 
+    @Operation(summary = "Endpoint para atualizar status do caminhão via código")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Status atualizado com sucesso"),
+            @ApiResponse(responseCode = "400", description = "Status inválido ou não fornecido"),
+            @ApiResponse(responseCode = "404", description = "Caminhão não encontrada com o código informado")
+    })
     @PatchMapping("/{code}/status")
     public ResponseEntity<Void> updateStatus(
             @PathVariable String code,

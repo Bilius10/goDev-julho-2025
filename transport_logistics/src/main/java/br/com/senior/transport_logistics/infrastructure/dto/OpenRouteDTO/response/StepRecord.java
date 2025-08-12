@@ -10,7 +10,8 @@ public record StepRecord(
         int type,
         String instruction,
         String name,
-        @JsonProperty("way_points") List<Integer> wayPoints,
+        @JsonProperty("way_points")
+        List<Integer> wayPoints,
         Integer exit_number
 ) {
 }
