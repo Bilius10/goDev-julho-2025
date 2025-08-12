@@ -9,6 +9,7 @@ import br.com.senior.transport_logistics.domain.employee.dto.request.EmployeeUpd
 import br.com.senior.transport_logistics.domain.employee.dto.response.EmployeeResponseDTO;
 import br.com.senior.transport_logistics.domain.employee.enums.Role;
 import br.com.senior.transport_logistics.infrastructure.dto.PageDTO;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -38,6 +39,7 @@ class EmployeeControllerTest {
     private EmployeeService service;
 
     @Test
+    @DisplayName("Deve retornar status OK e listar funcionários com paginação")
     void findAll() {
         int page = 0;
         int size = 10;
@@ -58,6 +60,7 @@ class EmployeeControllerTest {
     }
 
     @Test
+    @DisplayName("Deve retornar status OK e DTO do funcionário atualizado")
     void update() {
         Long employeeId = 1L;
         EmployeeUpdateRequestDTO requestDTO = new EmployeeUpdateRequestDTO("John Doe Updated", "john.doe@example.com");
@@ -75,6 +78,7 @@ class EmployeeControllerTest {
     }
 
     @Test
+    @DisplayName("Deve retornar status NO CONTENT e trocar role com sucesso")
     void updateRole() {
         Long employeeId = 1L;
         Role newRole = Role.ADMIN;
@@ -88,6 +92,7 @@ class EmployeeControllerTest {
     }
 
     @Test
+    @DisplayName("Deve retornar status NO CONTENT e fazer delete lógico com sucesso")
     void delete() {
         Long employeeId = 1L;
 
