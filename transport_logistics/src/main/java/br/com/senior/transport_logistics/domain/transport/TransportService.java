@@ -9,6 +9,7 @@ import br.com.senior.transport_logistics.domain.shipment.ShipmentEntity;
 import br.com.senior.transport_logistics.domain.shipment.ShipmentService;
 import br.com.senior.transport_logistics.domain.transport.dto.request.CreateTransportRequest;
 import br.com.senior.transport_logistics.domain.transport.dto.request.UpdateTransportRequest;
+import br.com.senior.transport_logistics.domain.transport.dto.response.HubSummaryProjection;
 import br.com.senior.transport_logistics.domain.transport.dto.response.TransportResponseDTO;
 import br.com.senior.transport_logistics.domain.transport.enums.TransportStatus;
 import br.com.senior.transport_logistics.domain.truck.TruckEntity;
@@ -23,6 +24,7 @@ import br.com.senior.transport_logistics.infrastructure.email.SpringMailSenderSe
 import br.com.senior.transport_logistics.infrastructure.exception.common.ResourceNotFoundException;
 import br.com.senior.transport_logistics.infrastructure.external.GeminiApiClientService;
 import br.com.senior.transport_logistics.infrastructure.external.OpenRouteApiClientService;
+import br.com.senior.transport_logistics.infrastructure.pdf.PdfGenerationService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +32,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.YearMonth;
@@ -37,6 +40,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static br.com.senior.transport_logistics.infrastructure.exception.ExceptionMessages.HUB_NOT_FOUND_BY_ID;
 import static br.com.senior.transport_logistics.infrastructure.exception.ExceptionMessages.TRANSPORT_NOT_FOUND_BY_ID;
 
 @Service
@@ -52,7 +56,9 @@ public class TransportService {
     private final EmployeeService employeeService;
     private final ObjectMapper objectMapper;
     private final SpringMailSenderService emailService;
+    private final PdfGenerationService pdfGenerationService;
 
+    @Transactional(readOnly = true)
     public PageDTO<TransportResponseDTO> findAll(Pageable pageable) {
 
         Page<TransportEntity> transportPage = repository.findAll(pageable);
@@ -67,6 +73,12 @@ public class TransportService {
                 transportPage.getTotalPages());
     }
 
+    public HubSummaryProjection hubSummary(Long id){
+        return repository.findHubSummaryById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(HUB_NOT_FOUND_BY_ID.getMessage(id)));
+    }
+
+    @Transactional
     public TransportResponseDTO optimizeAllocation(CreateTransportRequest request) throws JsonProcessingException {
         HubEntity originHub = hubService.findById(request.idOriginHub());
         HubEntity destinationHub = hubService.findById(request.idDestinationHub());
@@ -99,17 +111,22 @@ public class TransportService {
         return TransportResponseDTO.geminiResponse(savedTransport, truckSuggestion.justificativa());
     }
 
+    @Transactional
     public TransportResponseDTO confirmTransport(Long id){
         TransportEntity transport = this.findById(id);
         transport.setStatus(TransportStatus.ASSIGNED);
 
         TransportEntity savedTransport = repository.save(transport);
-        emailService.sendConfirmTransportEmail(savedTransport);
 
-        return TransportResponseDTO.basic(savedTransport);
+        byte[] bytes = pdfGenerationService.generateTransportManifestPdf(savedTransport);
+
+        emailService.sendConfirmTransportEmail(savedTransport, bytes);
+
+        return TransportResponseDTO.detailed(savedTransport);
     }
 
     @Scheduled(cron = "0 0 9 * * SAT")
+    @Transactional(readOnly = true)
     public void sendWeeklySchedule(){
         List<TransportEntity> weeklyTransport
                 = repository.findAllByExitDay(LocalDate.now(), LocalDate.now().plusDays(6));
@@ -123,8 +140,9 @@ public class TransportService {
     }
 
     @Scheduled(cron = "0 0 9 1 * ?")
+    @Transactional(readOnly = true)
     public void sendMonthReport() {
-        List<EmployeeEntity> managers = employeeService.findAllByRole(Role.ADMIN);
+        List<EmployeeEntity> managers = employeeService.findAllByRole(Role.MANAGER);
 
         YearMonth previousMonth = YearMonth.now().minusMonths(1);
         LocalDate startDate = previousMonth.atDay(1);
@@ -154,6 +172,7 @@ public class TransportService {
 
     }
 
+    @Transactional
     public TransportResponseDTO updateStatus(Long id, TransportStatus status){
         TransportEntity transport = this.findById(id);
         transport.setStatus(status);
@@ -163,6 +182,7 @@ public class TransportService {
         return TransportResponseDTO.basic(savedTransport);
     }
 
+    @Transactional
     public TransportResponseDTO update(UpdateTransportRequest request, Long id) {
         TransportEntity transportToUpdate = this.findById(id);
         EmployeeEntity assignedEmployee = employeeService.findById(request.employeeId());
@@ -174,13 +194,13 @@ public class TransportService {
         return TransportResponseDTO.detailed(updatedTransport);
     }
 
+    @Transactional
     public void delete(Long id) {
         if (!repository.existsById(id)) {
             throw new ResourceNotFoundException(TRANSPORT_NOT_FOUND_BY_ID.getMessage(id));
         }
         repository.deleteById(id);
     }
-
 
     private TransportEntity findById(Long id) {
         return repository.findById(id)

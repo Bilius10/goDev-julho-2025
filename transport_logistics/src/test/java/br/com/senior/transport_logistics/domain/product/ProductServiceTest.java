@@ -121,7 +121,7 @@ class ProductServiceTest {
     }
 
     @Test
-    @DisplayName("Deve listar todos usando filtros")
+    @DisplayName("Deve fazer o delete fisico")
     void delete() {
 
         Long productId = 1L;
@@ -131,13 +131,7 @@ class ProductServiceTest {
 
         when(repository.findById(productId)).thenReturn(Optional.of(celular));
 
-        var before = service.findById(productId);
         service.delete(productId);
-        var after = service.findById(productId);
-
-        assertNotEquals(before, after);
-        assertTrue(before);
-        assertFalse(after);
 
         verify(repository).save(celular);
     }

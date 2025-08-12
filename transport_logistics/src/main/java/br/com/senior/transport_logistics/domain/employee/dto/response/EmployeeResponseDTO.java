@@ -21,7 +21,7 @@ public record EmployeeResponseDTO(
         String token
 ) {
 
-    public static EmployeeResponseDTO basic(EmployeeEntity entity, HubEntity hub) {
+    public static EmployeeResponseDTO basic(EmployeeEntity entity) {
         return EmployeeResponseDTO
                 .builder()
                 .id(entity.getId())
@@ -30,7 +30,7 @@ public record EmployeeResponseDTO(
                 .cpf(entity.getCpf())
                 .email(entity.getEmail())
                 .role(entity.getRole())
-                .hub(HubResponseDTO.basic(hub))
+                .hub(HubResponseDTO.basic(entity.getHub()))
                 .build();
     }
 

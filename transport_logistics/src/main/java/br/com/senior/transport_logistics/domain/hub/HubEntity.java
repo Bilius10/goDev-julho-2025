@@ -11,7 +11,6 @@ import org.hibernate.validator.constraints.br.CNPJ;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 @Entity(name = "Hub")
 @Table(name = "hubs")
 public class HubEntity {
@@ -68,7 +67,7 @@ public class HubEntity {
     @Column(nullable = false)
     private String cep;
 
-    public HubEntity(HubCreateRequestDTO request, AddresDTO addresDTO){
+    public HubEntity(HubCreateRequestDTO request, AddresDTO addresDTO) {
         this.name = request.name();
         this.cnpj = request.cnpj();
         this.cep = request.cep();

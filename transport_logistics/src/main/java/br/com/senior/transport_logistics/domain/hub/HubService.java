@@ -3,7 +3,6 @@ package br.com.senior.transport_logistics.domain.hub;
 import br.com.senior.transport_logistics.domain.hub.dto.request.HubCreateRequestDTO;
 import br.com.senior.transport_logistics.domain.hub.dto.request.HubUpdateRequestDTO;
 import br.com.senior.transport_logistics.domain.hub.dto.response.HubResponseDTO;
-import br.com.senior.transport_logistics.domain.hub.dto.response.HubSummaryProjection;
 import br.com.senior.transport_logistics.infrastructure.dto.NominationDTO.CoordinatesDTO;
 import br.com.senior.transport_logistics.infrastructure.dto.PageDTO;
 import br.com.senior.transport_logistics.infrastructure.dto.ViaCepDTO.AddresDTO;
@@ -29,6 +28,7 @@ public class HubService {
     private final ViaCepApiCilentService viaCepApiCilentService;
     private final NominatimApiClientService nominatimApiClientService;
 
+    @Transactional(readOnly = true)
     public PageDTO<HubResponseDTO> findAll(Pageable pageable) {
         Page<HubEntity> hubs = repository.findAll(pageable);
 
@@ -40,11 +40,6 @@ public class HubService {
                 hubs.getSize(),
                 hubs.getTotalElements(),
                 hubs.getTotalPages());
-    }
-
-    public HubSummaryProjection hubSummary(Long id){
-        return repository.findHubSummaryById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(HUB_NOT_FOUND_BY_ID.getMessage(id)));
     }
 
     @Transactional
@@ -61,9 +56,9 @@ public class HubService {
 
         hubEntity.updateCoordinates(coordinates);
 
-        HubEntity saveHub = repository.save(hubEntity);
+        HubEntity savedHub = repository.save(hubEntity);
 
-        return HubResponseDTO.detailed(saveHub);
+        return HubResponseDTO.detailed(savedHub);
     }
 
     @Transactional
@@ -75,10 +70,12 @@ public class HubService {
             hubFound.setName(request.name());
         }
 
-        if(!Objects.equals(hubFound.getCep(), request.cep())){
+        if(!hubFound.getCep().equals(request.cep()) && !hubFound.getNumber().equals(request.number())){
             AddresDTO address = viaCepApiCilentService.getAddress(request.cep());
 
-            checkIfThereIsAHubInTheCity(address.localidade());
+            if(!address.localidade().equals(hubFound.getCity())){
+                checkIfThereIsAHubInTheCity(address.localidade());
+            }
 
             hubFound.updateAddres(address, request.number());
 
@@ -86,9 +83,9 @@ public class HubService {
             hubFound.updateCoordinates(coordinates);
         }
 
-        HubEntity saveHub = repository.save(hubFound);
+        HubEntity savedHub = repository.save(hubFound);
 
-        return HubResponseDTO.detailed(saveHub);
+        return HubResponseDTO.detailed(savedHub);
     }
 
     @Transactional

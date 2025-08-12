@@ -60,6 +60,5 @@ public class AuthController {
         service.updatePassword(employee, employeePasswordUpdateDTO);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
-
 }
 

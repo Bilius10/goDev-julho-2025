@@ -9,7 +9,7 @@ import java.time.LocalDate;
 
 public record UpdateTransportRequest(
         @NotNull(message = "{transport.exitDay.notNull}")
-        @Future(message = "{transport.exitDay.future}")
+        @Future(message = "{transport.request.exitDay.future}")
         LocalDate exitDay,
 
         @NotNull(message = "{transport.driver.notNull}")

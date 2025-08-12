@@ -21,8 +21,8 @@ public record EmployeeCreateRequestDTO(
         @Email(message = "{employee.email.format}")
         String email,
 
-        @NotNull(message = "{employee.idHub.notNull}")
-        @Positive(message = "{employee.idHub.Positive}")
+        @NotNull(message = "{employee.request.idHub.notNull}")
+        @Positive(message = "{employee.request.idHub.Positive}")
         Long idHub
 ) {
 }

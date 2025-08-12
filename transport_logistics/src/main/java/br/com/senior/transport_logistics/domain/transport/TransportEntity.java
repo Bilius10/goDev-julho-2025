@@ -21,7 +21,6 @@ import java.time.LocalDate;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 @Entity(name = "Transport")
 @Table(name = "transports")
 public class TransportEntity {
@@ -85,7 +84,6 @@ public class TransportEntity {
                            Double fuelConsumption,
                            LocalDate exitDay,
                            LocalDate expectedArrivalDay) {
-
         this.driver = driver;
         this.originHub = originHub;
         this.destinationHub = destinationHub;

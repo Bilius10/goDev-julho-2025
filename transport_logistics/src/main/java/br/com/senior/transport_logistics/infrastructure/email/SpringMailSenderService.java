@@ -7,10 +7,12 @@ import br.com.senior.transport_logistics.domain.transport.enums.TransportStatus;
 import br.com.senior.transport_logistics.domain.truck.TruckEntity;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
+import jakarta.mail.util.ByteArrayDataSource;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
@@ -46,15 +48,17 @@ public class SpringMailSenderService {
         );
     }
 
-    public void sendConfirmTransportEmail(TransportEntity transport){
-        sendEmailWithTemplate(
+    public void sendConfirmTransportEmail(TransportEntity transport, byte[] pdf){
+        sendEmailWithTemplateAndPdf(
                 transport.getDriver().getEmail(),
                 String.format("Olá, %s voce possui uma nova entrega", transport.getDriver().getName()),
                 "confirm-transport.html",
                 Map.of(
                         "driver", transport.getDriver(),
                         "transport", transport
-                )
+                ),
+                pdf,
+                "Confirmação de transport"
         );
     }
 
@@ -127,19 +131,47 @@ public class SpringMailSenderService {
         );
     }
 
-    private void sendEmailWithTemplate(String to, String subject, String templateName, Map<String, Object> variables) {
+    private void sendEmailWithTemplate(String to, String subject, String templateName,
+                                       Map<String, Object> variables) {
         try {
             Context context = new Context();
             context.setVariables(variables);
             String htmlContent = templateEngine.process(templateName, context);
 
             MimeMessage mimeMessage = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, "UTF-8");
+
+            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
 
             helper.setFrom(emailFrom);
             helper.setTo(to);
             helper.setSubject(subject);
             helper.setText(htmlContent, true);
+
+            mailSender.send(mimeMessage);
+            log.info("E-mail com template '{}' enviado com sucesso para {}", templateName, to);
+
+        } catch (MessagingException e) {
+            log.error("Erro ao enviar e-mail com template '{}' para {}: {}", templateName, to, e.getMessage());
+        }
+    }
+
+    private void sendEmailWithTemplateAndPdf(String to, String subject, String templateName,
+                                       Map<String, Object> variables, byte[] pdfAttachment, String attachmentName) {
+        try {
+            Context context = new Context();
+            context.setVariables(variables);
+            String htmlContent = templateEngine.process(templateName, context);
+
+            MimeMessage mimeMessage = mailSender.createMimeMessage();
+
+            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
+
+            helper.setFrom(emailFrom);
+            helper.setTo(to);
+            helper.setSubject(subject);
+            helper.setText(htmlContent, true);
+
+            helper.addAttachment(attachmentName + ".pdf", new ByteArrayResource(pdfAttachment));
 
             mailSender.send(mimeMessage);
             log.info("E-mail com template '{}' enviado com sucesso para {}", templateName, to);

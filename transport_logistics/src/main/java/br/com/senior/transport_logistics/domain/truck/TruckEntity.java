@@ -19,7 +19,6 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 @Entity(name = "Truck")
 @Table(name = "trucks")
 public class TruckEntity {
@@ -99,8 +98,8 @@ public class TruckEntity {
 
     public TruckEntity(TruckRequestDTO request, String code, HubEntity hub) {
         this.code = code;
-        this.model = request.model();
         this.hub = hub;
+        this.model = request.model();
         this.type = request.type();
         this.body = request.body();
         this.axleSetup = request.axleSetup();
@@ -110,7 +109,6 @@ public class TruckEntity {
         this.width = request.width();
         this.height = request.height();
         this.averageFuelConsumption = request.averageFuelConsumption();
-        this.status = TruckStatus.AVAILABLE;
         this.features = request.features();
     }
 }

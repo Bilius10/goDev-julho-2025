@@ -12,6 +12,9 @@ public enum ExceptionMessages {
     EMPLOYEE_EMAIL_IN_USE("O campo email com valor '%s' já está em uso por outro funcionário"),
     EMPLOYEE_CPF_IN_USE("O campo CPF com valor '%s' já está em uso por outro funcionário."),
     EMPLOYEE_CNH_IN_USE("O campo CNH com valor '%s' já está em uso por outro funcionário."),
+    EMPLOYEE_PASSWORD_CONFIRMATION_MISMATCH("A nova senha e a confirmação não coincidem. Verifique os campos e tente novamente."),
+    EMPLOYEE_WRONG_CURRENT_PASSWORD("A senha atual informada está incorreta. Por favor, revise e tente novamente."),
+    DRIVER_NOT_FOUND("Nenhum motorista disponível foi encontrado para os critérios informados. Verifique os dados e tente novamente."),
 
     PRODUCT_NOT_FOUND_BY_ID("Produto com o campo 'id' igual a '%s' não foi encontrado"),
     PRODUCT_NAME_IN_USE("O campo nome com valor '%s' já está em uso por outro produto."),

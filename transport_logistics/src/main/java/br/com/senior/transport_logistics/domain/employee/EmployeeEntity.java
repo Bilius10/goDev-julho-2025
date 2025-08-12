@@ -12,14 +12,15 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
 @Getter
 @Setter
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @Table(name = "employees")
 @Entity(name = "Employee")
 public class EmployeeEntity implements UserDetails {
@@ -40,7 +41,6 @@ public class EmployeeEntity implements UserDetails {
     private String cnh;
 
     @Column(name = "cpf")
-    @Size(max = 11, message = "{employee.cpf.size}")
     @CPF(message = "{employee.cpf.format}")
     private String cpf;
 
@@ -67,11 +67,12 @@ public class EmployeeEntity implements UserDetails {
     @NotNull(message = "{employee.role.notNull}")
     private Role role;
 
-    public EmployeeEntity(EmployeeCreateRequestDTO request, HubEntity hub) {
+    public EmployeeEntity(EmployeeCreateRequestDTO request, HubEntity hub, String password) {
         this.name = request.name();
         this.cnh = request.cnh();
         this.cpf = request.cpf();
         this.email = request.email();
+        this.password = password;
         this.active = true;
         this.role = Role.DRIVER;
         this.hub = hub;
@@ -84,7 +85,20 @@ public class EmployeeEntity implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority("ROLE_" + role.name()));
+        List<GrantedAuthority> authorities = new ArrayList<>();
+
+        if (this.role == Role.MANAGER) {
+            authorities.add(new SimpleGrantedAuthority("ROLE_MANAGER"));
+            authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
+            authorities.add(new SimpleGrantedAuthority("ROLE_DRIVER"));
+        } else if (this.role == Role.ADMIN) {
+            authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
+            authorities.add(new SimpleGrantedAuthority("ROLE_DRIVER"));
+        } else {
+            authorities.add(new SimpleGrantedAuthority("ROLE_DRIVER"));
+        }
+
+        return authorities;
     }
 
     @Override
@@ -97,23 +111,4 @@ public class EmployeeEntity implements UserDetails {
         return email;
     }
 
-    @Override
-    public boolean isAccountNonExpired() {
-        return true;
-    }
-
-    @Override
-    public boolean isAccountNonLocked() {
-        return true;
-    }
-
-    @Override
-    public boolean isCredentialsNonExpired() {
-        return true;
-    }
-
-    @Override
-    public boolean isEnabled() {
-        return active;
-    }
 }

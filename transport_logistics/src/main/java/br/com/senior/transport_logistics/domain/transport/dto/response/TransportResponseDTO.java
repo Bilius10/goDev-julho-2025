@@ -42,11 +42,16 @@ public record TransportResponseDTO(
     public static TransportResponseDTO geminiResponse(TransportEntity entity, String response){
         return TransportResponseDTO.builder()
                 .id(entity.getId())
-                .status(entity.getStatus().getDescription())
+                .fuelConsumption(entity.getFuelConsumption())
+                .distance(entity.getDistance())
                 .exitDay(entity.getExitDay())
                 .expectedArrivalDay(entity.getExpectedArrivalDay())
+                .status(entity.getStatus().getDescription())
                 .truckModel(entity.getTruck().getModel())
                 .shipmentTrackingCode(entity.getShipment().getId())
+                .driverName(entity.getDriver().getName())
+                .originHubName(entity.getOriginHub().getName())
+                .destinationHubName(entity.getDestinationHub().getName())
                 .response(response)
                 .build();
     }

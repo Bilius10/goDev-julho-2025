@@ -3,6 +3,7 @@ package br.com.senior.transport_logistics.controller;
 import br.com.senior.transport_logistics.domain.transport.TransportService;
 import br.com.senior.transport_logistics.domain.transport.dto.request.CreateTransportRequest;
 import br.com.senior.transport_logistics.domain.transport.dto.request.UpdateTransportRequest;
+import br.com.senior.transport_logistics.domain.transport.dto.response.HubSummaryProjection;
 import br.com.senior.transport_logistics.domain.transport.dto.response.TransportResponseDTO;
 import br.com.senior.transport_logistics.domain.transport.enums.TransportStatus;
 import br.com.senior.transport_logistics.infrastructure.dto.PageDTO;
@@ -48,6 +49,16 @@ public class TransportController {
         Pageable pageable = PageRequest.of(page, size, sort);
 
         return ResponseEntity.status(HttpStatus.OK).body(service.findAll(pageable));
+    }
+
+    @Operation(summary = "Endpoint buscar filial por ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Retorna filial desejada, de acordo com o ID informado"),
+            @ApiResponse(responseCode = "404", description = "Nenhuma filial localizada com o ID informado")
+    })
+    @GetMapping("hubSummary/{id}")
+    public ResponseEntity<HubSummaryProjection> hubSummary(@PathVariable Long id){
+        return ResponseEntity.status(HttpStatus.OK).body(service.hubSummary(id));
     }
 
     @Operation(summary = "Endpoint para criar transporte otimizado")

@@ -4,7 +4,6 @@ import br.com.senior.transport_logistics.domain.hub.HubService;
 import br.com.senior.transport_logistics.domain.hub.dto.request.HubCreateRequestDTO;
 import br.com.senior.transport_logistics.domain.hub.dto.request.HubUpdateRequestDTO;
 import br.com.senior.transport_logistics.domain.hub.dto.response.HubResponseDTO;
-import br.com.senior.transport_logistics.domain.hub.dto.response.HubSummaryProjection;
 import br.com.senior.transport_logistics.infrastructure.dto.PageDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -47,16 +46,6 @@ public class HubController {
         Pageable pageable = PageRequest.of(page, size, sort);
 
         return ResponseEntity.status(HttpStatus.OK).body(service.findAll(pageable));
-    }
-
-    @Operation(summary = "Endpoint buscar filial por ID")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Retorna filial desejada, de acordo com o ID informado"),
-            @ApiResponse(responseCode = "404", description = "Nenhuma filial localizada com o ID informado")
-    })
-    @GetMapping("/{id}")
-    public ResponseEntity<HubSummaryProjection> hubSummary(@PathVariable Long id) {
-        return ResponseEntity.status(HttpStatus.OK).body(service.hubSummary(id));
     }
 
     @Operation(summary = "Endpoint para criar uma filial")
