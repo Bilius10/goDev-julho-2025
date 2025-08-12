@@ -9,6 +9,7 @@ import br.com.senior.transport_logistics.domain.shipment.ShipmentEntity;
 import br.com.senior.transport_logistics.domain.shipment.ShipmentService;
 import br.com.senior.transport_logistics.domain.transport.dto.request.CreateTransportRequest;
 import br.com.senior.transport_logistics.domain.transport.dto.request.UpdateTransportRequest;
+import br.com.senior.transport_logistics.domain.transport.dto.response.HubSummaryProjection;
 import br.com.senior.transport_logistics.domain.transport.dto.response.TransportResponseDTO;
 import br.com.senior.transport_logistics.domain.transport.enums.TransportStatus;
 import br.com.senior.transport_logistics.domain.truck.TruckEntity;
@@ -39,6 +40,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static br.com.senior.transport_logistics.infrastructure.exception.ExceptionMessages.HUB_NOT_FOUND_BY_ID;
 import static br.com.senior.transport_logistics.infrastructure.exception.ExceptionMessages.TRANSPORT_NOT_FOUND_BY_ID;
 
 @Service
@@ -69,6 +71,11 @@ public class TransportService {
                 transportPage.getSize(),
                 transportPage.getTotalElements(),
                 transportPage.getTotalPages());
+    }
+
+    public HubSummaryProjection hubSummary(Long id){
+        return repository.findHubSummaryById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(HUB_NOT_FOUND_BY_ID.getMessage(id)));
     }
 
     @Transactional

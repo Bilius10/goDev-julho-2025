@@ -3,7 +3,6 @@ package br.com.senior.transport_logistics.domain.hub;
 import br.com.senior.transport_logistics.domain.hub.dto.request.HubCreateRequestDTO;
 import br.com.senior.transport_logistics.domain.hub.dto.request.HubUpdateRequestDTO;
 import br.com.senior.transport_logistics.domain.hub.dto.response.HubResponseDTO;
-import br.com.senior.transport_logistics.domain.hub.dto.response.HubSummaryProjection;
 import br.com.senior.transport_logistics.infrastructure.dto.NominationDTO.CoordinatesDTO;
 import br.com.senior.transport_logistics.infrastructure.dto.PageDTO;
 import br.com.senior.transport_logistics.infrastructure.dto.ViaCepDTO.AddresDTO;
@@ -43,11 +42,6 @@ public class HubService {
                 hubs.getTotalPages());
     }
 
-    public HubSummaryProjection hubSummary(Long id){
-        return repository.findHubSummaryById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(HUB_NOT_FOUND_BY_ID.getMessage(id)));
-    }
-
     @Transactional
     public HubResponseDTO create(HubCreateRequestDTO request){
         createValidation(request);
@@ -76,10 +70,10 @@ public class HubService {
             hubFound.setName(request.name());
         }
 
-        if(!Objects.equals(hubFound.getCep(), request.cep()) && !Objects.equals(hubFound.getNumber(), request.number())){
+        if(!hubFound.getCep().equals(request.cep()) && !hubFound.getNumber().equals(request.number())){
             AddresDTO address = viaCepApiCilentService.getAddress(request.cep());
 
-            if(!Objects.equals(address.localidade(), hubFound.getCity())){
+            if(!address.localidade().equals(hubFound.getCity())){
                 checkIfThereIsAHubInTheCity(address.localidade());
             }
 

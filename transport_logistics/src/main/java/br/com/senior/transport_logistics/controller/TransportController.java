@@ -4,6 +4,7 @@ import br.com.senior.transport_logistics.domain.transport.TransportEntity;
 import br.com.senior.transport_logistics.domain.transport.TransportService;
 import br.com.senior.transport_logistics.domain.transport.dto.request.CreateTransportRequest;
 import br.com.senior.transport_logistics.domain.transport.dto.request.UpdateTransportRequest;
+import br.com.senior.transport_logistics.domain.transport.dto.response.HubSummaryProjection;
 import br.com.senior.transport_logistics.domain.transport.dto.response.TransportResponseDTO;
 import br.com.senior.transport_logistics.domain.transport.enums.TransportStatus;
 import br.com.senior.transport_logistics.infrastructure.dto.GeminiDTO.GeminiResponse;
@@ -40,6 +41,11 @@ public class TransportController {
         Pageable pageable = PageRequest.of(page, size, sort);
 
         return ResponseEntity.status(HttpStatus.OK).body(service.findAll(pageable));
+    }
+
+    @GetMapping("hubSummary/{id}")
+    public ResponseEntity<HubSummaryProjection> hubSummary(@PathVariable Long id){
+        return ResponseEntity.status(HttpStatus.OK).body(service.hubSummary(id));
     }
 
     @PostMapping("/optimize-allocation")
