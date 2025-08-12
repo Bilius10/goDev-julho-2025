@@ -1,5 +1,7 @@
 package br.com.senior.transport_logistics.domain.shipment;
 
+import br.com.senior.transport_logistics.domain.hub.HubEntity;
+import br.com.senior.transport_logistics.domain.hub.HubService;
 import br.com.senior.transport_logistics.domain.product.ProductEntity;
 import br.com.senior.transport_logistics.domain.product.ProductService;
 import br.com.senior.transport_logistics.domain.shipment.dto.request.ShipmentCreateDTO;
@@ -21,6 +23,7 @@ public class ShipmentService {
 
     private final ShipmentRepository repository;
     private final ProductService productService;
+    private final HubService hubService;
 
     @Transactional(readOnly = true)
     public PageDTO<ShipmentResponseDTO> findAll(Pageable pageable){
@@ -41,7 +44,9 @@ public class ShipmentService {
     public ShipmentResponseDTO create(ShipmentCreateDTO request) {
         ProductEntity product = productService.findById(request.idProduct());
 
-        ShipmentEntity shipmentEntity = new ShipmentEntity(request, product);
+        HubEntity originHub = hubService.findById(request.idOriginHub());
+        HubEntity destinationHub = hubService.findById(request.idDestinationHub());
+        ShipmentEntity shipmentEntity = new ShipmentEntity(request, product, originHub, destinationHub);
 
         ShipmentEntity savedShipment = repository.save(shipmentEntity);
 
@@ -51,6 +56,12 @@ public class ShipmentService {
     @Transactional
     public ShipmentResponseDTO update(Long id, ShipmentUpdateDTO request) {
         ShipmentEntity shipmentFound = this.findById(id);
+
+        if(shipmentFound.getDestinationHub().getId() != request.idDestinationHub()) {
+            HubEntity destinationHub = hubService.findById(request.idDestinationHub());
+            shipmentFound.setDestinationHub(destinationHub);
+        }
+
         shipmentFound.updateShipment(request, shipmentFound.getProduct());
 
         ShipmentEntity savedShipment = repository.save(shipmentFound);
