@@ -2,6 +2,7 @@ package br.com.senior.transport_logistics.domain.employee;
 
 import br.com.senior.transport_logistics.domain.employee.dto.request.EmployeeCreateRequestDTO;
 import br.com.senior.transport_logistics.domain.employee.dto.request.EmployeeLoginRequestDTO;
+import br.com.senior.transport_logistics.domain.employee.dto.request.EmployeePasswordUpdateDTO;
 import br.com.senior.transport_logistics.domain.employee.dto.request.EmployeeUpdateRequestDTO;
 import br.com.senior.transport_logistics.domain.employee.dto.response.EmployeeResponseDTO;
 import br.com.senior.transport_logistics.domain.employee.enums.Role;
@@ -180,8 +181,7 @@ class EmployeeServiceTest {
         when(passwordEncoder.matches(request.password(), employee.getPassword())).thenReturn(false);
 
         var exception =  assertThrows(WrongPasswordException.class, () -> service.signIn(request));
-
-        assertEquals("Senha informada incorreta.", exception.getMessage());
+        assertEquals(ExceptionMessages.EMPLOYEE_WRONG_CURRENT_PASSWORD.getMessage(), exception.getMessage());
 
         verify(repository).findByEmail(request.email());
     }
@@ -195,7 +195,7 @@ class EmployeeServiceTest {
 
         var exception =  assertThrows(ResourceNotFoundException.class, () -> service.signIn(request));
 
-        assertEquals(ExceptionMessages.EMPLOYEE_EMAIL_IN_USE.getMessage(request.email()), exception.getMessage());
+        assertEquals(ExceptionMessages.EMPLOYEE_NOT_FOUND_BY_EMAIL.getMessage(request.email()), exception.getMessage());
 
         verify(repository).findByEmail(request.email());
     }
@@ -330,6 +330,147 @@ class EmployeeServiceTest {
 
         verify(repository).findById(employee.getId());
     }
+
+    @Test
+    @DisplayName("Deve lançar WrongPasswordException quando senha nova e confirmação são diferentes")
+    void updatePassword_shouldThrowWrongPasswordExceptionWhenPasswordsMismatch() {
+        var employee = createEmployeeEntity();
+
+        var request = new EmployeePasswordUpdateDTO("12345679", "12345678", "12345677");
+        var exception = assertThrows(WrongPasswordException.class, () -> service.updatePassword(employee, request));
+
+        assertEquals(ExceptionMessages.EMPLOYEE_PASSWORD_CONFIRMATION_MISMATCH.getMessage(), exception.getMessage());
+    }
+
+    @Test
+    @DisplayName("Deve lançar WrongPasswordException quando senha atual está incorreta")
+    void updatePassword_shouldThrowWrongPasswordExceptionExceptionWhenCurrentPasswordIsWrong() {
+        var employee = createEmployeeEntity();
+        employee.setPassword(passwordEncoder.encode("12345678"));
+
+        var request = new EmployeePasswordUpdateDTO("12345679", "12345678", "12345678");
+        var exception = assertThrows(WrongPasswordException.class, () -> service.updatePassword(employee, request));
+
+        assertEquals(ExceptionMessages.EMPLOYEE_WRONG_CURRENT_PASSWORD.getMessage(), exception.getMessage());
+    }
+
+    @Test
+    @DisplayName("Deve atualizar a senha corretamente")
+    void updatePassword_shouldUpdatePassword() {
+        var currentPassword = "12345678";
+        var newPassword = "11111111";
+        var encodedCurrentPassword = passwordEncoder.encode(currentPassword);
+
+        var employee = mock(EmployeeEntity.class);
+        when(employee.getPassword()).thenReturn(encodedCurrentPassword);
+
+        var request = new EmployeePasswordUpdateDTO(currentPassword, newPassword, newPassword);
+
+        when(passwordEncoder.matches(currentPassword, encodedCurrentPassword)).thenReturn(true);
+        when(passwordEncoder.encode(newPassword)).thenReturn("encodedNewPassword");
+
+        service.updatePassword(employee, request);
+
+        verify(employee).setPassword("encodedNewPassword");
+        verify(repository).save(employee);
+    }
+
+    @Test
+    @DisplayName("Deve atualizar cargo corretamente")
+    void updateRole_shouldUpdateRole() {
+        var employee = createEmployeeEntity();
+        when(repository.findById(1L)).thenReturn(Optional.of(employee));
+
+        service.updateRole(1L, Role.MANAGER);
+
+        verify(repository).save(employee);
+        assertEquals(Role.MANAGER, employee.getRole());
+    }
+
+    @Test
+    @DisplayName("Deve lançar exceção quando employee não for encontrado")
+    void updateRole_shouldNotUpdateRole() {
+        when(repository.findById(1L)).thenReturn(Optional.empty());
+
+        var exception = assertThrows(ResourceNotFoundException.class, () -> service.updateRole(1L, Role.MANAGER));
+        assertEquals(ExceptionMessages.EMPLOYEE_NOT_FOUND_BY_ID.getMessage(1L), exception.getMessage());
+    }
+
+    @Test
+    @DisplayName("Deve lançar exceção quando motorista não for encontrado")
+    void findDriversOrderedByHistoryScore_shouldThrowExceptionWhenNotFound() {
+        var id = 1L;
+        when(repository.findDriversOrderedByHistoryScore(id, id, id)).thenReturn(Optional.empty());
+
+        var exception = assertThrows(ResourceNotFoundException.class, () -> service.findDriversOrderedByHistoryScore(id, id, id));
+        assertEquals(ExceptionMessages.DRIVER_NOT_FOUND.getMessage(), exception.getMessage());
+    }
+
+    @Test
+    @DisplayName("Deve retornar motoristas corretamente")
+    void findDriversOrderedByHistoryScore_shouldReturnDriversList() {
+        var id = 1L;
+        var employee = createEmployeeEntity();
+        when(repository.findDriversOrderedByHistoryScore(id, id, id)).thenReturn(Optional.of(employee));
+
+        var response = service.findDriversOrderedByHistoryScore(id, id, id);
+
+        assertEquals(employee, response);
+        verify(repository).findDriversOrderedByHistoryScore(id, id, id);
+    }
+
+    @Test
+    @DisplayName("Deve retornar lista vazia quando motoristas não forem encontrados")
+    void findAllByRole_shouldThrowExceptionWhenNotFound() {
+        var role = Role.MANAGER;
+        when(repository.findAllByRole(role)).thenReturn(List.of());
+
+        var response = service.findAllByRole(role);
+        assertEquals(0, response.size());
+        assertNotNull(response);
+        verify(repository).findAllByRole(role);
+    }
+
+    @Test
+    @DisplayName("Deve retornar motoristas corretamente")
+    void findAllByRole_shouldReturnDriversList() {
+        var role = Role.MANAGER;
+        var employee = createEmployeeEntity();
+        when(repository.findAllByRole(role)).thenReturn(List.of(employee));
+
+        var response = service.findAllByRole(role);
+        assertEquals(1, response.size());
+        assertEquals(employee, response.get(0));
+        verify(repository).findAllByRole(role);
+    }
+
+    @Test
+    @DisplayName("Deve retornar lista vazia quando motoristas não forem encontrados")
+    void findAllByRoleAndHub_shouldThrowExceptionWhenNotFound() {
+        var role = Role.MANAGER;
+        var hub = new HubEntity();
+        when(repository.findAllByRoleAndHub(role, hub)).thenReturn(List.of());
+
+        var response = service.findAllByRoleAndHub(role, hub);
+        assertEquals(0, response.size());
+        assertNotNull(response);
+        verify(repository).findAllByRoleAndHub(role, hub);
+    }
+
+    @Test
+    @DisplayName("Deve retornar motoristas corretamente")
+    void findAllByRoleAndHub_shouldReturnDriversList() {
+        var role = Role.MANAGER;
+        var hub = new HubEntity();
+        var employee = createEmployeeEntity();
+        when(repository.findAllByRoleAndHub(role, hub)).thenReturn(List.of(employee));
+
+        var response = service.findAllByRoleAndHub(role, hub);
+        assertEquals(1, response.size());
+        assertEquals(employee, response.get(0));
+        verify(repository).findAllByRoleAndHub(role, hub);
+    }
+
 
     private EmployeeEntity createEmployeeEntity() {
         return EmployeeEntity.builder()
