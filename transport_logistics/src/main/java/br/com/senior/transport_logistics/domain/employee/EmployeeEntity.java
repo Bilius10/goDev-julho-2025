@@ -85,20 +85,7 @@ public class EmployeeEntity implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        List<GrantedAuthority> authorities = new ArrayList<>();
-
-        if (this.role == Role.ADMIN) {
-            authorities.add(new SimpleGrantedAuthority("ROLE_MANAGER"));
-            authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
-            authorities.add(new SimpleGrantedAuthority("ROLE_DRIVER"));
-        } else if (this.role == Role.MANAGER) {
-            authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
-            authorities.add(new SimpleGrantedAuthority("ROLE_DRIVER"));
-        } else {
-            authorities.add(new SimpleGrantedAuthority("ROLE_DRIVER"));
-        }
-
-        return authorities;
+        return List.of(new SimpleGrantedAuthority(String.format("ROLE_%s", this.role.name())));
     }
 
     @Override
