@@ -16,9 +16,9 @@ import br.com.senior.transport_logistics.domain.transport.enums.TransportStatus;
 import br.com.senior.transport_logistics.domain.truck.TruckEntity;
 import br.com.senior.transport_logistics.domain.truck.TruckService;
 import br.com.senior.transport_logistics.domain.truck.dto.response.AverageDimensionsTrucks;
-import br.com.senior.transport_logistics.infrastructure.dto.GeminiDTO.GeminiResponse;
+import br.com.senior.transport_logistics.infrastructure.dto.GeminiDTO.TransportRecommendation;
 import br.com.senior.transport_logistics.infrastructure.dto.NominationDTO.CoordinatesDTO;
-import br.com.senior.transport_logistics.infrastructure.dto.OpenRouteDTO.ResponseForGemini;
+import br.com.senior.transport_logistics.infrastructure.dto.OpenRouteDTO.ORSRoute;
 import br.com.senior.transport_logistics.infrastructure.dto.OpenRouteDTO.request.RestrictionsRecord;
 import br.com.senior.transport_logistics.infrastructure.dto.PageDTO;
 import br.com.senior.transport_logistics.infrastructure.email.SpringMailSenderService;
@@ -59,6 +59,8 @@ public class TransportService {
     private final SpringMailSenderService emailService;
     private final PdfGenerationService pdfGenerationService;
 
+    private static final double SECONDS_IN_A_DAY = 86400.0;
+
     @Transactional(readOnly = true)
     public PageDTO<TransportResponseDTO> findAll(Pageable pageable) {
 
@@ -88,47 +90,47 @@ public class TransportService {
         List<ShipmentEntity> pendingShipments
                 = shipmentService.findAllByIdHubAndDestinationHubAndStatus(TransportStatus.PENDING, request.idDestinationHub(), request.idOriginHub());
 
-        ResponseForGemini route = getRouteData(originHub, destinationHub, shipment, request.isHazmat());
+        ORSRoute route = getRouteData(originHub, destinationHub, shipment, request.isHazmat());
 
-        long travelDays = (long) Math.ceil(route.duration() / 86400.0);
+        long travelDays = getTravelDays(route.duration());
 
         LocalDate availabilityDeadline = request.exitDay().plusDays(travelDays);
 
-        GeminiResponse truckSuggestion
+        TransportRecommendation truckSuggestion
                 = this.selectIdealTruck(request, shipment, originHub, route, availabilityDeadline, pendingShipments);
 
-        TruckEntity chosenTruck = truckService.findById(truckSuggestion.caminhaoSugerido());
+        TruckEntity chosenTruck = truckService.findById(truckSuggestion.suggestedTruckId());
 
         EmployeeEntity chosenDriver = employeeService.findDriversOrderedByHistoryScore(
-                truckSuggestion.caminhaoSugerido(),
+                truckSuggestion.suggestedTruckId(),
                 destinationHub.getId(),
                 originHub.getId()
         );
 
-        double fuel = truckSuggestion.litrosGastosIda();
+        double fuel = truckSuggestion.litersSpentOutbound();
 
         TransportEntity exitTransport = new TransportEntity(
                 chosenDriver, originHub, destinationHub, shipment,
-                chosenTruck, route.distance(), truckSuggestion.litrosGastosIda(), request.exitDay(),
+                chosenTruck, route.distance(), truckSuggestion.litersSpentOutbound(), request.exitDay(),
                 availabilityDeadline
         );
         repository.save(exitTransport);
 
-        if (truckSuggestion.produtoSelecionadoRetorno() != null) {
-            fuel += truckSuggestion.litrosGastosVolta();
+        if (truckSuggestion.returnShipmentId() != null) {
+            fuel += truckSuggestion.litersSpentReturn();
 
-            ShipmentEntity shipmentReturn = shipmentService.findById(truckSuggestion.produtoSelecionadoRetorno());
+            ShipmentEntity shipmentReturn = shipmentService.findById(truckSuggestion.returnShipmentId());
 
             TransportEntity returnTransport = new TransportEntity(
                     chosenDriver, destinationHub, originHub, shipmentReturn,
-                    chosenTruck, route.distance() / 2, truckSuggestion.litrosGastosVolta(), null,
+                    chosenTruck, route.distance() / 2, truckSuggestion.litersSpentReturn(), null,
                     availabilityDeadline
             );
             repository.save(returnTransport);
         }
 
-        return TransportCreatedResponseDTO.buildCreatedResponse(exitTransport, truckSuggestion.justificativaCaminhao(),
-                truckSuggestion.justificativaCargaRetorno(), fuel, route.distance());
+        return TransportCreatedResponseDTO.buildCreatedResponse(exitTransport, truckSuggestion.truckJustification(),
+                truckSuggestion.returnShipmentJustification(), fuel, route.distance());
     }
 
     @Transactional
@@ -228,7 +230,7 @@ public class TransportService {
                 .orElseThrow(() -> new ResourceNotFoundException(TRANSPORT_NOT_FOUND_BY_ID.getMessage(id)));
     }
 
-    private ResponseForGemini getRouteData(HubEntity originHub, HubEntity destinationHub, ShipmentEntity shipment, boolean isHazmat) {
+    private ORSRoute getRouteData(HubEntity originHub, HubEntity destinationHub, ShipmentEntity shipment, boolean isHazmat) {
         AverageDimensionsTrucks averageDimensions = truckService.findAverageDimensionsTrucks();
 
         RestrictionsRecord restrictions = new RestrictionsRecord(
@@ -245,9 +247,9 @@ public class TransportService {
         );
     }
 
-    private GeminiResponse selectIdealTruck(CreateTransportRequest request, ShipmentEntity shipment,
-                                            HubEntity originHub, ResponseForGemini route, LocalDate availabilityDeadline,
-                                            List<ShipmentEntity> pendingShipments) throws JsonProcessingException {
+    private TransportRecommendation selectIdealTruck(CreateTransportRequest request, ShipmentEntity shipment,
+                                                     HubEntity originHub, ORSRoute route, LocalDate availabilityDeadline,
+                                                     List<ShipmentEntity> pendingShipments) throws JsonProcessingException {
 
         List<TruckEntity> candidateTrucks = truckService.findByLoadCapacityGreaterThan(
                 shipment.getWeight(),
@@ -265,5 +267,9 @@ public class TransportService {
                 candidateTrucks,
                 pendingShipments
         );
+    }
+
+    private long getTravelDays(double routeDuration) {
+        return (long) Math.ceil(routeDuration / SECONDS_IN_A_DAY);
     }
 }

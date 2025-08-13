@@ -4,7 +4,7 @@ import br.com.senior.transport_logistics.infrastructure.dto.OpenRouteDTO.respons
 
 import java.util.List;
 
-public record ResponseForGemini(
+public record ORSRoute(
         Double distance,
         double duration,
         List<StepRecord> steps

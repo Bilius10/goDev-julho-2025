@@ -1,7 +1,7 @@
 package br.com.senior.transport_logistics.infrastructure.external;
 
 import br.com.senior.transport_logistics.infrastructure.dto.NominationDTO.CoordinatesDTO;
-import br.com.senior.transport_logistics.infrastructure.dto.OpenRouteDTO.ResponseForGemini;
+import br.com.senior.transport_logistics.infrastructure.dto.OpenRouteDTO.ORSRoute;
 import br.com.senior.transport_logistics.infrastructure.dto.OpenRouteDTO.request.OpenRouteRequestBody;
 import br.com.senior.transport_logistics.infrastructure.dto.OpenRouteDTO.request.OptionsRecord;
 import br.com.senior.transport_logistics.infrastructure.dto.OpenRouteDTO.request.ProfileParamsRecord;
@@ -14,7 +14,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.client.HttpClientErrorException;
 
-import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -27,7 +26,7 @@ public class OpenRouteApiClientService {
     @Value("${openrouteservice.api.key}")
     private String chaveApi;
 
-    public ResponseForGemini obterDistancia(CoordinatesDTO start, CoordinatesDTO finish, RestrictionsRecord restrictions) {
+    public ORSRoute obterDistancia(CoordinatesDTO start, CoordinatesDTO finish, RestrictionsRecord restrictions) {
 
         List<List<Double>> coordinates = List.of(
                 List.of(start.latitude(), start.longitude()),
@@ -65,7 +64,7 @@ public class OpenRouteApiClientService {
                 throw new RuntimeException("Nenhuma rota encontrada entre os pontos informados.");
             }
 
-            return new ResponseForGemini(
+            return new ORSRoute(
                     responseBody.routes().get(0).summary().distance()/1000,
                     responseBody.routes().get(0).summary().duration(),
                     responseBody.routes().stream()

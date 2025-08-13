@@ -2,7 +2,7 @@ package br.com.senior.transport_logistics.infrastructure.external;
 
 import br.com.senior.transport_logistics.domain.shipment.ShipmentEntity;
 import br.com.senior.transport_logistics.domain.truck.TruckEntity;
-import br.com.senior.transport_logistics.infrastructure.dto.GeminiDTO.GeminiResponse;
+import br.com.senior.transport_logistics.infrastructure.dto.GeminiDTO.TransportRecommendation;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -19,8 +19,8 @@ public class GeminiApiClientService {
     private final OpenAiChatModel chatModel;
     private final ObjectMapper objectMapper;
 
-    public GeminiResponse chooseBestTruck(String rotaJson, double distance, ShipmentEntity shipment,
-                                          List<TruckEntity> caminhoesCandidatos, List<ShipmentEntity> pendingShipments) {
+    public TransportRecommendation chooseBestTruck(String rotaJson, double distance, ShipmentEntity shipment,
+                                                   List<TruckEntity> caminhoesCandidatos, List<ShipmentEntity> pendingShipments) {
 
         String promptString = construirPromptParaIA(rotaJson, distance, shipment, caminhoesCandidatos, pendingShipments);
         Prompt prompt = new Prompt(promptString);
@@ -32,7 +32,7 @@ public class GeminiApiClientService {
 
         try {
 
-            return objectMapper.readValue(cleanedJson, GeminiResponse.class);
+            return objectMapper.readValue(cleanedJson, TransportRecommendation.class);
 
         } catch (JsonProcessingException e) {
             throw new RuntimeException("Erro: O JSON recebido da API é inválido.", e);
