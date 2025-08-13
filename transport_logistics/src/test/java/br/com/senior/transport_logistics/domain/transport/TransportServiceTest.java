@@ -16,10 +16,9 @@ import br.com.senior.transport_logistics.domain.transport.enums.TransportStatus;
 import br.com.senior.transport_logistics.domain.truck.TruckEntity;
 import br.com.senior.transport_logistics.domain.truck.TruckService;
 import br.com.senior.transport_logistics.domain.truck.dto.response.AverageDimensionsTrucks;
-import br.com.senior.transport_logistics.domain.truck.enums.TruckBody;
-import br.com.senior.transport_logistics.infrastructure.dto.GeminiDTO.GeminiResponse;
+import br.com.senior.transport_logistics.infrastructure.dto.GeminiDTO.TransportRecommendation;
 import br.com.senior.transport_logistics.infrastructure.dto.NominationDTO.CoordinatesDTO;
-import br.com.senior.transport_logistics.infrastructure.dto.OpenRouteDTO.ResponseForGemini;
+import br.com.senior.transport_logistics.infrastructure.dto.OpenRouteDTO.ORSRoute;
 import br.com.senior.transport_logistics.infrastructure.dto.OpenRouteDTO.request.RestrictionsRecord;
 import br.com.senior.transport_logistics.infrastructure.dto.OpenRouteDTO.response.StepRecord;
 import br.com.senior.transport_logistics.infrastructure.email.SpringMailSenderService;
@@ -256,7 +255,7 @@ class TransportServiceTest {
 
         var averageDimensions = new AverageDimensionsTrucks(8000.0, 12.0, 3.8);
 
-        var route = new ResponseForGemini(
+        var route = new ORSRoute(
                 200.0,
                 18000,
                 List.of(
@@ -272,7 +271,7 @@ class TransportServiceTest {
                 )
         );
 
-        var choosedTruck = new GeminiResponse(
+        var choosedTruck = new TransportRecommendation(
                 truck.getId(),
                 pendingShipment.getId(),
                 "Exemplo de justificativa",
@@ -316,17 +315,17 @@ class TransportServiceTest {
                 allPendingShipments
         )).thenReturn(choosedTruck);
 
-        when(truckService.findById(choosedTruck.caminhaoSugerido())).thenReturn(truck);
+        when(truckService.findById(choosedTruck.suggestedTruckId())).thenReturn(truck);
 
         when(employeeService.findDriversOrderedByHistoryScore(
-                choosedTruck.caminhaoSugerido(),
+                choosedTruck.suggestedTruckId(),
                 hubNavegantes.getId(),
                 hubBlumenau.getId()
         )).thenReturn(emp1);
 
         var exitTransport = new TransportEntity(
                 emp1, hubBlumenau, hubNavegantes, optShipment,
-                truck, route.distance(), choosedTruck.litrosGastosIda(), transportRequest.exitDay(),
+                truck, route.distance(), choosedTruck.litersSpentOutbound(), transportRequest.exitDay(),
                 durationInDays
         );
 
@@ -334,15 +333,15 @@ class TransportServiceTest {
 
         var returnTransport = new TransportEntity(
                 emp1, hubNavegantes, hubBlumenau, pendingShipment,
-                truck, route.distance() / 2, choosedTruck.litrosGastosVolta(), null,
+                truck, route.distance() / 2, choosedTruck.litersSpentReturn(), null,
                 durationInDays
         );
 
         var response = service.optimizeAllocation(transportRequest);
 
         var expected = TransportCreatedResponseDTO.buildCreatedResponse(
-                exitTransport, choosedTruck.justificativaCaminhao(), choosedTruck.justificativaCargaRetorno(),
-                choosedTruck.litrosGastosIda(), route.distance()
+                exitTransport, choosedTruck.truckJustification(), choosedTruck.returnShipmentJustification(),
+                choosedTruck.litersSpentOutbound(), route.distance()
         );
 
         assertNotNull(response);
@@ -365,7 +364,7 @@ class TransportServiceTest {
 
         var averageDimensions = new AverageDimensionsTrucks(8000.0, 12.0, 3.8);
 
-        var route = new ResponseForGemini(
+        var route = new ORSRoute(
                 200.0,
                 18000,
                 List.of(
@@ -381,7 +380,7 @@ class TransportServiceTest {
                 )
         );
 
-        var choosedTruck = new GeminiResponse(
+        var choosedTruck = new TransportRecommendation(
                 truck.getId(),
                 null,
                 "Exemplo de justificativa",
@@ -425,25 +424,25 @@ class TransportServiceTest {
                 allPendingShipments
         )).thenReturn(choosedTruck);
 
-        when(truckService.findById(choosedTruck.caminhaoSugerido())).thenReturn(truck);
+        when(truckService.findById(choosedTruck.suggestedTruckId())).thenReturn(truck);
 
         when(employeeService.findDriversOrderedByHistoryScore(
-                choosedTruck.caminhaoSugerido(),
+                choosedTruck.suggestedTruckId(),
                 hubNavegantes.getId(),
                 hubBlumenau.getId()
         )).thenReturn(emp1);
 
         var exitTransport = new TransportEntity(
                 emp1, hubBlumenau, hubNavegantes, optShipment,
-                truck, route.distance(), choosedTruck.litrosGastosIda(), transportRequest.exitDay(),
+                truck, route.distance(), choosedTruck.litersSpentOutbound(), transportRequest.exitDay(),
                 durationInDays
         );
 
         var response = service.optimizeAllocation(transportRequest);
 
         var expected = TransportCreatedResponseDTO.buildCreatedResponse(
-                exitTransport, choosedTruck.justificativaCaminhao(), choosedTruck.justificativaCargaRetorno(),
-                choosedTruck.litrosGastosIda(), route.distance()
+                exitTransport, choosedTruck.truckJustification(), choosedTruck.returnShipmentJustification(),
+                choosedTruck.litersSpentOutbound(), route.distance()
         );
 
         assertNotNull(response);
@@ -555,7 +554,7 @@ class TransportServiceTest {
 
         var averageDimensions = new AverageDimensionsTrucks(8000.0, 12.0, 3.8);
 
-        var route = new ResponseForGemini(
+        var route = new ORSRoute(
                 200.0,
                 18000,
                 List.of(
@@ -571,7 +570,7 @@ class TransportServiceTest {
                 )
         );
 
-        var choosedTruck = new GeminiResponse(
+        var choosedTruck = new TransportRecommendation(
                 truck.getId(),
                 pendingShipment.getId(),
                 "Exemplo de justificativa",
@@ -615,14 +614,14 @@ class TransportServiceTest {
                 allPendingShipments
         )).thenReturn(choosedTruck);
 
-        when(truckService.findById(choosedTruck.caminhaoSugerido())).thenThrow(new ResourceNotFoundException(
-                TRUCK_NOT_FOUND_BY_ID.getMessage(choosedTruck.caminhaoSugerido())
+        when(truckService.findById(choosedTruck.suggestedTruckId())).thenThrow(new ResourceNotFoundException(
+                TRUCK_NOT_FOUND_BY_ID.getMessage(choosedTruck.suggestedTruckId())
         ));
 
         var exception = assertThrows(ResourceNotFoundException.class, () -> service.optimizeAllocation(transportRequest));
 
         assertNotNull(exception);
-        assertEquals(TRUCK_NOT_FOUND_BY_ID.getMessage(choosedTruck.caminhaoSugerido()), exception.getMessage());
+        assertEquals(TRUCK_NOT_FOUND_BY_ID.getMessage(choosedTruck.suggestedTruckId()), exception.getMessage());
 
         verifyNoMoreInteractions(hubService);
         verifyNoMoreInteractions(shipmentService);
