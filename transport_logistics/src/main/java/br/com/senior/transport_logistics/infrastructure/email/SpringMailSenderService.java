@@ -140,7 +140,7 @@ public class SpringMailSenderService {
             maxAttempts = 3,
             backoff = @Backoff(delay = 1000)
     )
-    public void sendEmailWithTemplate(String to, String subject, String templateName,
+    private void sendEmailWithTemplate(String to, String subject, String templateName,
                                       Map<String, Object> variables) {
         try {
             Context context = new Context();
@@ -169,7 +169,7 @@ public class SpringMailSenderService {
             maxAttempts = 3,
             backoff = @Backoff(delay = 1000)
     )
-    public void sendEmailWithTemplateAndPdf(String to, String subject,
+    private void sendEmailWithTemplateAndPdf(String to, String subject,
                                             String templateName, Map<String, Object> variables,
                                             byte[] pdfAttachment, String attachmentName) {
         try {
@@ -197,7 +197,7 @@ public class SpringMailSenderService {
     }
 
     @Recover
-    public void recoverFromEmailError(Exception e,
+    private void recoverFromEmailError(Exception e,
                                       String to,
                                       String subject,
                                       String templateName,
@@ -206,7 +206,7 @@ public class SpringMailSenderService {
     }
 
     @Recover
-    public void recoverFromEmailWithPdfError(Exception e,
+    private void recoverFromEmailWithPdfError(Exception e,
                                              String to,
                                              String subject,
                                              String templateName,
