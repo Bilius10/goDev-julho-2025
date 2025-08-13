@@ -28,59 +28,73 @@ public class SecurityConfigurations {
         return http
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(Customizer.withDefaults())
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(auth -> auth
-                        // Autenticação
-                        .requestMatchers(HttpMethod.POST, "/api/v1/auth/create").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.POST, "/api/v1/auth/sign-in").permitAll()
+                .sessionManagement(      session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(auth -> {
+                    // Endpoints publicos
+                    auth.requestMatchers(
+                        "/v3/api-docs/**", 
+                        "/swagger-ui.html", 
+                        "/swagger-ui/**", 
+                        "/docs/**"
+                    ).permitAll();
+                    
+                    // Endpoints de autenticacao
+                    auth.requestMatchers(HttpMethod.POST, "/api/v1/auth/sign-in").permitAll();
+                    auth.requestMatchers(HttpMethod.POST, "/api/v1/auth/create").hasRole("ADMIN");
 
-                        // Produtos
-                        .requestMatchers(HttpMethod.GET, "/api/v1/products").hasRole("MANAGER")
-                        .requestMatchers(HttpMethod.POST, "/api/v1/products").hasRole("MANAGER")
-                        .requestMatchers(HttpMethod.PUT, "/api/v1/products/{id}").hasRole("MANAGER")
-                        .requestMatchers(HttpMethod.DELETE, "/api/v1/products/{id}").hasRole("MANAGER")
+                    // Endpoints de produto (ADMIN > MANAGER)
+                    auth.requestMatchers(HttpMethod.GET, "/api/v1/products").hasAnyRole("ADMIN", "MANAGER");
+                    auth.requestMatchers(HttpMethod.POST, "/api/v1/products").hasAnyRole("ADMIN", "MANAGER");
+                    auth.requestMatchers(HttpMethod.PUT, "/api/v1/products/{id}").hasAnyRole("ADMIN", "MANAGER");
+                    auth.requestMatchers(HttpMethod.DELETE, "/api/v1/products/{id}").hasAnyRole("ADMIN", "MANAGER");
 
-                        // Cargas
-                        .requestMatchers(HttpMethod.GET, "/api/v1/shipments").hasRole("MANAGER")
-                        .requestMatchers(HttpMethod.POST, "/api/v1/shipments").hasRole("MANAGER")
-                        .requestMatchers(HttpMethod.PUT, "/api/v1/shipments/{id}").hasRole("MANAGER")
-                        .requestMatchers(HttpMethod.DELETE, "/api/v1/shipments/{id}").hasRole("MANAGER")
+                    // Endpoints de carga (ADMIN > MANAGER)
+                    auth.requestMatchers(HttpMethod.GET, "/api/v1/shipments").hasAnyRole("ADMIN", "MANAGER");
+                    auth.requestMatchers(HttpMethod.POST, "/api/v1/shipments").hasAnyRole("ADMIN", "MANAGER");
+                    auth.requestMatchers(HttpMethod.PUT, "/api/v1/shipments/{id}").hasAnyRole("ADMIN", "MANAGER");
+                    auth.requestMatchers(HttpMethod.DELETE, "/api/v1/shipments/{id}").hasAnyRole("ADMIN", "MANAGER");
 
-                        // Caminhões
-                        .requestMatchers(HttpMethod.GET, "/api/v1/trucks", "/api/v1/trucks/{code}").hasRole("DRIVER")
-                        .requestMatchers(HttpMethod.POST, "/api/v1/trucks").hasRole("MANAGER")
-                        .requestMatchers(HttpMethod.PUT, "/api/v1/trucks/{id}").hasRole("MANAGER")
-                        .requestMatchers(HttpMethod.PATCH, "/api/v1/trucks/{code}/status").hasRole("MANAGER")
+                    // Endpoints de caminhao (ADMIN > MANAGER)
+                    auth.requestMatchers(HttpMethod.POST, "/api/v1/trucks").hasAnyRole("ADMIN", "MANAGER");
+                    auth.requestMatchers(HttpMethod.PUT, "/api/v1/trucks/{id}").hasAnyRole("ADMIN", "MANAGER");
+                    auth.requestMatchers(HttpMethod.PATCH, "/api/v1/trucks/{code}/status").hasAnyRole("ADMIN", "MANAGER");
+                    
+                    // Leitura - Caminhao (ADMIN > MANAGER > DRIVER)
+                    auth.requestMatchers(HttpMethod.GET, "/api/v1/trucks").hasAnyRole("ADMIN", "MANAGER", "DRIVER");
+                    auth.requestMatchers(HttpMethod.GET, "/api/v1/trucks/{code}").hasAnyRole("ADMIN", "MANAGER", "DRIVER");
 
-                        // Hubs
-                        .requestMatchers(HttpMethod.GET, "/api/v1/hubs").hasRole("DRIVER")
-                        .requestMatchers(HttpMethod.POST, "/api/v1/hubs").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.PUT, "/api/v1/hubs/{id}").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.DELETE, "/api/v1/hubs/{id}").hasRole("ADMIN")
+                    // Gestao de filiais (ADMIN)
+                    auth.requestMatchers(HttpMethod.POST, "/api/v1/hubs").hasRole("ADMIN");
+                    auth.requestMatchers(HttpMethod.PUT, "/api/v1/hubs/{id}").hasRole("ADMIN");
+                    auth.requestMatchers(HttpMethod.DELETE, "/api/v1/hubs/{id}").hasRole("ADMIN");
+                    
+                    // Leitura - Filial (ADMIN > MANAGER > DRIVER)
+                    auth.requestMatchers(HttpMethod.GET, "/api/v1/hubs").hasAnyRole("ADMIN", "MANAGER", "DRIVER");
 
-                        // Funcionários
-                        .requestMatchers(HttpMethod.GET, "/api/v1/employees").hasRole("MANAGER")
-                        .requestMatchers(HttpMethod.PUT, "/api/v1/employees/{id}").hasRole("MANAGER")
-                        .requestMatchers(HttpMethod.DELETE, "/api/v1/employees/{id}").hasRole("MANAGER")
-                        .requestMatchers(HttpMethod.PATCH, "/api/v1/employees/password").hasRole("DRIVER")
-                        .requestMatchers(HttpMethod.PATCH, "/api/v1/employees/{id}/role").hasRole("ADMIN")
+                    // Gestão de funcionarios (ADMIN > MANAGER)
+                    auth.requestMatchers(HttpMethod.GET, "/api/v1/employees").hasAnyRole("ADMIN", "MANAGER");
+                    auth.requestMatchers(HttpMethod.PUT, "/api/v1/employees/{id}").hasAnyRole("ADMIN", "MANAGER");
+                    auth.requestMatchers(HttpMethod.DELETE, "/api/v1/employees/{id}").hasAnyRole("ADMIN", "MANAGER");
+                    
+                    // Permissoes especiais de funcionarios
+                    auth.requestMatchers(HttpMethod.PATCH, "/api/v1/employees/password").hasAnyRole("ADMIN", "MANAGER", "DRIVER");
+                    auth.requestMatchers(HttpMethod.PATCH, "/api/v1/employees/{id}/role").hasRole("ADMIN");
 
-                        // Transportes
-                        .requestMatchers(HttpMethod.GET, "/api/v1/transports").hasRole("MANAGER")
-                        .requestMatchers(HttpMethod.POST, "/api/v1/transports/optimize-allocation").hasRole("MANAGER")
-                        .requestMatchers(HttpMethod.PATCH, "/api/v1/transports/confirm-transport/{id}").hasRole("MANAGER")
-                        .requestMatchers(HttpMethod.PUT, "/api/v1/transports/{id}").hasRole("MANAGER")
-                        .requestMatchers(HttpMethod.DELETE, "/api/v1/transports/{id}").hasRole("MANAGER")
-                        .requestMatchers(HttpMethod.PATCH, "/api/v1/transports/update-status/{id}").hasRole("DRIVER")
-                        .requestMatchers(HttpMethod.POST, "/api/v1/transports/send-weekly-schedule").hasRole("MANAGER")
-                        .requestMatchers(HttpMethod.POST, "/api/v1/transports/send-month-report").hasRole("MANAGER")
+                    // Gestao de transportes (ADMIN > MANAGER)
+                    auth.requestMatchers(HttpMethod.GET, "/api/v1/transports").hasAnyRole("ADMIN", "MANAGER");
+                    auth.requestMatchers(HttpMethod.POST, "/api/v1/transports/optimize-allocation").hasAnyRole("ADMIN", "MANAGER");
+                    auth.requestMatchers(HttpMethod.PATCH, "/api/v1/transports/confirm-transport/{id}").hasAnyRole("ADMIN", "MANAGER");
+                    auth.requestMatchers(HttpMethod.PUT, "/api/v1/transports/{id}").hasAnyRole("ADMIN", "MANAGER");
+                    auth.requestMatchers(HttpMethod.DELETE, "/api/v1/transports/{id}").hasAnyRole("ADMIN", "MANAGER");
+                    auth.requestMatchers(HttpMethod.POST, "/api/v1/transports/send-weekly-schedule").hasAnyRole("ADMIN", "MANAGER");
+                    auth.requestMatchers(HttpMethod.POST, "/api/v1/transports/send-month-report").hasAnyRole("ADMIN", "MANAGER");
+                    
+                    // Permissoes especificas de motoristas para transportes (ADMIN > MANAGER > DRIVER)
+                    auth.requestMatchers(HttpMethod.PATCH, "/api/v1/transports/update-status/{id}").hasAnyRole("ADMIN", "MANAGER", "DRIVER");
 
-                        // Swagger
-                        .requestMatchers("/v3/api-docs/**", "/swagger-ui.html", "/swagger-ui/**", "/docs/**").permitAll()
-
-                        // Qualquer outra requisição
-                        .anyRequest().authenticated()
-                )
+                    // Restante dos endpoints precisam de autenticacao
+                    auth.anyRequest().authenticated();
+                })
                 .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
