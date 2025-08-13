@@ -36,11 +36,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static br.com.senior.transport_logistics.infrastructure.exception.ExceptionMessages.HUB_NOT_FOUND_BY_ID;
@@ -76,7 +74,7 @@ public class TransportService {
                 transportPage.getTotalPages());
     }
 
-    public HubSummaryProjection hubSummary(Long id){
+    public HubSummaryProjection hubSummary(Long id) {
         return repository.findHubSummaryById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(HUB_NOT_FOUND_BY_ID.getMessage(id)));
     }
@@ -119,22 +117,22 @@ public class TransportService {
         if (truckSuggestion.produtoSelecionadoRetorno() != null) {
             fuel += truckSuggestion.litrosGastosVolta();
 
-            ShipmentEntity shipmentReturn = shipmentService.findById(request.idShipment());
+            ShipmentEntity shipmentReturn = shipmentService.findById(truckSuggestion.produtoSelecionadoRetorno());
 
             TransportEntity returnTransport = new TransportEntity(
                     chosenDriver, destinationHub, originHub, shipmentReturn,
-                    chosenTruck, route.distance()/2, truckSuggestion.litrosGastosVolta(), null,
+                    chosenTruck, route.distance() / 2, truckSuggestion.litrosGastosVolta(), null,
                     availabilityDeadline
             );
             repository.save(returnTransport);
         }
-        
-        return TransportCreatedResponseDTO.buildCreatedResponse(exitTransport, truckSuggestion.justificativaCaminhao(), 
+
+        return TransportCreatedResponseDTO.buildCreatedResponse(exitTransport, truckSuggestion.justificativaCaminhao(),
                 truckSuggestion.justificativaCargaRetorno(), fuel, route.distance());
     }
 
     @Transactional
-    public TransportResponseDTO confirmTransport(Long id){
+    public TransportResponseDTO confirmTransport(Long id) {
         TransportEntity transport = this.findById(id);
         transport.setStatus(TransportStatus.ASSIGNED);
 
@@ -149,7 +147,7 @@ public class TransportService {
 
     @Scheduled(cron = "0 0 9 * * SAT")
     @Transactional(readOnly = true)
-    public void sendWeeklySchedule(){
+    public void sendWeeklySchedule() {
         List<TransportEntity> weeklyTransport
                 = repository.findAllByExitDay(LocalDate.now(), LocalDate.now().plusDays(6));
 
@@ -192,11 +190,10 @@ public class TransportService {
 
             emailService.sendMonthReportEmail(manager, monthlyTransports, hubDrivers, hubTrucks, fuelByTruck, totalDistance);
         }
-
     }
 
     @Transactional
-    public TransportResponseDTO updateStatus(Long id, TransportStatus status){
+    public TransportResponseDTO updateStatus(Long id, TransportStatus status) {
         TransportEntity transport = this.findById(id);
         transport.setStatus(status);
         transport.getShipment().setStatus(status);
@@ -249,8 +246,8 @@ public class TransportService {
     }
 
     private GeminiResponse selectIdealTruck(CreateTransportRequest request, ShipmentEntity shipment,
-                                             HubEntity originHub, ResponseForGemini route, LocalDate availabilityDeadline,
-                                            List<ShipmentEntity> pendingShipments ) throws JsonProcessingException {
+                                            HubEntity originHub, ResponseForGemini route, LocalDate availabilityDeadline,
+                                            List<ShipmentEntity> pendingShipments) throws JsonProcessingException {
 
         List<TruckEntity> candidateTrucks = truckService.findByLoadCapacityGreaterThan(
                 shipment.getWeight(),
