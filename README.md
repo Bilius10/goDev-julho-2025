@@ -88,21 +88,36 @@ Para executar este projeto localmente, siga os passos abaixo.
     apos isso renomeie o arquivo para `application-dev.properties`
 
     ```properties
-    # --- Banco de Dados e Flyway ---
+    # Database and Flyway properties
     spring.datasource.url=jdbc:postgresql://localhost:5432/transport_logistics
-    spring.datasource.username=your-db-username
-    spring.datasource.password=your-db-password
+    spring.datasource.username=example-db-username
+    spring.datasource.password=example-db-password
+    spring.datasource.driver-class-name=org.postgresql.Driver
     
-    # --- Segurança com JWT ---
-    security.jwt.secret=your-super-strong-and-long-jwt-secret
+    spring.jpa.show-sql=true
+    spring.jpa.properties.hibernate.format_sql=true
     
-    # --- Configuração de Email (Ex: Gmail) ---
-    spring.mail.username=your-email@gmail.com
-    spring.mail.password=your-google-app-password
+    spring.flyway.enabled=true
+    spring.flyway.locations=classpath:db/migration
     
-    # --- Chaves de APIs Externas ---
-    openrouteservice.api.key=your-openrouteservice-api-key
-    spring.ai.openai.api-key=your-openai-api-key
+    # Spring Security properties
+    security.jwt.secret=example-jwt-secret
+    security.jwt.issuer=example-jwt-issuer
+    security.jwt.expiration-hours=example-jwt-expiration-hours
+    
+    # Spring Mail properties
+    spring.mail.host=smtp.gmail.com
+    spring.mail.port=587
+    spring.mail.username=example-email-username
+    spring.mail.password=example-email-password
+    spring.mail.properties.mail.smtp.auth=true
+    spring.mail.properties.mail.smtp.starttls.enable=true
+    spring.mail.properties.mail.smtp.starttls.required=true
+    
+    # External API Keys
+    openrouteservice.api.key=example-openrouteservice-api-key
+    spring.ai.openai.api-key=example-api-key
+    spring.ai.openai.chat.options.model=example-model
     ```
 
 4.  **Execute a aplicação:**
@@ -116,7 +131,7 @@ A API estará disponível em `http://localhost:8080`.
 
 ### 📖 Documentação da API
 
-Para uma exploração interativa, acesse a UI do Swagger: **[http://localhost:8080/swagger-ui/index.html](http://localhost:8080/swagger-ui/index.html)**
+Para uma exploração interativa, acesse a UI do Swagger: **[http://localhost:8080/swagger-ui/index.html](http://localhost:8080/docs)**
 
 A seguir, a lista detalhada dos endpoints disponíveis:
 
