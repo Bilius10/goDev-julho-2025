@@ -54,7 +54,7 @@ A API foi construída com um conjunto de tecnologias modernas para garantir perf
 | **Spring Security & JWT** | Controle de autenticação e autorização.                  |
 | **Spring AI (OpenAI)** | Integração com IA para otimização logística.             |
 | **Flyway** | Ferramenta para versionamento e migração do banco de dados.|
-| **JasperReports** | Geração de relatórios em PDF.                            |
+| **ITEXT** | Geração de relatórios em PDF.                            |
 | **Thymeleaf & Spring Mail**| Criação de templates e envio de e-mails.                 |
 | **OpenRouteService** | API de terceiros para cálculo de rotas e distâncias.     |
 | **JUnit 5 & Mockito** | Ferramentas para a escrita de testes.                    |
