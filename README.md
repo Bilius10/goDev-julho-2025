@@ -135,42 +135,66 @@ Para uma exploração interativa, acesse a UI do Swagger: **[http://localhost:80
 
 A seguir, a lista detalhada dos endpoints disponíveis:
 
-#### Autenticação (`AuthController`)
-| Método | Endpoint           | Descrição                                         | Acesso |
-| :----- | :----------------- | :------------------------------------------------ | :----- |
-| `POST` | `/auth/sign-in`    | Autentica um usuário e retorna um token JWT.      | Público|
-| `POST` | `/auth/create`     | Registra um novo funcionário na plataforma.       | ADMIN  |
-| `PATCH`| `/auth/password`   | Permite ao usuário autenticado alterar sua senha. | Todos  |
+## Autenticação
+| Método HTTP | Endpoint                  | Roles Permitidas |
+|-------------|---------------------------|------------------|
+| POST        | /api/v1/auth/create        | ADMIN            |
+| POST        | /api/v1/auth/sign-in       | PÚBLICO          |
+| PATCH       | /api/v1/auth/password      | TODOS            |
 
-#### Funcionários (`EmployeeController`)
-| Método | Endpoint           | Descrição                                         | Acesso |
-| :----- | :----------------- | :------------------------------------------------ | :----- |
-| `GET`  | `/employees`       | Lista todos os funcionários com paginação.        | MANAGER|
-| `PUT`  | `/employees/{id}`  | Atualiza os dados de um funcionário.              | MANAGER|
-| `PATCH`| `/employees/{id}/role` | Altera a permissão (role) de um funcionário.  | ADMIN  |
-| `DELETE`| `/employees/{id}` | Desativa (delete lógico) um funcionário.         | ADMIN  |
+## Produtos
+| Método HTTP | Endpoint                  | Roles Permitidas |
+|-------------|---------------------------|------------------|
+| GET         | /api/v1/products           | MANAGER          |
+| POST        | /api/v1/products           | MANAGER          |
+| PUT         | /api/v1/products/{id}      | MANAGER          |
+| DELETE      | /api/v1/products/{id}      | MANAGER          |
 
-#### Filiais (`HubController`)
-| Método | Endpoint   | Descrição                               | Acesso |
-| :----- | :--------- | :-------------------------------------- | :----- |
-| `GET`  | `/hubs`    | Lista todas as filiais com paginação.   | Todos  |
-| `POST` | `/hubs`    | Cadastra uma nova filial.               | ADMIN  |
-| `PUT`  | `/hubs/{id}`| Atualiza os dados de uma filial.       | ADMIN  |
-| `DELETE`| `/hubs/{id}`| Remove uma filial (delete físico).      | ADMIN  |
+## Cargas
+| Método HTTP | Endpoint                     | Roles Permitidas |
+|-------------|------------------------------|------------------|
+| GET         | /api/v1/shipments             | MANAGER          |
+| POST        | /api/v1/shipments             | MANAGER          |
+| PUT         | /api/v1/shipments/{id}        | MANAGER          |
+| DELETE      | /api/v1/shipments/{id}        | MANAGER          |
 
-#### Transportes (`TransportController`)
-| Método | Endpoint                     | Descrição                                                              | Acesso |
-| :----- | :--------------------------- | :--------------------------------------------------------------------- | :----- |
-| `GET`  | `/transports`                | Lista todos os transportes com paginação.                              | MANAGER|
-| `GET`  | `/transports/hubSummary/{id}`| Retorna um resumo operacional de uma filial.                           | MANAGER|
-| `POST` | `/transports/optimize-allocation`| **(Core)** Cria um transporte otimizado utilizando IA.               | MANAGER|
-| `PATCH`| `/transports/confirm-transport/{id}`| Confirma um transporte criado pela IA, alocando os recursos.     | MANAGER|
-| `PATCH`| `/transports/update-status/{id}`| Atualiza o status de um transporte (ex: EM TRÂNSITO).                | DRIVER |
-| `POST` | `/transports/send-weekly-schedule`| Envia o relatório de escala semanal para os motoristas.            | MANAGER|
-| `POST` | `/transports/send-month-report`| Envia o relatório de balanço mensal para os gestores de filial.      | ADMIN  |
-| `PUT`  | `/transports/{id}`           | Atualiza os dados de um transporte.                                    | MANAGER|
-| `DELETE`| `/transports/{id}`          | Remove um transporte (delete físico).                                  | ADMIN  |
+## Caminhões
+| Método HTTP | Endpoint                           | Roles Permitidas |
+|-------------|------------------------------------|------------------|
+| GET         | /api/v1/trucks                     | DRIVER           |
+| GET         | /api/v1/trucks/{code}               | DRIVER           |
+| POST        | /api/v1/trucks                     | MANAGER          |
+| PATCH       | /api/v1/trucks/{code}/status        | MANAGER          |
 
+## Hubs
+| Método HTTP | Endpoint                  | Roles Permitidas |
+|-------------|---------------------------|------------------|
+| GET         | /api/v1/hubs               | DRIVER           |
+| GET         | /api/v1/hubs/{id}          | DRIVER           |
+| POST        | /api/v1/hubs               | ADMIN            |
+| PUT         | /api/v1/hubs/{id}          | ADMIN            |
+| DELETE      | /api/v1/hubs/{id}          | ADMIN            |
+
+## Funcionários
+| Método HTTP | Endpoint                        | Roles Permitidas |
+|-------------|---------------------------------|------------------|
+| GET         | /api/v1/employees                | MANAGER          |
+| PUT         | /api/v1/employees/{id}           | MANAGER          |
+| DELETE      | /api/v1/employees/{id}           | MANAGER          |
+| PATCH       | /api/v1/employees/{id}/role      | ADMIN            |
+
+## Transportes
+| Método HTTP | Endpoint                                      | Roles Permitidas |
+|-------------|-----------------------------------------------|------------------|
+| GET         | /api/v1/transports                            | MANAGER          |
+| GET         | /api/v1/transports/hubSummary/{id}             | MANAGER          |
+| POST        | /api/v1/transports/optimize-allocation         | MANAGER          |
+| PATCH       | /api/v1/transports/confirm-transport/{id}      | MANAGER          |
+| PATCH       | /api/v1/transports/update-status/{id}          | DRIVER           |
+| POST        | /api/v1/transports/send-weekly-schedule        | MANAGER          |
+| POST        | /api/v1/transports/send-month-report           | ADMIN            |
+| PUT         | /api/v1/transports/{id}                        | MANAGER          |
+| DELETE      | /api/v1/transports/{id}                        | ADMIN            |
 ---
 
 ### 👨‍💻 Autores
