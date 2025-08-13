@@ -48,7 +48,7 @@ public class NominatimApiClientService {
         JSONArray results = new JSONArray(json);
 
         if (results.isEmpty()) {
-            throw new ErrorForRequest("Endereõ não encontrado.");
+            throw new ErrorForRequest("Endereço não encontrado.");
         }
 
         JSONObject firstResult = results.getJSONObject(0);

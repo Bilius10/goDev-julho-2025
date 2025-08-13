@@ -90,7 +90,7 @@ public class TransportService {
         List<ShipmentEntity> pendingShipments
                 = shipmentService.findAllByIdHubAndDestinationHubAndStatus(TransportStatus.PENDING, request.idDestinationHub(), request.idOriginHub());
 
-        ResponseForGemini route = getRouteData(originHub, destinationHub, shipment, request.isHazmat());
+        ResponseForGemini route = this.getRouteData(originHub, destinationHub, shipment, request.isHazmat());
 
         long travelDays = (long) Math.ceil(route.duration() / 86400.0);
 
@@ -119,7 +119,7 @@ public class TransportService {
         if (truckSuggestion.produtoSelecionadoRetorno() != null) {
             fuel += truckSuggestion.litrosGastosVolta();
 
-            ShipmentEntity shipmentReturn = shipmentService.findById(request.idShipment());
+            ShipmentEntity shipmentReturn = shipmentService.findById(truckSuggestion.produtoSelecionadoRetorno());
 
             TransportEntity returnTransport = new TransportEntity(
                     chosenDriver, destinationHub, originHub, shipmentReturn,
@@ -173,7 +173,7 @@ public class TransportService {
         for (EmployeeEntity manager : managers) {
             HubEntity hub = manager.getHub();
 
-            List<TransportEntity> monthlyTransports = repository.findAllByExitDayAndOriginHub(LocalDate.now(), LocalDate.now().plusDays(8), hub.getId());
+            List<TransportEntity> monthlyTransports = repository.findAllByExitDayAndOriginHub(startDate, endDate, hub.getId());
             List<EmployeeEntity> hubDrivers = employeeService.findAllByRoleAndHub(Role.DRIVER, hub);
             List<TruckEntity> hubTrucks = truckService.findAllByHub(hub);
 
