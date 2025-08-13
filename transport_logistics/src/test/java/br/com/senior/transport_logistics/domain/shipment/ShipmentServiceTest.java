@@ -1,5 +1,7 @@
 package br.com.senior.transport_logistics.domain.shipment;
 
+import br.com.senior.transport_logistics.domain.hub.HubEntity;
+import br.com.senior.transport_logistics.domain.hub.HubService;
 import br.com.senior.transport_logistics.domain.product.ProductEntity;
 import br.com.senior.transport_logistics.domain.product.ProductService;
 import br.com.senior.transport_logistics.domain.product.enums.ProductCategory;
@@ -41,6 +43,9 @@ class ShipmentServiceTest {
     @Mock
     private ProductService productService;
 
+    @Mock
+    private HubService hubService;
+
     @Test
     void findAll() {
 
@@ -63,44 +68,99 @@ class ShipmentServiceTest {
     @Test
     @DisplayName("Deve criar um novo shipment com sucesso")
     void create_context1() {
+        ShipmentCreateDTO teste = new ShipmentCreateDTO(10, "teste", false, 1L, 1L, 2L);
 
         ProductEntity product = new ProductEntity(1L, "Produto Teste", ProductCategory.AUTOMOTIVE, 1.2f, true);
-        ShipmentCreateDTO requestDTO = new ShipmentCreateDTO(5, "Notas", false, 1L, null, null);
-        ShipmentEntity shipmentEntity = new ShipmentEntity(1L, 6.0, 5, "Notas", false, product, TransportStatus.PENDING, null, null);
 
-        when(productService.findById(1L)).thenReturn(product);
-        when(repository.save(any(ShipmentEntity.class))).thenReturn(shipmentEntity);
+        HubEntity originHub = new HubEntity(1L, "Hub Novo", "0", "rua teste",
+                "0", "bairro teste", "cidade testes", "estado teste",
+                "pais teste", 0.0, 0.0, "001");
+        HubEntity destinationsHub = new HubEntity(2L, "Hub Novo", "0", "rua teste",
+                "0", "bairro teste", "cidade testes", "estado teste",
+                "pais teste", 0.0, 0.0, "001");
 
+        ShipmentEntity shipment = new ShipmentEntity(teste, product, originHub, destinationsHub);
+        shipment.setId(1L);
 
-        ShipmentResponseDTO result = service.create(requestDTO);
+        ShipmentResponseDTO detailed = ShipmentResponseDTO.detailed(shipment);
 
+        when(productService.findById(anyLong())).thenReturn(product);
+        when(hubService.findById(anyLong())).thenReturn(originHub);
+        when(hubService.findById(anyLong())).thenReturn(destinationsHub);
+        when(repository.save(any())).thenReturn(shipment);
 
-        assertNotNull(result);
-        assertEquals(shipmentEntity.getId(), result.id());
-        assertEquals(shipmentEntity.getQuantity(), result.quantity());
+        ShipmentResponseDTO shipmentResponseDTO = service.create(teste);
+
+        assertNotNull(shipmentResponseDTO);
+        assertEquals(shipmentResponseDTO.id(), shipmentResponseDTO.id());
+        assertEquals(shipmentResponseDTO.productName(), shipmentResponseDTO.productName());
+        assertEquals(shipmentResponseDTO, detailed);
     }
 
     @Test
-    @DisplayName("Deve atualizar um shipment existente com sucesso")
-    void update() {
-
+    @DisplayName("Deve atualizar um shipment existente com sucesso sem trocar o destino")
+    void update_context1() {
         Long shipmentId = 1L;
+
+        HubEntity originHub = new HubEntity(1L, "Hub Novo", "0", "rua teste",
+                "0", "bairro teste", "cidade testes", "estado teste",
+                "pais teste", 0.0, 0.0, "001");
+        HubEntity destinationsHub = new HubEntity(2L, "Hub Novo", "0", "rua teste",
+                "0", "bairro teste", "cidade testes", "estado teste",
+                "pais teste", 0.0, 0.0, "001");
+
         ProductEntity product = new ProductEntity(1L, "Produto Teste", ProductCategory.AUTOMOTIVE, 1.2f, true);
-        ShipmentEntity shipmentFound = new ShipmentEntity(shipmentId, 10.0, 5, "Notas Antigas", false, product, TransportStatus.PENDING, null, null);
+        ShipmentEntity shipmentFound = new ShipmentEntity(shipmentId, 10.0, 5, "Notas Antigas",
+                false, product, TransportStatus.PENDING, originHub, destinationsHub);
+        ShipmentUpdateDTO requestDTO = new ShipmentUpdateDTO(10, "Notas Novas", true, 2L);
+        ShipmentEntity shipmentUpdated = new ShipmentEntity(shipmentId, 10.0, 10, "Notas Novas",
+                true, product, TransportStatus.PENDING, originHub, destinationsHub);
+
+
+        when(repository.findById(anyLong())).thenReturn(Optional.of(shipmentFound));
+        when(repository.save(any())).thenReturn(shipmentUpdated);
+
+        ShipmentResponseDTO update = service.update(shipmentId, requestDTO);
+
+        assertNotNull(update);
+        assertEquals(update.id(), update.id());
+        assertEquals(update.productName(), update.productName());
+
+    }
+
+    @Test
+    @DisplayName("Deve atualizar um shipment existente com sucesso trocando o destino")
+    void update_context2() {
+        Long shipmentId = 1L;
+
+        HubEntity originHub = new HubEntity(1L, "Hub Novo", "0", "rua teste",
+                "0", "bairro teste", "cidade testes", "estado teste",
+                "pais teste", 0.0, 0.0, "001");
+        HubEntity destinationsHub = new HubEntity(2L, "Hub Novo", "0", "rua teste",
+                "0", "bairro teste", "cidade testes", "estado teste",
+                "pais teste", 0.0, 0.0, "001");
+
+        ProductEntity product = new ProductEntity(1L, "Produto Teste", ProductCategory.AUTOMOTIVE, 1.2f, true);
+        ShipmentEntity shipmentFound = new ShipmentEntity(shipmentId, 10.0, 5, "Notas Antigas",
+                false, product, TransportStatus.PENDING, originHub, destinationsHub);
         ShipmentUpdateDTO requestDTO = new ShipmentUpdateDTO(10, "Notas Novas", true, 1L);
+        ShipmentEntity shipmentUpdated = new ShipmentEntity(shipmentId, 10.0, 10, "Notas Novas",
+                true, product, TransportStatus.PENDING, originHub, destinationsHub);
 
-        ShipmentEntity shipmentUpdated = new ShipmentEntity(shipmentId, 10.0, 10, "Notas Novas", true, product, TransportStatus.PENDING, null, null);
 
-        when(repository.findById(shipmentId)).thenReturn(Optional.of(shipmentFound));
-        when(repository.save(any(ShipmentEntity.class))).thenReturn(shipmentUpdated);
+        when(repository.findById(anyLong())).thenReturn(Optional.of(shipmentFound));
+        when(repository.save(any())).thenReturn(shipmentUpdated);
+        when(hubService.findById(anyLong())).thenReturn(originHub);
 
-        ShipmentResponseDTO result = service.update(shipmentId, requestDTO);
+        shipmentUpdated.setDestinationHub(originHub);
 
-        assertNotNull(result);
-        assertEquals(shipmentUpdated.getId(), result.id());
-        assertEquals(shipmentUpdated.getQuantity(), result.quantity());
-        assertEquals(shipmentUpdated.getNotes(), result.notes());
-        assertEquals(shipmentUpdated.isHazardous(), result.isHazardous());
+        ShipmentResponseDTO update = service.update(shipmentId, requestDTO);
+
+        assertNotNull(update);
+        assertEquals(update.id(), update.id());
+        assertEquals(update.productName(), update.productName());
+        assertEquals(shipmentUpdated.getDestinationHub(), originHub);
+
     }
 
     @Test
