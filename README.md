@@ -1,1 +1,167 @@
-# goDev-julho-2025
+# LogiTrack API 🚚
+
+![Linguagem](https://img.shields.io/badge/Java-17%2B-blue?style=for-the-badge&logo=java)
+![Framework](https://img.shields.io/badge/Spring%20Boot-3.x-brightgreen?style=for-the-badge&logo=spring)
+![Banco de Dados](https://img.shields.io/badge/PostgreSQL-darkblue?style=for-the-badge&logo=postgresql)
+![Status](https://img.shields.io/badge/status-concluído-green?style=for-the-badge)
+
+<br>
+
+<p align="center">
+  <strong>API robusta para gerenciamento e otimização de operações logísticas, utilizando IA para decisões inteligentes.</strong>
+</p>
+
+---
+
+### 📝 Índice
+
+* [Sobre o Projeto](#-sobre-o-projeto)
+* [Funcionalidades](#-funcionalidades)
+* [Tecnologias e Arquitetura](#️-tecnologias-e-arquitetura)
+* [Começando](#-começando)
+* [Documentação da API](#-documentação-da-api)
+* [Autores](#-autores)
+
+---
+
+### 🧐 Sobre o Projeto
+
+O **LogiTrack API** é uma solução de back-end completa desenvolvida para o desafio GoDev da Senior Sistemas. O projeto simula uma plataforma de gerenciamento logístico, focada em otimizar toda a cadeia de transporte. A API utiliza **Inteligência Artificial** para analisar dados complexos e auxiliar na tomada de decisões estratégicas, como a seleção do caminhão mais eficiente para uma determinada rota e a escolha de cargas de retorno, visando maximizar a eficiência e reduzir custos operacionais.
+
+---
+
+### ✨ Funcionalidades
+
+A plataforma foi projetada com as seguintes funcionalidades em mente:
+
+* **Gestão Completa:** Controle total sobre as entidades do negócio, incluindo Filiais, Produtos, Cargas, Caminhões, Funcionários e Transportes.
+* **Otimização Inteligente:** Endpoint dedicado (`/optimize-allocation`) que utiliza IA para sugerir o melhor caminhão para uma entrega, com base em segurança, manobrabilidade e consumo de combustível.
+* **Segurança:** Autenticação e autorização baseadas em JWT para proteger os endpoints, com diferentes níveis de acesso (Roles).
+* **Relatórios Automatizados:** Geração e envio de relatórios operacionais por e-mail, como a escala semanal de motoristas e o balanço mensal das filiais.
+* **Documentação Interativa:** API totalmente documentada com Swagger (OpenAPI 3), permitindo fácil exploração e teste dos endpoints.
+
+---
+
+### 🛠️ Tecnologias e Arquitetura
+
+A API foi construída com um conjunto de tecnologias modernas para garantir performance, segurança e escalabilidade.
+
+| Tecnologia                 | Propósito                                                |
+| :------------------------- | :------------------------------------------------------- |
+| **Spring Boot** | Framework principal para construção da API REST.         |
+| **Java 17+** | Linguagem de programação base.                           |
+| **PostgreSQL** | Banco de dados relacional para persistência dos dados.   |
+| **Spring Security & JWT** | Controle de autenticação e autorização.                  |
+| **Spring AI (OpenAI)** | Integração com IA para otimização logística.             |
+| **Flyway** | Ferramenta para versionamento e migração do banco de dados.|
+| **JasperReports** | Geração de relatórios em PDF.                            |
+| **Thymeleaf & Spring Mail**| Criação de templates e envio de e-mails.                 |
+| **OpenRouteService** | API de terceiros para cálculo de rotas e distâncias.     |
+| **JUnit 5 & Mockito** | Ferramentas para a escrita de testes.                    |
+| **SpringDoc (OpenAPI 3)** | Documentação automática da API.                          |
+
+A arquitetura do projeto segue o padrão de camadas (Controller, Service, Repository) para uma clara separação de responsabilidades.
+
+---
+
+### 🚀 Começando
+
+Para executar este projeto localmente, siga os passos abaixo.
+
+#### **Pré-requisitos**
+
+* Java JDK 17 ou superior
+* Maven 3.8+
+* PostgreSQL
+* Chaves de API para OpenAI e OpenRouteService
+
+#### **Instalação**
+
+1.  **Clone o repositório:**
+    ```sh
+    git clone [https://github.com/seu-usuario/logitrack-api.git]
+    cd logitrack-api
+    ```
+
+2.  **Configure as variáveis de ambiente:**
+    No arquivo `src/main/resources/application-dev-examples.properties`, preencha as informações de conexão com o banco de dados, chaves de API e segredos,
+    apos isso renomeie o arquivo para `application-dev.properties`
+
+    ```properties
+    # --- Banco de Dados e Flyway ---
+    spring.datasource.url=jdbc:postgresql://localhost:5432/transport_logistics
+    spring.datasource.username=your-db-username
+    spring.datasource.password=your-db-password
+    
+    # --- Segurança com JWT ---
+    security.jwt.secret=your-super-strong-and-long-jwt-secret
+    
+    # --- Configuração de Email (Ex: Gmail) ---
+    spring.mail.username=your-email@gmail.com
+    spring.mail.password=your-google-app-password
+    
+    # --- Chaves de APIs Externas ---
+    openrouteservice.api.key=your-openrouteservice-api-key
+    spring.ai.openai.api-key=your-openai-api-key
+    ```
+
+4.  **Execute a aplicação:**
+    ```sh
+    mvn spring-boot:run
+    ```
+
+A API estará disponível em `http://localhost:8080`.
+
+---
+
+### 📖 Documentação da API
+
+Para uma exploração interativa, acesse a UI do Swagger: **[http://localhost:8080/swagger-ui/index.html](http://localhost:8080/swagger-ui/index.html)**
+
+A seguir, a lista detalhada dos endpoints disponíveis:
+
+#### Autenticação (`AuthController`)
+| Método | Endpoint           | Descrição                                         | Acesso |
+| :----- | :----------------- | :------------------------------------------------ | :----- |
+| `POST` | `/auth/sign-in`    | Autentica um usuário e retorna um token JWT.      | Público|
+| `POST` | `/auth/create`     | Registra um novo funcionário na plataforma.       | ADMIN  |
+| `PATCH`| `/auth/password`   | Permite ao usuário autenticado alterar sua senha. | Todos  |
+
+#### Funcionários (`EmployeeController`)
+| Método | Endpoint           | Descrição                                         | Acesso |
+| :----- | :----------------- | :------------------------------------------------ | :----- |
+| `GET`  | `/employees`       | Lista todos os funcionários com paginação.        | MANAGER|
+| `PUT`  | `/employees/{id}`  | Atualiza os dados de um funcionário.              | MANAGER|
+| `PATCH`| `/employees/{id}/role` | Altera a permissão (role) de um funcionário.  | ADMIN  |
+| `DELETE`| `/employees/{id}` | Desativa (delete lógico) um funcionário.         | ADMIN  |
+
+#### Filiais (`HubController`)
+| Método | Endpoint   | Descrição                               | Acesso |
+| :----- | :--------- | :-------------------------------------- | :----- |
+| `GET`  | `/hubs`    | Lista todas as filiais com paginação.   | Todos  |
+| `POST` | `/hubs`    | Cadastra uma nova filial.               | ADMIN  |
+| `PUT`  | `/hubs/{id}`| Atualiza os dados de uma filial.       | ADMIN  |
+| `DELETE`| `/hubs/{id}`| Remove uma filial (delete físico).      | ADMIN  |
+
+#### Transportes (`TransportController`)
+| Método | Endpoint                     | Descrição                                                              | Acesso |
+| :----- | :--------------------------- | :--------------------------------------------------------------------- | :----- |
+| `GET`  | `/transports`                | Lista todos os transportes com paginação.                              | MANAGER|
+| `GET`  | `/transports/hubSummary/{id}`| Retorna um resumo operacional de uma filial.                           | MANAGER|
+| `POST` | `/transports/optimize-allocation`| **(Core)** Cria um transporte otimizado utilizando IA.               | MANAGER|
+| `PATCH`| `/transports/confirm-transport/{id}`| Confirma um transporte criado pela IA, alocando os recursos.     | MANAGER|
+| `PATCH`| `/transports/update-status/{id}`| Atualiza o status de um transporte (ex: EM TRÂNSITO).                | DRIVER |
+| `POST` | `/transports/send-weekly-schedule`| Envia o relatório de escala semanal para os motoristas.            | MANAGER|
+| `POST` | `/transports/send-month-report`| Envia o relatório de balanço mensal para os gestores de filial.      | ADMIN  |
+| `PUT`  | `/transports/{id}`           | Atualiza os dados de um transporte.                                    | MANAGER|
+| `DELETE`| `/transports/{id}`          | Remove um transporte (delete físico).                                  | ADMIN  |
+
+---
+
+### 👨‍💻 Autores
+
+Este projeto foi desenvolvido pela equipe:
+
+* **João Vitor da Rosa de Oliveira** - `joao.deoliveira@senior.com.br`
+* **Martin Garrote** - `Martin.Garrote@senior.com.br`
+* **Nicole Sypriany** - `Nicole.Sypriany@senior.com.br`
