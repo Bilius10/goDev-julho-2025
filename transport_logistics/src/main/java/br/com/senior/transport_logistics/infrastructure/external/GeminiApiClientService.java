@@ -3,6 +3,7 @@ package br.com.senior.transport_logistics.infrastructure.external;
 import br.com.senior.transport_logistics.domain.shipment.ShipmentEntity;
 import br.com.senior.transport_logistics.domain.truck.TruckEntity;
 import br.com.senior.transport_logistics.infrastructure.dto.GeminiDTO.GeminiResponse;
+import br.com.senior.transport_logistics.infrastructure.exception.external.ErrorForRequest;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -35,9 +36,9 @@ public class GeminiApiClientService {
             return objectMapper.readValue(cleanedJson, GeminiResponse.class);
 
         } catch (JsonProcessingException e) {
-            throw new RuntimeException("Erro: O JSON recebido da API é inválido.", e);
+            throw new ErrorForRequest("O JSON recebido da API é inválido.");
         } catch (NumberFormatException e) {
-            throw new RuntimeException("Erro: A API retornou um valor não numérico para ID do caminhão ou litros gastos.", e);
+            throw new ErrorForRequest("A API retornou um valor não numérico para ID do caminhão ou litros gastos.");
         }
     }
 
@@ -137,7 +138,7 @@ public class GeminiApiClientService {
             );
 
         } catch (JsonProcessingException e) {
-            throw new RuntimeException("Erro ao serializar a lista de caminhões para JSON.", e);
+            throw new ErrorForRequest("Erro ao serializar a lista de caminhões para JSON.");
         }
     }
 
@@ -147,7 +148,7 @@ public class GeminiApiClientService {
         if (inicio != -1 && fim != -1 && fim > inicio) {
             return textoCompleto.substring(inicio, fim + 1);
         }
-        throw new IllegalArgumentException("Não foi possível extrair um JSON válido da resposta da API: " + textoCompleto);
+        throw new ErrorForRequest("Não foi possível extrair um JSON válido da resposta da API: " + textoCompleto);
     }
 }
 
