@@ -14,11 +14,11 @@ public interface ProductRepository extends JpaRepository<ProductEntity,Long> {
     @Query("""
             SELECT p FROM Product p
             WHERE (:category IS NULL OR p.category = :category)
-            AND (:weight IS NULL OR p.weight <= :limitWeight)
+            AND (:limitWeight IS NULL OR p.weight <= :limitWeight)
             """)
     Page<ProductEntity> findAllProductsWithFilters(
             @Param(value = "category") ProductCategory category,
-            @Param(value = "weight") Float limitWeight,
+            @Param(value = "limitWeight") Float limitWeight,
             Pageable pageable
     );
 
