@@ -16,19 +16,21 @@ import br.com.senior.transport_logistics.domain.transport.enums.TransportStatus;
 import br.com.senior.transport_logistics.domain.truck.TruckEntity;
 import br.com.senior.transport_logistics.domain.truck.TruckService;
 import br.com.senior.transport_logistics.domain.truck.dto.response.AverageDimensionsTrucks;
-import br.com.senior.transport_logistics.infrastructure.dto.GeminiDTO.GeminiResponse;
+import br.com.senior.transport_logistics.infrastructure.dto.GeminiDTO.TransportRecommendation;
 import br.com.senior.transport_logistics.infrastructure.dto.NominationDTO.CoordinatesDTO;
-import br.com.senior.transport_logistics.infrastructure.dto.OpenRouteDTO.ResponseForGemini;
+import br.com.senior.transport_logistics.infrastructure.dto.OpenRouteDTO.ORSRoute;
 import br.com.senior.transport_logistics.infrastructure.dto.OpenRouteDTO.request.RestrictionsRecord;
 import br.com.senior.transport_logistics.infrastructure.dto.PageDTO;
 import br.com.senior.transport_logistics.infrastructure.email.SpringMailSenderService;
 import br.com.senior.transport_logistics.infrastructure.exception.common.ResourceNotFoundException;
-import br.com.senior.transport_logistics.infrastructure.external.GeminiApiClientService;
+import br.com.senior.transport_logistics.infrastructure.external.OpenAiApiClientService;
 import br.com.senior.transport_logistics.infrastructure.external.OpenRouteApiClientService;
 import br.com.senior.transport_logistics.infrastructure.pdf.PdfGenerationService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -36,11 +38,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static br.com.senior.transport_logistics.infrastructure.exception.ExceptionMessages.HUB_NOT_FOUND_BY_ID;
@@ -55,11 +55,24 @@ public class TransportService {
     private final HubService hubService;
     private final ShipmentService shipmentService;
     private final OpenRouteApiClientService openRouteApiClientService;
-    private final GeminiApiClientService geminiApiClientService;
+    private final OpenAiApiClientService openAiApiClientService;
     private final EmployeeService employeeService;
     private final ObjectMapper objectMapper;
     private final SpringMailSenderService emailService;
     private final PdfGenerationService pdfGenerationService;
+
+    // Self-injection para contornar limitacao do proxy transacional do Spring
+    // Chamadas internas (this.metodo()) nao passam pelo proxy, ignorando @Transactional
+    // Self-injection permite que chamadas internas sejam interceptadas pelo proxy
+    private TransportService self;
+
+    @Autowired
+    @Lazy // Evita dependencia circular - injeta proxy lazy ao inves do bean real
+    public void setSelf(TransportService self) {
+        this.self = self;
+    }
+
+    private static final double SECONDS_IN_A_DAY = 86400.0;
 
     @Transactional(readOnly = true)
     public PageDTO<TransportResponseDTO> findAll(Pageable pageable) {
@@ -76,65 +89,110 @@ public class TransportService {
                 transportPage.getTotalPages());
     }
 
-    public HubSummaryProjection hubSummary(Long id){
+    public HubSummaryProjection hubSummary(Long id) {
         return repository.findHubSummaryById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(HUB_NOT_FOUND_BY_ID.getMessage(id)));
     }
 
-    @Transactional
+    // anteriormente fazia tudo, agora delega para outros metodos
     public TransportCreatedResponseDTO optimizeAllocation(CreateTransportRequest request) throws JsonProcessingException {
+        TransportAllocationData allocationData = prepareAllocationData(request);
+
+        TransportEntity exitTransport = self.createTransports(allocationData);
+
+        return TransportCreatedResponseDTO.buildCreatedResponse(
+                exitTransport,
+                allocationData.truckSuggestion().truckJustification(),
+                allocationData.truckSuggestion().returnShipmentJustification(),
+                allocationData.totalFuel(),
+                allocationData.route().distance()
+        );
+    }
+
+    // Obtem todos os dados necessarios para criar o transporte (do banco de dados e das APIs)
+    private TransportAllocationData prepareAllocationData(CreateTransportRequest request) throws JsonProcessingException {
         HubEntity originHub = hubService.findById(request.idOriginHub());
         HubEntity destinationHub = hubService.findById(request.idDestinationHub());
         ShipmentEntity shipment = shipmentService.findById(request.idShipment());
 
-        List<ShipmentEntity> pendingShipments
-                = shipmentService.findAllByIdHubAndDestinationHubAndStatus(TransportStatus.PENDING, request.idDestinationHub(), request.idOriginHub());
+        List<ShipmentEntity> pendingShipments = getPendingShipments(request);
 
-        ResponseForGemini route = this.getRouteData(originHub, destinationHub, shipment, request.isHazmat());
+        ORSRoute route = getRouteData(originHub, destinationHub, shipment, request.isHazmat());
+        LocalDate availabilityDeadline = calculateAvailabilityDeadline(request, route);
 
-        long travelDays = (long) Math.ceil(route.duration() / 86400.0);
+        TransportRecommendation truckSuggestion = selectIdealTruck(request, shipment, originHub, route, availabilityDeadline, pendingShipments);
 
-        LocalDate availabilityDeadline = request.exitDay().plusDays(travelDays);
 
-        GeminiResponse truckSuggestion
-                = this.selectIdealTruck(request, shipment, originHub, route, availabilityDeadline, pendingShipments);
+        TruckEntity chosenTruck = truckService.findById(truckSuggestion.suggestedTruckId());
+        EmployeeEntity chosenDriver = getChosenDriver(truckSuggestion, destinationHub, originHub);
 
-        TruckEntity chosenTruck = truckService.findById(truckSuggestion.caminhaoSugerido());
+        double totalFuel = truckSuggestion.litersSpentOutbound();
+        ShipmentEntity returnShipment = null;
 
-        EmployeeEntity chosenDriver = employeeService.findDriversOrderedByHistoryScore(
-                truckSuggestion.caminhaoSugerido(),
-                destinationHub.getId(),
-                originHub.getId()
-        );
-
-        double fuel = truckSuggestion.litrosGastosIda();
-
-        TransportEntity exitTransport = new TransportEntity(
-                chosenDriver, originHub, destinationHub, shipment,
-                chosenTruck, route.distance(), truckSuggestion.litrosGastosIda(), request.exitDay(),
-                availabilityDeadline
-        );
-        repository.save(exitTransport);
-
-        if (truckSuggestion.produtoSelecionadoRetorno() != null) {
-            fuel += truckSuggestion.litrosGastosVolta();
-
-            ShipmentEntity shipmentReturn = shipmentService.findById(truckSuggestion.produtoSelecionadoRetorno());
-
-            TransportEntity returnTransport = new TransportEntity(
-                    chosenDriver, destinationHub, originHub, shipmentReturn,
-                    chosenTruck, route.distance()/2, truckSuggestion.litrosGastosVolta(), null,
-                    availabilityDeadline
-            );
-            repository.save(returnTransport);
+        if (truckSuggestion.returnShipmentId() != null) {
+            totalFuel += truckSuggestion.litersSpentReturn();
+            returnShipment = shipmentService.findById(truckSuggestion.returnShipmentId());
         }
-        
-        return TransportCreatedResponseDTO.buildCreatedResponse(exitTransport, truckSuggestion.justificativaCaminhao(), 
-                truckSuggestion.justificativaCargaRetorno(), fuel, route.distance());
+
+        return new TransportAllocationData(
+                originHub, destinationHub, shipment, returnShipment,
+                chosenDriver, chosenTruck, route, truckSuggestion,
+                availabilityDeadline, totalFuel, request
+        );
     }
 
     @Transactional
-    public TransportResponseDTO confirmTransport(Long id){
+    public TransportEntity createTransports(TransportAllocationData data) {
+        TransportEntity exitTransport = createExitTransport(data);
+        repository.save(exitTransport);
+
+        if (data.returnShipment() != null) {
+            TransportEntity returnTransport = createReturnTransport(data);
+            repository.save(returnTransport);
+        }
+
+        return exitTransport;
+    }
+
+    private TransportEntity createExitTransport(TransportAllocationData data) {
+        return new TransportEntity(
+                data.chosenDriver(), data.originHub(), data.destinationHub(), data.shipment(),
+                data.chosenTruck(), data.route().distance(), data.truckSuggestion().litersSpentOutbound(),
+                data.request().exitDay(), data.availabilityDeadline()
+        );
+    }
+
+    private TransportEntity createReturnTransport(TransportAllocationData data) {
+        return new TransportEntity(
+                data.chosenDriver(), data.destinationHub(), data.originHub(), data.returnShipment(),
+                data.chosenTruck(), data.route().distance() / 2, data.truckSuggestion().litersSpentReturn(),
+                null, data.availabilityDeadline()
+        );
+    }
+
+    private List<ShipmentEntity> getPendingShipments(CreateTransportRequest request) {
+        return shipmentService.findAllByIdHubAndDestinationHubAndStatus(
+                TransportStatus.PENDING,
+                request.idDestinationHub(),
+                request.idOriginHub()
+        );
+    }
+
+    private LocalDate calculateAvailabilityDeadline(CreateTransportRequest request, ORSRoute route) {
+        long travelDays = getTravelDays(route.duration());
+        return request.exitDay().plusDays(travelDays);
+    }
+
+    private EmployeeEntity getChosenDriver(TransportRecommendation truckSuggestion, HubEntity destinationHub, HubEntity originHub) {
+        return employeeService.findDriversOrderedByHistoryScore(
+                truckSuggestion.suggestedTruckId(),
+                destinationHub.getId(),
+                originHub.getId()
+        );
+    }
+
+    @Transactional
+    public TransportResponseDTO confirmTransport(Long id) {
         TransportEntity transport = this.findById(id);
         transport.setStatus(TransportStatus.ASSIGNED);
 
@@ -149,7 +207,7 @@ public class TransportService {
 
     @Scheduled(cron = "0 0 9 * * SAT")
     @Transactional(readOnly = true)
-    public void sendWeeklySchedule(){
+    public void sendWeeklySchedule() {
         List<TransportEntity> weeklyTransport
                 = repository.findAllByExitDay(LocalDate.now(), LocalDate.now().plusDays(6));
 
@@ -173,7 +231,7 @@ public class TransportService {
         for (EmployeeEntity manager : managers) {
             HubEntity hub = manager.getHub();
 
-            List<TransportEntity> monthlyTransports = repository.findAllByExitDayAndOriginHub(startDate, endDate, hub.getId());
+            List<TransportEntity> monthlyTransports = repository.findAllByExitDayAndOriginHub(LocalDate.now(), LocalDate.now().plusDays(8), hub.getId());
             List<EmployeeEntity> hubDrivers = employeeService.findAllByRoleAndHub(Role.DRIVER, hub);
             List<TruckEntity> hubTrucks = truckService.findAllByHub(hub);
 
@@ -192,11 +250,10 @@ public class TransportService {
 
             emailService.sendMonthReportEmail(manager, monthlyTransports, hubDrivers, hubTrucks, fuelByTruck, totalDistance);
         }
-
     }
 
     @Transactional
-    public TransportResponseDTO updateStatus(Long id, TransportStatus status){
+    public TransportResponseDTO updateStatus(Long id, TransportStatus status) {
         TransportEntity transport = this.findById(id);
         transport.setStatus(status);
         transport.getShipment().setStatus(status);
@@ -231,7 +288,7 @@ public class TransportService {
                 .orElseThrow(() -> new ResourceNotFoundException(TRANSPORT_NOT_FOUND_BY_ID.getMessage(id)));
     }
 
-    private ResponseForGemini getRouteData(HubEntity originHub, HubEntity destinationHub, ShipmentEntity shipment, boolean isHazmat) {
+    private ORSRoute getRouteData(HubEntity originHub, HubEntity destinationHub, ShipmentEntity shipment, boolean isHazmat) {
         AverageDimensionsTrucks averageDimensions = truckService.findAverageDimensionsTrucks();
 
         RestrictionsRecord restrictions = new RestrictionsRecord(
@@ -248,9 +305,9 @@ public class TransportService {
         );
     }
 
-    private GeminiResponse selectIdealTruck(CreateTransportRequest request, ShipmentEntity shipment,
-                                             HubEntity originHub, ResponseForGemini route, LocalDate availabilityDeadline,
-                                            List<ShipmentEntity> pendingShipments ) throws JsonProcessingException {
+    private TransportRecommendation selectIdealTruck(CreateTransportRequest request, ShipmentEntity shipment,
+                                                     HubEntity originHub, ORSRoute route, LocalDate availabilityDeadline,
+                                                     List<ShipmentEntity> pendingShipments) throws JsonProcessingException {
 
         List<TruckEntity> candidateTrucks = truckService.findByLoadCapacityGreaterThan(
                 shipment.getWeight(),
@@ -261,12 +318,22 @@ public class TransportService {
 
         String routeStepsJson = objectMapper.writeValueAsString(route.steps());
 
-        return geminiApiClientService.chooseBestTruck(
+        System.out.println(routeStepsJson);
+        System.out.println(route.distance());
+        System.out.println(shipment);
+        System.out.println(candidateTrucks);
+        System.out.println(pendingShipments);
+
+        return openAiApiClientService.chooseBestTruck(
                 routeStepsJson,
                 route.distance(),
                 shipment,
                 candidateTrucks,
                 pendingShipments
         );
+    }
+
+    private long getTravelDays(double routeDuration) {
+        return (long) Math.ceil(routeDuration / SECONDS_IN_A_DAY);
     }
 }

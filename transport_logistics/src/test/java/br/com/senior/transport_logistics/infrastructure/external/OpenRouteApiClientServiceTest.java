@@ -1,7 +1,7 @@
 package br.com.senior.transport_logistics.infrastructure.external;
 
 import br.com.senior.transport_logistics.infrastructure.dto.NominationDTO.CoordinatesDTO;
-import br.com.senior.transport_logistics.infrastructure.dto.OpenRouteDTO.ResponseForGemini;
+import br.com.senior.transport_logistics.infrastructure.dto.OpenRouteDTO.ORSRoute;
 import br.com.senior.transport_logistics.infrastructure.dto.OpenRouteDTO.request.RestrictionsRecord;
 import br.com.senior.transport_logistics.infrastructure.dto.OpenRouteDTO.response.*;
 import br.com.senior.transport_logistics.infrastructure.exception.external.ErrorForRequest;
@@ -56,7 +56,7 @@ class OpenRouteApiClientServiceTest {
         )).thenReturn(responseEntity);
 
         // Ação
-        ResponseForGemini result = openRouteService.obterDistancia(start, finish, restrictions);
+        ORSRoute result = openRouteService.obterDistancia(start, finish, restrictions);
 
         // Verificação
         assertNotNull(result);

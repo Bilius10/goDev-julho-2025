@@ -2,8 +2,7 @@ package br.com.senior.transport_logistics.infrastructure.external;
 
 import br.com.senior.transport_logistics.domain.shipment.ShipmentEntity;
 import br.com.senior.transport_logistics.domain.truck.TruckEntity;
-import br.com.senior.transport_logistics.infrastructure.dto.GeminiDTO.GeminiResponse;
-import br.com.senior.transport_logistics.infrastructure.exception.external.ErrorForRequest;
+import br.com.senior.transport_logistics.infrastructure.dto.GeminiDTO.TransportRecommendation;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -15,13 +14,13 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class GeminiApiClientService {
+public class OpenAiApiClientService {
 
     private final OpenAiChatModel chatModel;
     private final ObjectMapper objectMapper;
 
-    public GeminiResponse chooseBestTruck(String rotaJson, double distance, ShipmentEntity shipment,
-                                          List<TruckEntity> caminhoesCandidatos, List<ShipmentEntity> pendingShipments) {
+    public TransportRecommendation chooseBestTruck(String rotaJson, double distance, ShipmentEntity shipment,
+                                                   List<TruckEntity> caminhoesCandidatos, List<ShipmentEntity> pendingShipments) {
 
         String promptString = construirPromptParaIA(rotaJson, distance, shipment, caminhoesCandidatos, pendingShipments);
         Prompt prompt = new Prompt(promptString);
@@ -33,12 +32,12 @@ public class GeminiApiClientService {
 
         try {
 
-            return objectMapper.readValue(cleanedJson, GeminiResponse.class);
+            return objectMapper.readValue(cleanedJson, TransportRecommendation.class);
 
         } catch (JsonProcessingException e) {
-            throw new ErrorForRequest("O JSON recebido da API é inválido.");
+            throw new RuntimeException("Erro: O JSON recebido da API é inválido.", e);
         } catch (NumberFormatException e) {
-            throw new ErrorForRequest("A API retornou um valor não numérico para ID do caminhão ou litros gastos.");
+            throw new RuntimeException("Erro: A API retornou um valor não numérico para ID do caminhão ou litros gastos.", e);
         }
     }
 
@@ -118,12 +117,12 @@ public class GeminiApiClientService {
                     
                     ```json
                     {
-                      "caminhaoSugerido": "ID numerico do caminhao escolhido ou null",
-                      "produtoSelecionadoRetorno": "ID numerico da CARGA ou null",
-                      "justificativaCaminhao": "Texto tecnico e conciso explicando a escolha, seguindo a metodologia. Ex: '1. Seguranca: Aprovado (Carroceria DRY_VAN compativel com ELECTRONICS). 2. Manobrabilidade: Criterio de desempate nao foi necessario. 3. Eficiencia: Selecionado por ter o maior consumo medio (2.8 km/L) entre os finalistas.'",
-                      "justificativaCargaRetorno": "Texto tecnico e conciso explicando a escolha, seguindo a metodologia.",
-                      "litrosGastosIda": "Valor numerico (string, duas casas decimais) de litros gastos, ou null."
-                      "litrosGastosVolta": "Valor numerico (string, duas casas decimais) de litros gastos, ou null."
+                      "suggestedTruckId": "ID numerico do caminhao escolhido ou null",
+                      "returnShipmentId": "ID numerico da CARGA ou null",
+                      "truckJustification": "Texto tecnico e conciso explicando a escolha, seguindo a metodologia. Ex: '1. Seguranca: Aprovado (Carroceria DRY_VAN compativel com ELECTRONICS). 2. Manobrabilidade: Criterio de desempate nao foi necessario. 3. Eficiencia: Selecionado por ter o maior consumo medio (2.8 km/L) entre os finalistas.'",
+                      "returnShipmentJustification": "Texto tecnico e conciso explicando a escolha, seguindo a metodologia.",
+                      "litersSpentOutbound": "Valor numerico (string, duas casas decimais) de litros gastos, ou null."
+                      "litersSpentReturn": "Valor numerico (string, duas casas decimais) de litros gastos, ou null."
                     }
                     ```
                     """,
@@ -138,7 +137,7 @@ public class GeminiApiClientService {
             );
 
         } catch (JsonProcessingException e) {
-            throw new ErrorForRequest("Erro ao serializar a lista de caminhões para JSON.");
+            throw new RuntimeException("Erro ao serializar a lista de caminhões para JSON.", e);
         }
     }
 
@@ -148,7 +147,7 @@ public class GeminiApiClientService {
         if (inicio != -1 && fim != -1 && fim > inicio) {
             return textoCompleto.substring(inicio, fim + 1);
         }
-        throw new ErrorForRequest("Não foi possível extrair um JSON válido da resposta da API: " + textoCompleto);
+        throw new IllegalArgumentException("Não foi possível extrair um JSON válido da resposta da API: " + textoCompleto);
     }
 }
 

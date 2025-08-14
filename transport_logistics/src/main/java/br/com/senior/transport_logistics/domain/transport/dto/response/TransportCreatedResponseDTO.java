@@ -23,22 +23,22 @@ public record TransportCreatedResponseDTO(
         String responseChooseReturnProduct
 ) {
 
-    public static TransportCreatedResponseDTO buildCreatedResponse(TransportEntity go,
+    public static TransportCreatedResponseDTO buildCreatedResponse(TransportEntity transportEntity,
                                                                    String responseChooseTruck,
                                                                    String responseChooseReturnProduct,
                                                                    Double totalFuelConsuption,
                                                                    Double totalDistance) {
         return TransportCreatedResponseDTO.builder()
-                .idTransport(go.getId())
+                .idTransport(transportEntity.getId())
                 .totalFuelConsuption(totalFuelConsuption)
                 .totalDistance(totalDistance)
-                .exitDay(go.getExitDay())
-                .expectedArrivalDay(go.getExpectedArrivalDay())
-                .truckModel(go.getTruck().getModel())
-                .ProductExitName(go.getShipment().getProduct().getName())
-                .driverName(go.getDriver().getName())
-                .originHubName(go.getOriginHub().getName())
-                .destinationHubName(go.getDestinationHub().getName())
+                .exitDay(transportEntity.getExitDay())
+                .expectedArrivalDay(transportEntity.getExpectedArrivalDay())
+                .truckModel(transportEntity.getTruck().getModel())
+                .ProductExitName(transportEntity.getShipment().getProduct().getName())
+                .driverName(transportEntity.getDriver().getName())
+                .originHubName(transportEntity.getOriginHub().getName())
+                .destinationHubName(transportEntity.getDestinationHub().getName())
                 .responseChooseTruck(responseChooseTruck)
                 .responseChooseReturnProduct(responseChooseReturnProduct)
                 .build();
