@@ -1,6 +1,7 @@
 package br.com.senior.transport_logistics.infrastructure.external;
 
 import br.com.senior.transport_logistics.infrastructure.dto.NominationDTO.CoordinatesDTO;
+import br.com.senior.transport_logistics.infrastructure.exception.external.ErrorForRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -24,7 +25,7 @@ public class NominatimApiClientService {
             String jsonResponse = queryApi(address);
             return extractCoordinates(jsonResponse);
         } catch (Exception e) {
-            throw new RuntimeException("Error fetching coordinates: " + e.getMessage());
+            throw new ErrorForRequest("Erro ao buscar as coordenadas: " + e.getMessage());
         }
     }
 
@@ -47,7 +48,7 @@ public class NominatimApiClientService {
         JSONArray results = new JSONArray(json);
 
         if (results.isEmpty()) {
-            throw new RuntimeException("Address not found.");
+            throw new ErrorForRequest("Endereço não encontrado.");
         }
 
         JSONObject firstResult = results.getJSONObject(0);

@@ -1,6 +1,7 @@
 package br.com.senior.transport_logistics.infrastructure.external;
 
 import br.com.senior.transport_logistics.infrastructure.dto.ViaCepDTO.AddresDTO;
+import br.com.senior.transport_logistics.infrastructure.exception.external.ErrorForRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -23,7 +24,7 @@ public class ViaCepApiCilentService {
             return addres;
 
         } catch (Exception e) {
-            throw new RuntimeException("Não foi possível consultar o CEP: " + cep, e);
+            throw new ErrorForRequest("Não foi possível consultar o CEP: " + cep);
         }
     }
 }

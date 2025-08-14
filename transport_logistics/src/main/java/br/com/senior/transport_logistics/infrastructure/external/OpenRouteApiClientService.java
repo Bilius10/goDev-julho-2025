@@ -7,6 +7,7 @@ import br.com.senior.transport_logistics.infrastructure.dto.OpenRouteDTO.request
 import br.com.senior.transport_logistics.infrastructure.dto.OpenRouteDTO.request.ProfileParamsRecord;
 import br.com.senior.transport_logistics.infrastructure.dto.OpenRouteDTO.request.RestrictionsRecord;
 import br.com.senior.transport_logistics.infrastructure.dto.OpenRouteDTO.response.OrsResponse;
+import br.com.senior.transport_logistics.infrastructure.exception.external.ErrorForRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
@@ -61,7 +62,7 @@ public class OpenRouteApiClientService {
             OrsResponse responseBody = response.getBody();
 
             if (responseBody != null && responseBody.routes() != null && responseBody.routes().isEmpty()) {
-                throw new RuntimeException("Nenhuma rota encontrada entre os pontos informados.");
+                throw new ErrorForRequest("Nenhuma rota encontrada entre os pontos informados.");
             }
 
             return new ORSRoute(
@@ -75,7 +76,7 @@ public class OpenRouteApiClientService {
 
         } catch (HttpClientErrorException e) {
 
-            throw new RuntimeException("Problema com a requisição para a API de rotas: ");
+            throw new ErrorForRequest("Problema com a requisição para a API de rotas: ");
         }
     }
 }
