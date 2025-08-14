@@ -23,7 +23,7 @@ import br.com.senior.transport_logistics.infrastructure.dto.OpenRouteDTO.request
 import br.com.senior.transport_logistics.infrastructure.dto.PageDTO;
 import br.com.senior.transport_logistics.infrastructure.email.SpringMailSenderService;
 import br.com.senior.transport_logistics.infrastructure.exception.common.ResourceNotFoundException;
-import br.com.senior.transport_logistics.infrastructure.external.GeminiApiClientService;
+import br.com.senior.transport_logistics.infrastructure.external.OpenAiApiClientService;
 import br.com.senior.transport_logistics.infrastructure.external.OpenRouteApiClientService;
 import br.com.senior.transport_logistics.infrastructure.pdf.PdfGenerationService;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -55,7 +55,7 @@ public class TransportService {
     private final HubService hubService;
     private final ShipmentService shipmentService;
     private final OpenRouteApiClientService openRouteApiClientService;
-    private final GeminiApiClientService geminiApiClientService;
+    private final OpenAiApiClientService openAiApiClientService;
     private final EmployeeService employeeService;
     private final ObjectMapper objectMapper;
     private final SpringMailSenderService emailService;
@@ -324,7 +324,7 @@ public class TransportService {
         System.out.println(candidateTrucks);
         System.out.println(pendingShipments);
 
-        return geminiApiClientService.chooseBestTruck(
+        return openAiApiClientService.chooseBestTruck(
                 routeStepsJson,
                 route.distance(),
                 shipment,

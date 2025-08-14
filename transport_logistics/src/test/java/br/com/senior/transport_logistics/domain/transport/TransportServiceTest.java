@@ -23,7 +23,7 @@ import br.com.senior.transport_logistics.infrastructure.dto.OpenRouteDTO.request
 import br.com.senior.transport_logistics.infrastructure.dto.OpenRouteDTO.response.StepRecord;
 import br.com.senior.transport_logistics.infrastructure.email.SpringMailSenderService;
 import br.com.senior.transport_logistics.infrastructure.exception.common.ResourceNotFoundException;
-import br.com.senior.transport_logistics.infrastructure.external.GeminiApiClientService;
+import br.com.senior.transport_logistics.infrastructure.external.OpenAiApiClientService;
 import br.com.senior.transport_logistics.infrastructure.external.OpenRouteApiClientService;
 import br.com.senior.transport_logistics.infrastructure.pdf.PdfGenerationService;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -74,7 +74,7 @@ class TransportServiceTest {
     private OpenRouteApiClientService openRouteApiClientService;
 
     @Mock
-    private GeminiApiClientService geminiApiClientService;
+    private OpenAiApiClientService openAiApiClientService;
 
     @Mock
     private EmployeeService employeeService;
@@ -315,7 +315,7 @@ class TransportServiceTest {
 
         when(objectMapper.writeValueAsString(route.steps())).thenReturn(routeStepsJson);
 
-        when(geminiApiClientService.chooseBestTruck(
+        when(openAiApiClientService.chooseBestTruck(
                 routeStepsJson,
                 route.distance(),
                 optShipment,
@@ -424,7 +424,7 @@ class TransportServiceTest {
 
         when(objectMapper.writeValueAsString(route.steps())).thenReturn(routeStepsJson);
 
-        when(geminiApiClientService.chooseBestTruck(
+        when(openAiApiClientService.chooseBestTruck(
                 routeStepsJson,
                 route.distance(),
                 optShipment,
@@ -486,7 +486,7 @@ class TransportServiceTest {
         verifyNoInteractions(pdfGenerationService);
         verifyNoInteractions(repository);
         verifyNoInteractions(openRouteApiClientService);
-        verifyNoInteractions(geminiApiClientService);
+        verifyNoInteractions(openAiApiClientService);
     }
 
     @Test
@@ -516,7 +516,7 @@ class TransportServiceTest {
         verifyNoInteractions(pdfGenerationService);
         verifyNoInteractions(repository);
         verifyNoInteractions(openRouteApiClientService);
-        verifyNoInteractions(geminiApiClientService);
+        verifyNoInteractions(openAiApiClientService);
     }
 
     @Test
@@ -546,7 +546,7 @@ class TransportServiceTest {
         verifyNoInteractions(pdfGenerationService);
         verifyNoInteractions(repository);
         verifyNoInteractions(openRouteApiClientService);
-        verifyNoInteractions(geminiApiClientService);
+        verifyNoInteractions(openAiApiClientService);
     }
 
     @Test
@@ -614,7 +614,7 @@ class TransportServiceTest {
 
         when(objectMapper.writeValueAsString(route.steps())).thenReturn(routeStepsJson);
 
-        when(geminiApiClientService.chooseBestTruck(
+        when(openAiApiClientService.chooseBestTruck(
                 routeStepsJson,
                 route.distance(),
                 optShipment,
@@ -639,7 +639,7 @@ class TransportServiceTest {
         verifyNoInteractions(repository);
         verifyNoMoreInteractions(objectMapper);
         verifyNoMoreInteractions(openRouteApiClientService);
-        verifyNoMoreInteractions(geminiApiClientService);
+        verifyNoMoreInteractions(openAiApiClientService);
     }
 
     @Test

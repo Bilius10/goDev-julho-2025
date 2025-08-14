@@ -14,7 +14,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class GeminiApiClientService {
+public class OpenAiApiClientService {
 
     private final OpenAiChatModel chatModel;
     private final ObjectMapper objectMapper;
