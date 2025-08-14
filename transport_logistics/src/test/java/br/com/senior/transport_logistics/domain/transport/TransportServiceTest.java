@@ -2,6 +2,7 @@ package br.com.senior.transport_logistics.domain.transport;
 
 import br.com.senior.transport_logistics.domain.employee.EmployeeEntity;
 import br.com.senior.transport_logistics.domain.employee.EmployeeService;
+import br.com.senior.transport_logistics.domain.employee.enums.Role;
 import br.com.senior.transport_logistics.domain.hub.HubEntity;
 import br.com.senior.transport_logistics.domain.hub.HubService;
 import br.com.senior.transport_logistics.domain.product.ProductEntity;
@@ -44,6 +45,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.List;
 import java.util.Optional;
 
@@ -786,5 +788,125 @@ class TransportServiceTest {
         assertEquals(TRANSPORT_NOT_FOUND_BY_ID.getMessage(defaultID), exception.getMessage());
 
         verifyNoMoreInteractions(repository);
+    }
+
+    @Test
+    @DisplayName("Deve enviar email aos motoristas com suas proximas viagens dentro dos proximos 6 dias")
+    void sendWeeklySchedule_ShouldSendEmailsToDrivers() {
+        LocalDate today = LocalDate.now();
+        TransportEntity transport1 = new TransportEntity();
+        transport1.setId(1L);
+        transport1.setDriver(emp1);
+        transport1.setExitDay(today.plusDays(1));
+
+        TransportEntity transport2 = new TransportEntity();
+        transport2.setId(2L);
+        transport2.setDriver(emp1);
+        transport2.setExitDay(today.plusDays(3));
+
+        EmployeeEntity driver2 = new EmployeeEntity();
+        driver2.setId(2L);
+        TransportEntity transport3 = new TransportEntity();
+        transport3.setId(3L);
+        transport3.setDriver(driver2);
+        transport3.setExitDay(today.plusDays(5));
+
+        List<TransportEntity> weeklyTransports = List.of(transport1, transport2, transport3);
+
+        when(repository.findAllByExitDay(today, today.plusDays(6))).thenReturn(weeklyTransports);
+
+        service.sendWeeklySchedule();
+
+        verify(emailService).sendWeeklyScheduleEmail(argThat(transports ->
+                transports.size() == 2 &&
+                transports.stream().allMatch(t -> t.getDriver().equals(emp1))
+        ));
+
+        verify(emailService).sendWeeklyScheduleEmail(argThat(transports ->
+                transports.size() == 1 &&
+                transports.get(0).getDriver().equals(driver2)
+        ));
+    }
+
+    @Test
+    @DisplayName("Deve enviar relatorio mensal a todos os gerentes com dados da filial")
+    void sendMonthReport_ShouldSendReportsToAllManagers() {
+        YearMonth previousMonth = YearMonth.now().minusMonths(1);
+        LocalDate startDate = previousMonth.atDay(1);
+        LocalDate endDate = previousMonth.atEndOfMonth();
+
+        EmployeeEntity manager1 = new EmployeeEntity();
+        manager1.setId(1L);
+        manager1.setRole(Role.MANAGER);
+        HubEntity h1 = new HubEntity();
+        h1.setId(1L);
+        manager1.setHub(h1);
+
+        EmployeeEntity manager2 = new EmployeeEntity();
+        manager2.setId(2L);
+        manager2.setRole(Role.MANAGER);
+        HubEntity hub2 = new HubEntity();
+        hub2.setId(2L);
+        manager2.setHub(hub2);
+
+        EmployeeEntity driver1 = new EmployeeEntity();
+        driver1.setId(3L);
+        driver1.setRole(Role.DRIVER);
+        driver1.setHub(h1);
+
+        TruckEntity truck1 = new TruckEntity();
+        truck1.setId(1L);
+        truck1.setModel("Volvo FH16");
+        truck1.setHub(h1);
+
+        TransportEntity t1 = new TransportEntity();
+        t1.setId(1L);
+        t1.setStatus(TransportStatus.DELIVERED);
+        t1.setDistance(100.0);
+        t1.setFuelConsumption(25.0);
+        t1.setTruck(truck1);
+        t1.setDriver(driver1);
+        t1.setOriginHub(h1);
+        t1.setExitDay(LocalDate.now().minusDays(5));
+
+        when(employeeService.findAllByRole(Role.MANAGER)).thenReturn(List.of(manager1, manager2));
+        when(repository.findAllByExitDayAndOriginHub(any(LocalDate.class), any(LocalDate.class), eq(h1.getId())))
+                .thenReturn(List.of(t1));
+        when(repository.findAllByExitDayAndOriginHub(any(LocalDate.class), any(LocalDate.class), eq(hub2.getId())))
+                .thenReturn(List.of());
+
+        when(employeeService.findAllByRoleAndHub(Role.DRIVER, h1)).thenReturn(List.of(driver1));
+        when(employeeService.findAllByRoleAndHub(Role.DRIVER, hub2)).thenReturn(List.of());
+
+        when(truckService.findAllByHub(h1)).thenReturn(List.of(truck1));
+        when(truckService.findAllByHub(hub2)).thenReturn(List.of());
+
+        service.sendMonthReport();
+
+        verify(emailService, times(2)).sendMonthReportEmail(
+                any(EmployeeEntity.class),
+                anyList(),
+                anyList(),
+                anyList(),
+                anyMap(),
+                anyDouble()
+        );
+    }
+
+    @Test
+    @DisplayName("Deve lidar com dados vazios ao enviar o relatorio mensal")
+    void sendMonthReport_ShouldHandleEmptyData() {
+        when(employeeService.findAllByRole(Role.MANAGER)).thenReturn(List.of());
+
+        assertDoesNotThrow(() -> service.sendMonthReport());
+
+        verify(emailService, never()).sendMonthReportEmail(
+                any(EmployeeEntity.class),
+                anyList(),
+                anyList(),
+                anyList(),
+                anyMap(),
+                anyDouble()
+        );
     }
 }
