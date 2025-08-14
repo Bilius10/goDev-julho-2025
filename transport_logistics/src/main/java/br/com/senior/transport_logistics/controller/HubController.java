@@ -33,7 +33,8 @@ public class HubController {
 
     @Operation(summary = "Endpoint para listar filiais com paginação")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Listagem paginada das filiais")
+            @ApiResponse(responseCode = "200", description = "Listagem paginada das filiais"),
+            @ApiResponse(responseCode = "403", description = "Acesso recusado")
     })
     @GetMapping
     public ResponseEntity<PageDTO<HubResponseDTO>> findAll(
@@ -51,7 +52,8 @@ public class HubController {
     @Operation(summary = "Endpoint para criar uma filial")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Realiza a criação de uma nova filial"),
-            @ApiResponse(responseCode = "409", description = "Já existe uma filial com o mesmo nome, CNPJ ou na mesma cidade")
+            @ApiResponse(responseCode = "409", description = "Já existe uma filial com o mesmo nome, CNPJ ou na mesma cidade"),
+            @ApiResponse(responseCode = "403", description = "Acesso recusado")
     })
     @PostMapping
     public ResponseEntity<HubResponseDTO> create(@RequestBody @Valid HubCreateRequestDTO hubCreateRequestDTO) {
@@ -70,7 +72,8 @@ public class HubController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Filial foi atualizada com sucesso"),
             @ApiResponse(responseCode = "400", description = "Dados de entrada inválidos ou não informados"),
-            @ApiResponse(responseCode = "404", description = "Nenhuma filial localizada com o ID informado")
+            @ApiResponse(responseCode = "404", description = "Nenhuma filial localizada com o ID informado"),
+            @ApiResponse(responseCode = "403", description = "Acesso recusado")
     })
     @PutMapping("/{id}")
     public ResponseEntity<HubResponseDTO> update(
@@ -85,7 +88,8 @@ public class HubController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Filial foi deletada com sucesso"),
             @ApiResponse(responseCode = "404", description = "Nenhuma filial localizada com o ID informado"),
-            @ApiResponse(responseCode = "409", description = "Filial tem outras entidades envolvidas")
+            @ApiResponse(responseCode = "409", description = "Filial tem outras entidades envolvidas"),
+            @ApiResponse(responseCode = "403", description = "Acesso recusado")
     })
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {

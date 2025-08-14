@@ -30,7 +30,8 @@ public class EmployeeController {
 
     @Operation(summary = "Endpoint para listar funcionários com paginação")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Listagem paginada dos funcionários")
+            @ApiResponse(responseCode = "200", description = "Listagem paginada dos funcionários"),
+            @ApiResponse(responseCode = "403", description = "Acesso recusado")
     })
     @GetMapping
     public ResponseEntity<PageDTO<EmployeeResponseDTO>> findAll(
@@ -46,7 +47,8 @@ public class EmployeeController {
     @Operation(summary = "Endpoint para atualizar um funcionário via ID")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Atualização realizada com sucesso"),
-            @ApiResponse(responseCode = "400", description = "Dados de entrada inválidos")
+            @ApiResponse(responseCode = "400", description = "Dados de entrada inválidos"),
+            @ApiResponse(responseCode = "403", description = "Acesso recusado")
     })
     @PutMapping("/{id}")
     public ResponseEntity<EmployeeResponseDTO> update(
@@ -60,7 +62,8 @@ public class EmployeeController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Senha atualizada com sucesso"),
             @ApiResponse(responseCode = "404", description = "Funcionário não encontrado com o ID informado"),
-            @ApiResponse(responseCode = "400", description = "Role não informada ou inválida")
+            @ApiResponse(responseCode = "400", description = "Role não informada ou inválida"),
+            @ApiResponse(responseCode = "403", description = "Acesso recusado")
     })
     @PatchMapping("/{id}/role")
     public ResponseEntity<Void> updateRole(@PathVariable Long id, @RequestParam Role role) {
@@ -71,7 +74,8 @@ public class EmployeeController {
     @Operation(summary = "Endpoint para deletar funcionário (delete lógico)")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Funcionário deletado com sucesso (lógico)"),
-            @ApiResponse(responseCode = "404", description = "Nenhum funcionário localizado com o ID informado")
+            @ApiResponse(responseCode = "404", description = "Nenhum funcionário localizado com o ID informado"),
+            @ApiResponse(responseCode = "403", description = "Acesso recusado")
     })
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {

@@ -33,7 +33,8 @@ public class ShipmentController {
 
     @Operation(summary = "Endpoint para listar cargas com paginação")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Listagem paginada das cargas")
+            @ApiResponse(responseCode = "200", description = "Listagem paginada das cargas"),
+            @ApiResponse(responseCode = "403", description = "Acesso recusado")
     })
     @GetMapping
     public ResponseEntity<PageDTO<ShipmentResponseDTO>> findAll(
@@ -51,7 +52,8 @@ public class ShipmentController {
     @Operation(summary = "Endpoint para criar carga")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Carga criada com sucesso"),
-            @ApiResponse(responseCode = "400", description = "Dados inválidos ou não fornecidos")
+            @ApiResponse(responseCode = "400", description = "Dados inválidos ou não fornecidos"),
+            @ApiResponse(responseCode = "403", description = "Acesso recusado")
     })
     @PostMapping
     public ResponseEntity<ShipmentResponseDTO> create(@RequestBody @Valid ShipmentCreateDTO shipmentRequestDTO) {
@@ -70,7 +72,8 @@ public class ShipmentController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Carga atualizada com sucesso"),
             @ApiResponse(responseCode = "400", description = "Dados inválidos ou não fornecidos"),
-            @ApiResponse(responseCode = "404", description = "Carga não encontrada com o ID informado")
+            @ApiResponse(responseCode = "404", description = "Carga não encontrada com o ID informado"),
+            @ApiResponse(responseCode = "403", description = "Acesso recusado")
     })
     @PutMapping("/{id}")
     public ResponseEntity<ShipmentResponseDTO> update(
@@ -83,7 +86,8 @@ public class ShipmentController {
     @Operation(summary = "Endpoint para remover carga (delete físico)")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Carga deletada com sucesso"),
-            @ApiResponse(responseCode = "404", description = "Carga não encontrada com o ID informado")
+            @ApiResponse(responseCode = "404", description = "Carga não encontrada com o ID informado"),
+            @ApiResponse(responseCode = "403", description = "Acesso recusado")
     })
     @DeleteMapping("/{id}")
     public  ResponseEntity<Void> delete(@PathVariable Long id) {

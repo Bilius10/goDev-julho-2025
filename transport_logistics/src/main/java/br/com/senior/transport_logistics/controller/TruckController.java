@@ -33,7 +33,8 @@ public class TruckController {
     @Operation(summary = "Endpoint para criar caminhão")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Caminhão criado com sucesso"),
-            @ApiResponse(responseCode = "400", description = "Dados inválidos ou não fornecidos")
+            @ApiResponse(responseCode = "400", description = "Dados inválidos ou não fornecidos"),
+            @ApiResponse(responseCode = "403", description = "Acesso recusado")
     })
     @PostMapping
     public ResponseEntity<TruckResponseDTO> create(@Valid @RequestBody TruckRequestDTO request) {
@@ -50,7 +51,8 @@ public class TruckController {
 
     @Operation(summary = "Endpoint para listar caminhões com paginação, podendo filtrar por status")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Listagem paginada das cargas")
+            @ApiResponse(responseCode = "200", description = "Listagem paginada das cargas"),
+            @ApiResponse(responseCode = "403", description = "Acesso recusado")
     })
     @GetMapping
     public ResponseEntity<PageDTO<TruckResponseDTO>> getAll(
@@ -69,7 +71,8 @@ public class TruckController {
     @Operation(summary = "Endpoint para buscar caminhão por código")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Retorna caminhão com código informado"),
-            @ApiResponse(responseCode = "404", description = "Nenhum caminhão localizado com código informado")
+            @ApiResponse(responseCode = "404", description = "Nenhum caminhão localizado com código informado"),
+            @ApiResponse(responseCode = "403", description = "Acesso recusado")
     })
     @GetMapping("/{code}")
     public ResponseEntity<TruckResponseDTO> getByCode(@PathVariable String code) {
@@ -80,7 +83,8 @@ public class TruckController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Status atualizado com sucesso"),
             @ApiResponse(responseCode = "400", description = "Status inválido ou não fornecido"),
-            @ApiResponse(responseCode = "404", description = "Caminhão não encontrada com o código informado")
+            @ApiResponse(responseCode = "404", description = "Caminhão não encontrada com o código informado"),
+            @ApiResponse(responseCode = "403", description = "Acesso recusado")
     })
     @PatchMapping("/{code}/status")
     public ResponseEntity<Void> updateStatus(
