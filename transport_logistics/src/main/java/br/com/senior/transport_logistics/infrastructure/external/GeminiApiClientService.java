@@ -117,12 +117,12 @@ public class GeminiApiClientService {
                     
                     ```json
                     {
-                      "caminhaoSugerido": "ID numerico do caminhao escolhido ou null",
-                      "produtoSelecionadoRetorno": "ID numerico da CARGA ou null",
-                      "justificativaCaminhao": "Texto tecnico e conciso explicando a escolha, seguindo a metodologia. Ex: '1. Seguranca: Aprovado (Carroceria DRY_VAN compativel com ELECTRONICS). 2. Manobrabilidade: Criterio de desempate nao foi necessario. 3. Eficiencia: Selecionado por ter o maior consumo medio (2.8 km/L) entre os finalistas.'",
-                      "justificativaCargaRetorno": "Texto tecnico e conciso explicando a escolha, seguindo a metodologia.",
-                      "litrosGastosIda": "Valor numerico (string, duas casas decimais) de litros gastos, ou null."
-                      "litrosGastosVolta": "Valor numerico (string, duas casas decimais) de litros gastos, ou null."
+                      "suggestedTruckId": "ID numerico do caminhao escolhido ou null",
+                      "returnShipmentId": "ID numerico da CARGA ou null",
+                      "truckJustification": "Texto tecnico e conciso explicando a escolha, seguindo a metodologia. Ex: '1. Seguranca: Aprovado (Carroceria DRY_VAN compativel com ELECTRONICS). 2. Manobrabilidade: Criterio de desempate nao foi necessario. 3. Eficiencia: Selecionado por ter o maior consumo medio (2.8 km/L) entre os finalistas.'",
+                      "returnShipmentJustification": "Texto tecnico e conciso explicando a escolha, seguindo a metodologia.",
+                      "litersSpentOutbound": "Valor numerico (string, duas casas decimais) de litros gastos, ou null."
+                      "litersSpentReturn": "Valor numerico (string, duas casas decimais) de litros gastos, ou null."
                     }
                     ```
                     """,
