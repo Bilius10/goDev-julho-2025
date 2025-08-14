@@ -30,7 +30,8 @@ public class AuthController {
     @Operation(summary = "Endpoint para criar funcionário e respectiva conta no sistema")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Conta de funcionário criada"),
-            @ApiResponse(responseCode = "400", description = "Dados de entrada inválidos: não fornecidos, incorretos ou inválidos")
+            @ApiResponse(responseCode = "400", description = "Dados de entrada inválidos: não fornecidos, incorretos ou inválidos"),
+            @ApiResponse(responseCode = "403", description = "Acesso recusado")
     })
     @PostMapping("/create")
     public ResponseEntity<Void> create(@Valid @RequestBody EmployeeCreateRequestDTO dto) {
@@ -52,7 +53,8 @@ public class AuthController {
     @Operation(summary = "Endpoint para realizar troca de senha")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Senha atualizada com sucesso"),
-            @ApiResponse(responseCode = "400", description = "Dados de entrada inválidos")
+            @ApiResponse(responseCode = "400", description = "Dados de entrada inválidos"),
+            @ApiResponse(responseCode = "401", description = "Dados de login incorretos")
     })
     @PatchMapping("/password")
     public ResponseEntity<Void> updatePassword(@AuthenticationPrincipal EmployeeEntity employee,

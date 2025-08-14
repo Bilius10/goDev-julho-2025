@@ -38,6 +38,7 @@ public class TransportController {
     @Operation(summary = "Endpoint para listar transportes com paginação")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Lista transportes paginados"),
+            @ApiResponse(responseCode = "403", description = "Acesso recusado")
     })
     @GetMapping
     public ResponseEntity<PageDTO<TransportResponseDTO>> findAll(
@@ -55,7 +56,8 @@ public class TransportController {
     @Operation(summary = "Endpoint buscar filial por ID")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Retorna filial desejada, de acordo com o ID informado"),
-            @ApiResponse(responseCode = "404", description = "Nenhuma filial localizada com o ID informado")
+            @ApiResponse(responseCode = "404", description = "Nenhuma filial localizada com o ID informado"),
+            @ApiResponse(responseCode = "403", description = "Acesso recusado")
     })
     @GetMapping("hubSummary/{id}")
     public ResponseEntity<HubSummaryProjection> hubSummary(@PathVariable Long id){
@@ -66,7 +68,8 @@ public class TransportController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Transporte criado com sucesso"),
             @ApiResponse(responseCode = "400", description = "Dados inválidos ou não fornecidos"),
-            @ApiResponse(responseCode = "404", description = "Origem, destino ou carga não encontrados")
+            @ApiResponse(responseCode = "404", description = "Origem, destino ou carga não encontrados"),
+            @ApiResponse(responseCode = "403", description = "Acesso recusado")
     })
     @PostMapping("/optimize-allocation")
     public ResponseEntity<TransportCreatedResponseDTO> optimizeAllocation(@RequestBody @Valid CreateTransportRequest request) throws JsonProcessingException {
@@ -84,7 +87,8 @@ public class TransportController {
     @Operation(summary = "Endpoint para envio manual de relatório semanal para caminhoneiros")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Relatório enviado por email com sucesso"),
-            @ApiResponse(responseCode = "500", description = "Erro interno ao enviar emails")
+            @ApiResponse(responseCode = "500", description = "Erro interno ao enviar emails"),
+            @ApiResponse(responseCode = "403", description = "Acesso recusado")
     })
     @PostMapping("/send-weekly-schedule")
     public ResponseEntity<Void> sendWeeklySchedule() {
@@ -96,6 +100,7 @@ public class TransportController {
     @Operation(summary = "Endpoint para envio manual de relatório mensal das filiais")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Relatório enviado por email com sucesso"),
+            @ApiResponse(responseCode = "403", description = "Acesso recusado")
     })
     @PostMapping("/send-month-report")
     public ResponseEntity<Void> sendMonthReport() {
@@ -107,7 +112,8 @@ public class TransportController {
     @Operation(summary = "Endpoint para confirmar transporte otimizado criado anteriormente")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Transporte confirmado com sucesso"),
-            @ApiResponse(responseCode = "404", description = "Transporte não localizado com o ID informado")
+            @ApiResponse(responseCode = "404", description = "Transporte não localizado com o ID informado"),
+            @ApiResponse(responseCode = "403", description = "Acesso recusado")
     })
     @PatchMapping("/confirm-transport/{id}")
     public ResponseEntity<TransportResponseDTO> confirmTransport(@PathVariable Long id) {
@@ -117,7 +123,8 @@ public class TransportController {
     @Operation(summary = "Endpoint para atualizar o status de um transporte")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Status do transporte atualizado com sucesso"),
-            @ApiResponse(responseCode = "404", description = "Transporte não localizado com o ID informado")
+            @ApiResponse(responseCode = "404", description = "Transporte não localizado com o ID informado"),
+            @ApiResponse(responseCode = "403", description = "Acesso recusado")
     })
     @PatchMapping("/update-status/{id}")
     public ResponseEntity<TransportResponseDTO> updateStatus(
@@ -131,7 +138,8 @@ public class TransportController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Transporte atualizado com sucesso"),
             @ApiResponse(responseCode = "400", description = "Dados inválidos ou não fornecidos"),
-            @ApiResponse(responseCode = "404", description = "Transporte não localizado com o ID informado")
+            @ApiResponse(responseCode = "404", description = "Transporte não localizado com o ID informado"),
+            @ApiResponse(responseCode = "403", description = "Acesso recusado")
     })
     @PutMapping("/{id}")
     public ResponseEntity<TransportResponseDTO> update(
@@ -145,7 +153,8 @@ public class TransportController {
     @Operation(summary = "Endpoint para remover um transporte (delete físico)")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Transporte removido com sucesso"),
-            @ApiResponse(responseCode = "404", description = "Transporte não localizado com o ID informado")
+            @ApiResponse(responseCode = "404", description = "Transporte não localizado com o ID informado"),
+            @ApiResponse(responseCode = "403", description = "Acesso recusado")
     })
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {

@@ -33,7 +33,8 @@ public class ProductController {
 
     @Operation(summary = "Endpoint para listar produtos com paginação, podendo ter filtros por categoria e peso limite")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Listagem paginada dos funcionários")
+            @ApiResponse(responseCode = "200", description = "Listagem paginada dos funcionários"),
+            @ApiResponse(responseCode = "403", description = "Acesso recusado")
     })
     @GetMapping
     public ResponseEntity<PageDTO<ProductResponseDTO>> findAllWithFilters(
@@ -53,7 +54,8 @@ public class ProductController {
     @Operation(summary = "Endpoint para criar produto")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Produto criado com sucesso"),
-            @ApiResponse(responseCode = "400", description = "Dados inválidos ou não fornecidos")
+            @ApiResponse(responseCode = "400", description = "Dados inválidos ou não fornecidos"),
+            @ApiResponse(responseCode = "403", description = "Acesso recusado")
     })
     @PostMapping
     public ResponseEntity<ProductResponseDTO> create(@RequestBody @Valid ProductRequestDTO productCreateDTO) {
@@ -72,7 +74,8 @@ public class ProductController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Produto atualizado com sucesso"),
             @ApiResponse(responseCode = "400", description = "Dados inválidos ou não fornecidos"),
-            @ApiResponse(responseCode = "404", description = "Produto não encontrado com o ID informado")
+            @ApiResponse(responseCode = "404", description = "Produto não encontrado com o ID informado"),
+            @ApiResponse(responseCode = "403", description = "Acesso recusado")
     })
     @PutMapping("/{id}")
     public ResponseEntity<ProductResponseDTO> update(
@@ -85,7 +88,8 @@ public class ProductController {
     @Operation(summary = "Endpoint para remover produto (delete lógico)")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Produto deletado com sucesso"),
-            @ApiResponse(responseCode = "404", description = "Produto não encontrado com o ID informado")
+            @ApiResponse(responseCode = "404", description = "Produto não encontrado com o ID informado"),
+            @ApiResponse(responseCode = "403", description = "Acesso recusado")
     })
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
