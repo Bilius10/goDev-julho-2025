@@ -118,6 +118,10 @@ Para executar este projeto localmente, siga os passos abaixo.
     openrouteservice.api.key=example-openrouteservice-api-key
     spring.ai.openai.api-key=example-api-key
     spring.ai.openai.chat.options.model=example-model
+
+    # Swagger
+    springdoc.swagger-ui.path=/docs
+    springdoc.api-docs.path=/docs/json
     ```
 
 4.  **Execute a aplicação:**
