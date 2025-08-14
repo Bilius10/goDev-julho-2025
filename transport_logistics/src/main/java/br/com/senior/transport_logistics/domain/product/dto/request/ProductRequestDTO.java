@@ -3,6 +3,7 @@ package br.com.senior.transport_logistics.domain.product.dto.request;
 import br.com.senior.transport_logistics.domain.product.enums.ProductCategory;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 
 public record ProductRequestDTO(
@@ -15,6 +16,7 @@ public record ProductRequestDTO(
         ProductCategory productCategory,
 
         @NotNull(message = "{product.weight.notNull}")
+        @Positive(message = "{product.weight.positive}")
         double weight
 ) {
 }
