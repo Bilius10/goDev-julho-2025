@@ -29,6 +29,7 @@ import br.com.senior.transport_logistics.infrastructure.pdf.PdfGenerationService
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -39,6 +40,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -104,6 +106,12 @@ class TransportServiceTest {
     private static List<ShipmentEntity> allPendingShipments;
 
     private static HubSummaryProjection hubSummaryProjection;
+
+    // necessario para realizar a auto-injecao e evitar null pointer
+    @BeforeEach
+    void setUpSelfInjection() {
+        ReflectionTestUtils.setField(service, "self", service);
+    }
 
     @BeforeAll
     static void setUp() {
