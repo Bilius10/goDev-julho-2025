@@ -5,11 +5,14 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
@@ -19,6 +22,7 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 
 import java.time.LocalDateTime;
 
+@Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -38,6 +42,13 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(BaseException.class)
     public ResponseEntity<ExceptionResponse> handleBaseException(BaseException ex, HttpServletRequest request) {
+        if (ex.getStatus().is5xxServerError()) {
+            log.error("Excecao base: {} - Caminho: {}", ex.getMessage(), request.getRequestURI(), ex);
+        } else {
+            log.warn("Excecao base: {} - Caminho: {} - Status: {}",
+                    ex.getMessage(), request.getRequestURI(), ex.getStatus().value());
+        }
+
         var response = buildResponse(
                 ex.getStatus(),
                 ex.getLocalizedMessage(),
@@ -52,6 +63,10 @@ public class GlobalExceptionHandler {
             MethodArgumentNotValidException ex,
             HttpServletRequest request
     ) {
+        log.warn("Validacao falhou para requisicao: {} - Erros: {}",
+                request.getRequestURI(),
+                ex.getBindingResult().getFieldErrors().size());
+
         var response = buildResponse(
                 HttpStatus.BAD_REQUEST,
                 INVALID_INPUT_DATA,
@@ -77,6 +92,9 @@ public class GlobalExceptionHandler {
             ConstraintViolationException ex,
             HttpServletRequest request
     ) {
+        log.warn("Violacao de restricao para requisicao: {} - Violacoes: {}",
+                request.getRequestURI(), ex.getConstraintViolations().size());
+
         var response = buildResponse(
                 HttpStatus.BAD_REQUEST,
                 VALIDATION_CONSTRAINT_VIOLATION,
@@ -96,6 +114,9 @@ public class GlobalExceptionHandler {
             HttpMessageNotReadableException ex,
             HttpServletRequest request
     ) {
+        log.warn("Formato de corpo de requisicao invalido para: {} - Causa: {}",
+                request.getRequestURI(), ex.getCause() != null ? ex.getCause().getClass().getSimpleName() : "Desconhecida");
+
         String message = INVALID_DATA_FORMAT;
 
         if (ex.getCause() instanceof JsonParseException) {
@@ -113,6 +134,10 @@ public class GlobalExceptionHandler {
             HttpRequestMethodNotSupportedException ex,
             HttpServletRequest request
     ) {
+        log.warn("Metodo HTTP nao suportado: {} para caminho: {} - Suportados: {}",
+                request.getMethod(), request.getRequestURI(),
+                ex.getSupportedMethods() != null ? String.join(", ", ex.getSupportedMethods()) : "Nenhum");
+
         String message = String.format(
                 METHOD_NOT_SUPPORTED_TEMPLATE,
                 request.getMethod(),
@@ -128,6 +153,11 @@ public class GlobalExceptionHandler {
             MethodArgumentTypeMismatchException ex,
             HttpServletRequest request
     ) {
+        log.warn("Incompatibilidade de tipo de parametro para: {} - Parametro: '{}', Esperado: {}, Atual: '{}'",
+                request.getRequestURI(), ex.getName(),
+                ex.getRequiredType() != null ? ex.getRequiredType().getSimpleName() : "Desconhecido",
+                ex.getValue());
+
         String message = String.format(
                 PARAMETER_TYPE_MISMATCH_TEMPLATE,
                 ex.getName(),
@@ -145,6 +175,9 @@ public class GlobalExceptionHandler {
             MissingServletRequestParameterException ex,
             HttpServletRequest request
     ) {
+        log.warn("Parametro obrigatorio ausente: '{}' para caminho: {}",
+                ex.getParameterName(), request.getRequestURI());
+
         String message = String.format(MISSING_PARAMETER_TEMPLATE, ex.getParameterName());
         var response = buildResponse(HttpStatus.BAD_REQUEST, message, request.getRequestURI());
         response.addError(ex.getParameterName(), message, null);
@@ -157,6 +190,11 @@ public class GlobalExceptionHandler {
             AccessDeniedException ex,
             HttpServletRequest request
     ) {
+        log.warn("Acesso negado para caminho: {} - Usuario: {} - Motivo: {}",
+                request.getRequestURI(),
+                getCurrentUsername(),
+                ex.getMessage());
+
         var response = buildResponse(
                 HttpStatus.FORBIDDEN,
                 ACCESS_DENIED_MESSAGE,
@@ -171,6 +209,10 @@ public class GlobalExceptionHandler {
             DataIntegrityViolationException ex,
             HttpServletRequest request
     ) {
+        log.warn("Violacao de integridade de dados para caminho: {} - Causa: {}",
+                request.getRequestURI(),
+                ex.getCause() != null ? ex.getCause().getClass().getSimpleName() : "Desconhecida");
+
         String message = DATA_INTEGRITY_VIOLATION;
 
         if (ex.getCause() instanceof ConstraintViolationException) {
@@ -186,6 +228,9 @@ public class GlobalExceptionHandler {
             Exception ex,
             HttpServletRequest request
     ) {
+        log.error("Erro inesperado para caminho: {} - Excecao: {}",
+                request.getRequestURI(), ex.getClass().getSimpleName(), ex);
+
         var response = buildResponse(
                 HttpStatus.INTERNAL_SERVER_ERROR,
                 INTERNAL_SERVER_ERROR,
@@ -203,5 +248,10 @@ public class GlobalExceptionHandler {
                 .message(message)
                 .path(path)
                 .build();
+    }
+
+    private String getCurrentUsername() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        return auth != null ? auth.getName() : "anonimo";
     }
 }

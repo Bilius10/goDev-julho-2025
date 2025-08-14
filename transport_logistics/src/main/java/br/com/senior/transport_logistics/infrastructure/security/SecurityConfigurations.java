@@ -22,22 +22,23 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfigurations {
 
     private final SecurityFilter securityFilter;
+    private final CustomAccessDeniedHandler accessDeniedHandler;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(Customizer.withDefaults())
-                .sessionManagement(      session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> {
                     // Endpoints publicos
                     auth.requestMatchers(
-                        "/v3/api-docs/**", 
-                        "/swagger-ui.html", 
-                        "/swagger-ui/**", 
-                        "/docs/**"
+                            "/v3/api-docs/**",
+                            "/swagger-ui.html",
+                            "/swagger-ui/**",
+                            "/docs/**"
                     ).permitAll();
-                    
+
                     // Endpoints de autenticacao
                     auth.requestMatchers(HttpMethod.POST, "/api/v1/auth/sign-in").permitAll();
                     auth.requestMatchers(HttpMethod.POST, "/api/v1/auth/create").hasRole("ADMIN");
@@ -58,7 +59,7 @@ public class SecurityConfigurations {
                     auth.requestMatchers(HttpMethod.POST, "/api/v1/trucks").hasAnyRole("ADMIN", "MANAGER");
                     auth.requestMatchers(HttpMethod.PUT, "/api/v1/trucks/{id}").hasAnyRole("ADMIN", "MANAGER");
                     auth.requestMatchers(HttpMethod.PATCH, "/api/v1/trucks/{code}/status").hasAnyRole("ADMIN", "MANAGER");
-                    
+
                     // Leitura - Caminhao (ADMIN > MANAGER > DRIVER)
                     auth.requestMatchers(HttpMethod.GET, "/api/v1/trucks").hasAnyRole("ADMIN", "MANAGER", "DRIVER");
                     auth.requestMatchers(HttpMethod.GET, "/api/v1/trucks/{code}").hasAnyRole("ADMIN", "MANAGER", "DRIVER");
@@ -67,7 +68,7 @@ public class SecurityConfigurations {
                     auth.requestMatchers(HttpMethod.POST, "/api/v1/hubs").hasRole("ADMIN");
                     auth.requestMatchers(HttpMethod.PUT, "/api/v1/hubs/{id}").hasRole("ADMIN");
                     auth.requestMatchers(HttpMethod.DELETE, "/api/v1/hubs/{id}").hasRole("ADMIN");
-                    
+
                     // Leitura - Filial (ADMIN > MANAGER > DRIVER)
                     auth.requestMatchers(HttpMethod.GET, "/api/v1/hubs").hasAnyRole("ADMIN", "MANAGER", "DRIVER");
 
@@ -75,7 +76,7 @@ public class SecurityConfigurations {
                     auth.requestMatchers(HttpMethod.GET, "/api/v1/employees").hasAnyRole("ADMIN", "MANAGER");
                     auth.requestMatchers(HttpMethod.PUT, "/api/v1/employees/{id}").hasAnyRole("ADMIN", "MANAGER");
                     auth.requestMatchers(HttpMethod.DELETE, "/api/v1/employees/{id}").hasAnyRole("ADMIN", "MANAGER");
-                    
+
                     // Permissoes especiais de funcionarios
                     auth.requestMatchers(HttpMethod.PATCH, "/api/v1/employees/password").hasAnyRole("ADMIN", "MANAGER", "DRIVER");
                     auth.requestMatchers(HttpMethod.PATCH, "/api/v1/employees/{id}/role").hasRole("ADMIN");
@@ -88,13 +89,16 @@ public class SecurityConfigurations {
                     auth.requestMatchers(HttpMethod.DELETE, "/api/v1/transports/{id}").hasAnyRole("ADMIN", "MANAGER");
                     auth.requestMatchers(HttpMethod.POST, "/api/v1/transports/send-weekly-schedule").hasAnyRole("ADMIN", "MANAGER");
                     auth.requestMatchers(HttpMethod.POST, "/api/v1/transports/send-month-report").hasAnyRole("ADMIN", "MANAGER");
-                    
+
                     // Permissoes especificas de motoristas para transportes (ADMIN > MANAGER > DRIVER)
                     auth.requestMatchers(HttpMethod.PATCH, "/api/v1/transports/update-status/{id}").hasAnyRole("ADMIN", "MANAGER", "DRIVER");
 
                     // Restante dos endpoints precisam de autenticacao
                     auth.anyRequest().authenticated();
                 })
+                .exceptionHandling(ex -> ex
+                        .accessDeniedHandler(accessDeniedHandler)
+                )
                 .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
