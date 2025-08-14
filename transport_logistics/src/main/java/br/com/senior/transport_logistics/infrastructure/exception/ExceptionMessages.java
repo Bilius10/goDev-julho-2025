@@ -20,6 +20,7 @@ public enum ExceptionMessages {
     PRODUCT_NAME_IN_USE("O campo nome com valor '%s' já está em uso por outro produto."),
 
     SHIPMENT_NOT_FOUND_BY_ID("Carga com o campo 'id' igual a '%s' não foi encontrado"),
+    SHIPMENT_IS_NOT_PENDING("Carga com o status '%s'"),
 
     TRUCK_NOT_FOUND_BY_CODE("Caminhão com o campo 'code' igual a '%s' não foi encontrado"),
     TRUCK_NOT_FOUND_BY_ID("Caminhão com o campo 'id' igual a '%s' não foi encontrado"),

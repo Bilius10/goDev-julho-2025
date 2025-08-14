@@ -23,6 +23,7 @@ import br.com.senior.transport_logistics.infrastructure.dto.OpenRouteDTO.request
 import br.com.senior.transport_logistics.infrastructure.dto.PageDTO;
 import br.com.senior.transport_logistics.infrastructure.email.SpringMailSenderService;
 import br.com.senior.transport_logistics.infrastructure.exception.common.ResourceNotFoundException;
+import br.com.senior.transport_logistics.infrastructure.exception.common.TransportException;
 import br.com.senior.transport_logistics.infrastructure.external.OpenAiApiClientService;
 import br.com.senior.transport_logistics.infrastructure.external.OpenRouteApiClientService;
 import br.com.senior.transport_logistics.infrastructure.pdf.PdfGenerationService;
@@ -43,8 +44,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static br.com.senior.transport_logistics.infrastructure.exception.ExceptionMessages.HUB_NOT_FOUND_BY_ID;
-import static br.com.senior.transport_logistics.infrastructure.exception.ExceptionMessages.TRANSPORT_NOT_FOUND_BY_ID;
+import static br.com.senior.transport_logistics.infrastructure.exception.ExceptionMessages.*;
 
 @Service
 @RequiredArgsConstructor
@@ -94,7 +94,6 @@ public class TransportService {
                 .orElseThrow(() -> new ResourceNotFoundException(HUB_NOT_FOUND_BY_ID.getMessage(id)));
     }
 
-    // anteriormente fazia tudo, agora delega para outros metodos
     public TransportCreatedResponseDTO optimizeAllocation(CreateTransportRequest request) throws JsonProcessingException {
         TransportAllocationData allocationData = prepareAllocationData(request);
 
@@ -109,11 +108,14 @@ public class TransportService {
         );
     }
 
-    // Obtem todos os dados necessarios para criar o transporte (do banco de dados e das APIs)
-    private TransportAllocationData prepareAllocationData(CreateTransportRequest request) throws JsonProcessingException {
+    private TransportAllocationData  prepareAllocationData(CreateTransportRequest request) throws JsonProcessingException {
         HubEntity originHub = hubService.findById(request.idOriginHub());
         HubEntity destinationHub = hubService.findById(request.idDestinationHub());
         ShipmentEntity shipment = shipmentService.findById(request.idShipment());
+
+        if(!shipment.getStatus().equals(TransportStatus.PENDING)){
+            throw new TransportException(SHIPMENT_IS_NOT_PENDING.getMessage(shipment.getStatus()));
+        }
 
         List<ShipmentEntity> pendingShipments = getPendingShipments(request);
 
@@ -317,12 +319,6 @@ public class TransportService {
         );
 
         String routeStepsJson = objectMapper.writeValueAsString(route.steps());
-
-        System.out.println(routeStepsJson);
-        System.out.println(route.distance());
-        System.out.println(shipment);
-        System.out.println(candidateTrucks);
-        System.out.println(pendingShipments);
 
         return openAiApiClientService.chooseBestTruck(
                 routeStepsJson,
